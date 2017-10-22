@@ -1,0 +1,72 @@
+/* UI FIXES
+----------------------------------------- */
+.map-message img {
+    max-width: 98.5% !important; 
+    height: auto !important;    
+}
+
+input.mhs_tm_prim_button.button {
+    float: left;
+    margin-right: 6px;
+    margin-bottom: 20px;
+}
+
+.admin_title_mhs_tm img {
+    height: 32px;
+    width: 32px;
+    float: left;
+    padding: 0px 10px 0px 5px;
+}
+
+.admin_title_mhs_tm h1 {
+    display: initial;
+}
+
+.postbox_mhs_tm h2 {
+    border-bottom: 1px solid #eee;
+    background-color: #5A5A5A;
+    color: #ffffff;
+}
+.js .postbox_mhs_tm h3.no-hover:hover,
+.js .postbox_mhs_tm h3.no-hover:active,
+.js .postbox_mhs_tm h3.no-hover:focus {
+    color: #464646;
+    cursor: default;
+}
+
+#normal-sortables .ui-accordion-header-active {
+    border: 1px solid #5a5a5a;
+    background: #5a5a5a;
+    color: #ffffff;
+}
+
+#list .ui-accordion-header-active {
+    border: 1px solid #5a5a5a;
+    background: #5a5a5a;
+    color: #ffffff;
+}
+
+#mhs_tm-form .button-secondary.margin {
+    margin-bottom: 20px;
+    margin-top: 10px;
+    margin-right: 6px;
+}
+
+#mhs_tm-form .button-primary {
+    margin-bottom: 20px;
+    margin-top: 10px;
+    margin-right: 6px;
+}
+
+div.ui-dialog_mhs_tm {
+    padding: 0px;
+}
+
+.ui-dialog_mhs_tm div.ui-dialog-titlebar {
+    background-color: #5A5A5A;
+    border-width: 0px 0px 0px;
+    border-bottom-width: 3px;
+    border-bottom-color: #000000;
+    border-radius: 0px;
+    color: #ffffff;
+}

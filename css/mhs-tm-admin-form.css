@@ -1,0 +1,14 @@
+.html_div {
+    padding: 3px 5px; 
+    border: 1px solid #ddd; 
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.07); 
+    min-height: 10em; 
+    max-height: 20em; 
+    overflow: auto;
+}
+
+.html_div img {
+    max-width: 98.5% !important;
+    height: auto !important;
+}
+

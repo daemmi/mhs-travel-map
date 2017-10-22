@@ -1,0 +1,10 @@
+.admin_title_mhs_tm img {
+    height: 32px;
+    width: 32px;
+    float: left;
+    padding: 0px 10px 0px 5px;
+}
+
+.admin_title_mhs_tm h1 {
+    display: initial;
+}
