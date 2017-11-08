@@ -67,11 +67,11 @@ class MHS_TM_Admin_Page {
 
 		switch ( $type ) {
 			case 'top':
-				$output .= '<div class="wrap"> <div class="wrap admin_title_mhs_tm">';
+				$output .= '<div class="wrap"> <div class="admin_title_mhs_tm">';
 				if( ! empty( $icon ) ) {
-					$output .= '<img src="' . $icon . '" alt="Icon">';
+					$output .= '<img src="' . esc_url( $icon ) . '" alt="Icon">';
 				}
-				$output .= '<h1>' . $title . '</h1><hr /></div>';
+				$output .= '<h1>' . esc_html( $title ) . '</h1><hr /></div>';
 
 				if( ! empty( $messages ) ) {
 					$output .= $MHS_TM_Admin->convert_messages( $messages );
@@ -85,9 +85,9 @@ class MHS_TM_Admin_Page {
 					$output .= '<h2 class="nav-tab-wrapper">';
 					$i = 0;
 					foreach ( $tabs as $tab ) {
-						$output .= '<a href="' . $url . '&tab=' . $tab['value'] . '" class="nav-tab ' . ( $tab['value'] === $active_tab || ( $tab['value'] === '' && 0 === $i ) ? 'nav-tab-active' : '' ) . '">' .
-								'<div class="nav-tab-icon nt-' . $tab['icon'] . '"></div>' .
-								$tab['title'].
+						$output .= '<a href="' . esc_url( $url ) . '&tab=' . esc_attr( $tab['value'] ) . '" class="nav-tab ' . ( $tab['value'] === $active_tab || ( $tab['value'] === '' && 0 === $i ) ? 'nav-tab-active' : '' ) . '">' .
+								'<div class="nav-tab-icon nt-' . esc_attr( $tab['icon'] ) . '"></div>' .
+								esc_html( $tab['title'] ) .
 							'</a>';
 						$i++;
 					}

@@ -3,8 +3,8 @@
 /*
 Plugin Name: My Hitchhiking Spot Travel Map (MHS Travel Map)
 Plugin URI: 
-Description: Create your travel map by adding coordinates to a map, make your route public, write a story for each coordinate and import backup files from the Android app "<a title="My Hitchhiking Spots" href="https://play.google.com/store/apps/details?id=com.myhitchhikingspots" target="_blank" rel="noopener">My Hitchhiking Spots</a>"
-Version: 1.0.0
+Description: Create your travel map with use of google maps by adding coordinates to a map, make your route public, write a story for each coordinate and import backup files from the Android app "<a title="My Hitchhiking Spots" href="https://play.google.com/store/apps/details?id=com.myhitchhikingspots" target="_blank" rel="noopener">My Hitchhiking Spots</a>"
+Version: 1.0.1
 Author: Jonas Damhuis
 Author URI: 
 License: GPL3
@@ -54,13 +54,13 @@ function MHS_TM_enqueue() {
 	/* register scripts */ 
 	wp_register_script( 'google_jsapi','https://www.google.com/jsapi', true ); 
 	wp_register_script( 'mhs_tm_map', MHS_TM_RELPATH . 'js/mhs-tm-map.js' ); 
-	wp_register_script( 'mhs_tm_admin_utilities', MHS_TM_RELPATH . 'js/mhs-tm-admin-utilities.js', array( 'jquery', 'jquery-ui-dialog' ) );
+	wp_register_script( 'mhs_tm_utilities', MHS_TM_RELPATH . 'js/mhs-tm-utilities.js', array( 'jquery', 'jquery-ui-dialog' ) );
 	    
 	/* register styles */
     
 	/* enqueue scripts */
 	wp_enqueue_script( 'google_jsapi' );
-	wp_enqueue_script( 'mhs_tm_admin_utilities' );
+	wp_enqueue_script( 'mhs_tm_utilities' );
     
 	/* enqueue stylesheets */
     
@@ -104,7 +104,7 @@ function MHS_TM_admin_enqueue() {
 	wp_register_script( 'jquery_datetimepicker', MHS_TM_RELPATH . 'js/jquery.datetimepicker.full.min.js', array( 'jquery' ) );
 	wp_register_script( 'papaparse', MHS_TM_RELPATH . 'js/papaparse-4.1.2.js', array( 'jquery' ) );
 	wp_register_script( 'mhs_tm_admin_import', MHS_TM_RELPATH . 'js/mhs-tm-admin-import.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery-ui-datepicker' ) );
-	wp_register_script( 'mhs_tm_admin_utilities', MHS_TM_RELPATH . 'js/mhs-tm-admin-utilities.js', array( 'jquery', 'jquery-ui-dialog' ) );
+	wp_register_script( 'mhs_tm_utilities', MHS_TM_RELPATH . 'js/mhs-tm-utilities.js', array( 'jquery', 'jquery-ui-dialog' ) );
 	wp_register_script( 'mhs_tm_admin_maps', MHS_TM_RELPATH . 'js/mhs-tm-admin-maps.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable' ) );
 	wp_register_script( 'mhs_tm_admin_routes', MHS_TM_RELPATH . 'js/mhs-tm-admin-routes.js', array( 'jquery', 'jquery-ui-dialog' ) );
 	wp_register_script( 'google_jsapi','https://www.google.com/jsapi', true ); 
@@ -118,10 +118,10 @@ function MHS_TM_admin_enqueue() {
 	wp_register_style( 'mhs_tm_admin_page_style', MHS_TM_RELPATH . 'css/mhs-tm-admin-page.css', false, '1.0.0' );
 	wp_register_style( 'mhs_tm_admin_form_style', MHS_TM_RELPATH . 'css/mhs-tm-admin-form.css', false, '1.0.0' );
 	wp_register_style( 'mhs_tm_loading_overlay', MHS_TM_RELPATH . 'css/mhs-tm-loading-overlay.css', false, '1.0.0' );
-    wp_register_style( 'mhs_tm_admin_jquery_style', '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css', false, '1.0.0' );
+    wp_register_style( 'mhs_tm_admin_jquery_style', MHS_TM_RELPATH . 'css/jquery-ui-1.12.1/jquery-ui.css', false, '1.12.1' );
         
 	/* enqueue scripts */
-	wp_enqueue_script( 'mhs_tm_admin_utilities' );
+	wp_enqueue_script( 'mhs_tm_utilities' );
 	wp_enqueue_script( 'jquery_datetimepicker' );
 	wp_enqueue_script( 'papaparse' );
     wp_enqueue_script( 'google_jsapi' );
@@ -171,12 +171,13 @@ if ( is_admin() ) {
 	require_once( MHS_TM_ABSPATH . '/admin/class-mhs-tm-admin-maps.php' );
 	require_once( MHS_TM_ABSPATH . '/admin/class-mhs-tm-admin-routes.php' );
 	require_once( MHS_TM_ABSPATH . '/admin/class-mhs-tm-admin-settings.php' );
+	require_once( MHS_TM_ABSPATH . '/admin/class-mhs-tm-admin-utilities.php' );
 
 	/* template classes (non-OOP templates are included on the spot) */
 	require_once( MHS_TM_ABSPATH . '/templates/class-mhs-tm-admin-page.php' );
 	require_once( MHS_TM_ABSPATH . '/templates/class-mhs-tm-admin-form.php' );
         
-        /* templates for tables */
+	/* templates for tables */
 	require_once( MHS_TM_ABSPATH . '/admin/tables/list-table-maps.php' );
 	require_once( MHS_TM_ABSPATH . '/admin/tables/list-table-routes.php' );
             
@@ -189,7 +190,17 @@ if ( is_admin() ) {
 	$GLOBALS['MHS_TM_Admin_Maps'] = new MHS_TM_Admin_Maps();
 	$GLOBALS['MHS_TM_Admin_Routes'] = new MHS_TM_Admin_Routes();
 	$GLOBALS['MHS_TM_Admin_Settings'] = new MHS_TM_Admin_Settings();
+	$GLOBALS['MHS_TM_Admin_Utilities'] = new MHS_TM_Admin_Utilities();
+
 	
+	
+            
+	/**
+	 * MHS_TM_Admin ajax
+	 *
+	 * @since 1.0.1
+	 */
+	add_action( 'wp_ajax_routes_save', array( 'MHS_TM_Admin_Routes', 'routes_save' ) );
 }
 
 /**

@@ -18,6 +18,8 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 		 *
 		 * @since 1.0
 		 */
+		private $slug = 'mhs_tm';
+		
 		private $default_args	 = array(
 			'echo'			 => true,
 			'form'			 => false,
@@ -84,10 +86,10 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 
 			$output = '';
 
-			$the_button = '<input type="submit" name="submit" id="submit" class="button-primary" value="' . $button . '">';
+			$the_button = '<input type="submit" name="submit" class="button-primary ' . esc_attr( $this->slug ) . '_admin_form_submit" value="' . esc_attr( $button ) . '">';
 
 			if ( $form ) {
-				echo '<form id="mhs_tm-form" enctype="multipart/form-data" method="' . $method . '" action="' . $action . '"';
+				echo '<form id="mhs_tm-form" enctype="multipart/form-data" method="' . esc_attr( $method ) . '" action="' . esc_attr( $action ) . '"';
 				if ( $headspace ) {
 					echo ' class="headspace"';
 				}
@@ -97,7 +99,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 
 				echo '> <input type="hidden" name="MAX_FILE_SIZE" value="3000000" />';
 				if ( $back ) {
-					echo '<a href="' . $back_url . '" class="button-secondary margin" title="' . __( 'Back to where you came from...', 'mhs_tm' ) . '">' .
+					echo '<a href="' . esc_url( $back_url ) . '" class="button-secondary margin" title="' . __( 'Back to where you came from...', 'mhs_tm' ) . '">' .
 					'&larr; ' . __( 'back', 'mhs_tm' ) .
 					'</a>';
 				}
@@ -110,7 +112,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					}
 				}
 				echo '<input type="hidden" name="submitted" value="y"/>' .
-				'<input type="hidden" name="edit_val" value="' . $id . '"/>';
+				'<input type="hidden" name="edit_val" value="' . esc_attr( $id ) . '"/>';
 				if ( 'post' === $method ) {
 					echo wp_nonce_field( $nonce, $nonce . '-nonce', false, false ) .
 					wp_nonce_field( 'meta-box-order', 'meta-box-order-nonce', false, false ) .
@@ -126,7 +128,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 				foreach ( $fields as $box ) {
 					echo '<div class="postbox postbox_mhs_tm';
 					if ( isset( $box[ 'class' ] ) ) {
-						echo ' ' . $box[ 'class' ];
+						echo ' ' . esc_attr( $box[ 'class' ] );
 					}
 					echo '"';
 					if ( $box[ 'display' ] == 'none' ) {
@@ -140,7 +142,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					} else {
 						echo '<h2 class="no-hover"';
 					}
-					echo '><span class="postbox_title">' . $box[ 'title' ] . '</span></h2>' .
+					echo '><span class="postbox_title">' . esc_attr( $box[ 'title' ] ) . '</span></h2>' .
 					'<div class="inside">' .
 					'<table class="form-table pool-form"><tbody>';
 
@@ -195,11 +197,11 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 			}
 
 			if ( 'hidden' !== $field[ 'type' ] ) {
-				echo '<tr valign="top" id="row-' . $field[ 'id' ] . '"';
+				echo '<tr valign="top" id="row-' . esc_attr( $field[ 'id' ] ) . '"';
 				if ( ( isset( $field[ 'row-class' ] ) && isset( $field[ 'js-only' ] ) && true === $field[ 'js-only' ] ) || ( isset( $field[ 'row-class' ] ) && !empty( $field[ 'row-class' ] ) ) ) {
 					echo 'class="';
 					if ( isset( $field[ 'row-class' ] ) && !empty( $field[ 'row-class' ] ) ) {
-						echo $field[ 'row-class' ];
+						echo esc_attr( $field[ 'row-class' ] );
 					}
 					if ( isset( $field[ 'js-only' ] ) && true === $field[ 'js-only' ] ) {
 						if ( isset( $field[ 'row-class' ] ) && !empty( $field[ 'row-class' ] ) ) {
@@ -215,9 +217,9 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					echo '<th scope="row">';
 					if ( $field[ 'type' ] != 'section' && isset( $field[ 'label' ] ) && !empty( $field[ 'label' ] ) ) {
 						echo '<label for="' .
-						$field[ 'id' ] .
+						esc_attr( $field[ 'id' ] ) .
 						'">' .
-						$field[ 'label' ] .
+						esc_attr( $field[ 'label' ] ) .
 						'</label>';
 					}
 					echo '</th>';
@@ -227,22 +229,22 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 
 			switch ( $field[ 'type' ] ) {
 				case 'section':
-					echo '<h3>' . $field[ 'label' ] . '</h3>';
+					echo '<h3>' . esc_attr( $field[ 'label' ] ) . '</h3>';
 					break;
 
 				case 'hidden':
 					echo '<input type="hidden" ' .
-					'name="' . $field[ 'name' ] .
-					'" id="' . $field[ 'id' ] .
+					'name="' . esc_attr( $field[ 'name' ] ) .
+					'" id="' . esc_attr( $field[ 'id' ] ) .
 					'" class="input' .
-					'" value="' . $field[ 'value' ] . '" />';
+					'" value="' . esc_html( $field[ 'value' ] ) . '" />';
 					break;
 
 				case 'tel':
 					echo '<input type="tel" class="input input-tel"' .
-					'name="' . $field[ 'name' ] .
-					'" id="' . $field[ 'id' ] .
-					'" value="' . $field[ 'value' ] . '" size="40"';
+					'name="' . esc_attr( $field[ 'name' ] ) .
+					'" id="' . esc_attr( $field[ 'id' ] ) .
+					'" value="' . esc_html( $field[ 'value' ] ) . '" size="40"';
 					if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
 						echo ' disabled="disabled"';
 					}
@@ -251,9 +253,9 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 
 				case 'email':
 					echo '<input type="email" class="input input-email"' .
-					'name="' . $field[ 'name' ] .
-					'" id="' . $field[ 'id' ] .
-					'" value="' . $field[ 'value' ] . '" size="40"';
+					'name="' . esc_attr( $field[ 'name' ] ) .
+					'" id="' . esc_attr( $field[ 'id' ] ) .
+					'" value="' . esc_html( $field[ 'value' ] ) . '" size="40"';
 					if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
 						echo ' disabled="disabled"';
 					}
@@ -261,28 +263,28 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					break;
 
 				case 'textarea':
-					echo '<textarea name="' . $field[ 'name' ] .
-					'" id="' . $field[ 'id' ] .
+					echo '<textarea name="' . esc_attr( $field[ 'name' ] ) .
+					'" id="' . esc_attr( $field[ 'id' ] ) .
 					'" cols="100" rows="5"';
 					if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
 						echo ' disabled="disabled"';
 					}
-					echo '>' . $field[ 'value' ] . '</textarea>';
+					echo '>' . esc_textarea( $field[ 'value' ] ) . '</textarea>';
 					break;
 
 				case 'textarea_long':
-					echo '<textarea  style="width: 100%;" name="' . $field[ 'name' ] .
-					'" id="' . $field[ 'id' ] .
+					echo '<textarea  style="width: 100%;" name="' . esc_attr( $field[ 'name' ] ) .
+					'" id="' . esc_attr( $field[ 'id' ] ) .
 					'" cols="100" rows="5"';
 					if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
 						echo ' disabled="disabled"';
 					}
-					echo '>' . $field[ 'value' ] . '</textarea>';
+					echo '>' . esc_html( $field[ 'value' ] ) . '</textarea>';
 					break;
 
 				case 'wp_editor':
-					$content	 = $field[ 'value' ];
-					$editor_id	 = $field[ 'id' ];
+					$content	 = esc_attr( $field[ 'value' ] );
+					$editor_id	 = esc_attr( $field[ 'id' ] );
 					$settings	 = array(
 						'wpautop'		 => true, // use wpautop?
 						'media_buttons'	 => true, // show insert/upload button(s)
@@ -296,18 +298,22 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 						'tinymce'		 => true, // load TinyMCE, can be used to pass settings directly to TinyMCE using an array()
 						'quicktags'		 => true // load Quicktags, can be used to pass settings directly to Quicktags using an array()
 					);
-					wp_editor( $content, $editor_id, $settings );
+					//filter to increase the allowed tags from wp_kses_post
+					add_filter( 'wp_kses_allowed_html', array( 'MHS_TM_Admin_Utilities', 'add_wpkses_tags' ), 10, 2 );
+					wp_editor( wp_kses_post( $content ), $editor_id, $settings );
 					break;
 
 				case 'html_div':
-					echo '<div  class="html_div" name="' . $field[ 'name' ] .
-					'" id="' . $field[ 'id' ];
-					echo '">' . $field[ 'value' ] . '</div>';
+					//filter to increase the allowed tags from wp_kses_post
+					add_filter( 'wp_kses_allowed_html', array( 'MHS_TM_Admin_Utilities', 'add_wpkses_tags' ), 10, 2 );
+					echo '<div  class="html_div" name="' . esc_attr( $field[ 'name' ] ) .
+					'" id="' . esc_attr( $field[ 'id' ] );
+					echo '">' . wp_kses_post( $field[ 'value' ] ) . '</div>';
 					break;
 
 				case 'select':
-					echo '<select name="' . $field[ 'name' ] .
-					'" id="' . $field[ 'id' ] . '"';
+					echo '<select name="' . esc_attr( $field[ 'name' ] ) .
+					'" id="' . esc_attr( $field[ 'id' ] ) . '"';
 					if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
 						echo ' disabled="disabled"';
 					}
@@ -315,7 +321,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 						echo ' multiple ';
 					}
 					if ( isset( $field[ 'size' ] ) && $field[ 'size' ] >= 0 ) {
-						echo 'size="' . $field[ 'size' ] . '"';
+						echo 'size="' . esc_attr( $field[ 'size' ] ) . '"';
 					}
 					echo '>';
 					if ( isset( $field[ 'multiple' ] ) && $field[ 'multiple' ] === true ) {
@@ -326,7 +332,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 									echo ' selected="selected"';
 								}
 							}
-							echo ' value="' . $option[ 'value' ] . '">' . $option[ 'label' ] . '&nbsp;</option>';
+							echo ' value="' . $option[ 'value' ] . '">' . esc_attr( $option[ 'label' ] ) . '&nbsp;</option>';
 						}
 					} else {
 						foreach ( $field[ 'options' ] as $option ) {
@@ -334,7 +340,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 							if ( ( $field[ 'value' ] == $option[ 'value' ] && $option[ 'value' ] != 0 ) || $field[ 'value' ] === $option[ 'value' ] ) {
 								echo ' selected="selected"';
 							}
-							echo ' value="' . $option[ 'value' ] . '">' . $option[ 'label' ] . '&nbsp;</option>';
+							echo ' value="' . esc_attr( $option[ 'value' ] ) . '">' . esc_attr( $option[ 'label' ] ) . '&nbsp;</option>';
 						}
 					}
 					echo '</select>';
@@ -342,15 +348,15 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 
 				case 'checkbox':
 					echo '<input type="checkbox"' .
-					'name="' . $field[ 'name' ] .
-					'" id="' . $field[ 'id' ] . '" ';
+					'name="' . esc_attr( $field[ 'name' ] ) .
+					'" id="' . esc_attr( $field[ 'id' ] ) . '" ';
 					if ( isset( $field[ 'value' ] ) && !empty( $field[ 'value' ] ) ) {
 						echo ' checked="checked"';
 					}
 					if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
 						echo ' disabled="disabled"';
 					}
-					echo '/><label for="' . $field[ 'id' ] . '">' . $field[ 'label' ] . '</label>';
+					echo '/><label for="' . esc_attr( $field[ 'id' ] ) . '">' . esc_attr( $field[ 'label' ] ) . '</label>';
 					break;
 
 				case 'radio':
@@ -358,9 +364,9 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					$i	 = 1;
 					foreach ( $field[ 'options' ] as $option ) {
 						echo '<input type="radio"' .
-						'name="' . $field[ 'name' ] .
-						'" id="' . $field[ 'id' ] . '_' . $option[ 'value' ] .
-						'" value="' . $option[ 'value' ] . '" ';
+						'name="' . esc_attr( $field[ 'name' ] ) .
+						'" id="' . esc_attr( $field[ 'id' ] ) . '_' . esc_attr( $option[ 'value' ] ) .
+						'" value="' . esc_attr( $option[ 'value' ] ) . '" ';
 
 						if ( $field[ 'value' ] == $option[ 'value' ] ) {
 							echo ' checked="checked"';
@@ -368,7 +374,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 						if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
 							echo ' disabled="disabled"';
 						}
-						echo ' /><label for="' . $field[ 'id' ] . '_' . $option[ 'value' ] . '">' . $option[ 'label' ] . '</label>';
+						echo ' /><label for="' . esc_attr( $field[ 'id' ] ) . '_' . esc_attr( $option[ 'value' ] ) . '">' . esc_attr( $option[ 'label' ]) . '</label>';
 						if ( $i < $end ) {
 							echo '<br />';
 						}
@@ -397,10 +403,10 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 						foreach ( $field[ 'options' ] as $option ) {
 
 							echo '<input type="checkbox"' .
-							'value="' . $option[ 'value' ] . '" ' .
-							'name="' . $field[ 'name' ] . '[]" ' .
-							'class="' . $field[ 'id' ] . '" ' .
-							'id="' . $field[ 'id' ] . '_' . $option[ 'value' ] . '"';
+							'value="' . esc_attr( $option[ 'value' ] ) . '" ' .
+							'name="' . esc_attr( $field[ 'name' ] ) . '[]" ' .
+							'class="' . esc_attr( $field[ 'id' ] ) . '" ' .
+							'id="' . esc_attr( $field[ 'id' ] ) . '_' . esc_attr( $option[ 'value' ] ) . '"';
 
 							if ( ( isset( $field[ 'value' ] ) && is_array( $field[ 'value' ] ) && in_array( $option[ 'value' ], $field[ 'value' ] ) ) || ( isset( $option[ 'checked' ] ) && true === $option[ 'checked' ] ) ) {
 								echo ' checked="checked"';
@@ -409,8 +415,8 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 								echo ' disabled="disabled"';
 							}
 
-							echo ' /><label for="' . $field[ 'id' ] . '_' . $option[ 'value' ] . '">' .
-							$option[ 'label' ] .
+							echo ' /><label for="' . esc_attr( $field[ 'id' ] ) . '_' . esc_attr( $option[ 'value' ] ) . '">' .
+							esc_attr( $option[ 'label' ] ) .
 							'</label>';
 
 							if ( $cols !== 1 ) {
@@ -449,7 +455,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					echo '<script>
 							jQuery(function ($) { 
 								$(document).ready(function() {
-									$( "#' . $field[ 'id' ] . '" ).datepicker({
+									$( "#' . esc_attr( $field[ 'id' ] ) . '" ).datepicker({
 										showButtonPanel: true,
 										changeMonth: true,
 										changeYear: true,
@@ -458,14 +464,14 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 								} ); 
 							} );
 						</script>';
-					echo '<input type="text" id="' . $field[ 'id' ] . '" ';
+					echo '<input type="text" id="' . esc_attr( $field[ 'id' ] ) . '" ';
 					if ( !empty( $field[ 'value' ] ) ) {
-						echo 'value="' . $field[ 'value' ] . '"> ';
+						echo 'value="' . (int)$field[ 'value' ] . '"> ';
 						echo '<script>
 							jQuery(function ($) { 
 								$(document).ready(function() {
-									$( "#' . $field[ 'id' ] . '" ).datepicker(
-										"setDate", new Date( ' . $field[ 'value' ] . '  )
+									$( "#' . esc_attr( $field[ 'id' ] ) . '" ).datepicker(
+										"setDate", new Date( ' . (int)$field[ 'value' ] . '  )
 									  );
 								} ); 
 							} );
@@ -477,11 +483,11 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					break;
 
 				case 'datetimepicker':
-					echo '<input type="text" class="datetimepicker" id="' . $field[ 'id' ] . '" ';
+					echo '<input type="text" class="datetimepicker" id="' . esc_attr( $field[ 'id' ] ) . '" ';
 					if ( !empty( $field[ 'value' ] ) ) {
 						$timezone = date_default_timezone_get();
 						date_default_timezone_set('UTC');
-						echo 'value="' . date( "Y/m/d H:i", $field[ 'value' ] / 1000 ) . '"> ';
+						echo 'value="' . date( "Y/m/d H:i", (int)$field[ 'value' ] / 1000 ) . '"> ';
 						date_default_timezone_set($timezone);
 					} else {
 						echo '> ';
@@ -505,29 +511,29 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					if ( isset( $field[ 'required' ] ) ) {
 						echo ' required';
 					}
-					echo '" name="' . $field[ 'id' ] .
-					'" id="' . $field[ 'id' ] .
-					'" value="' . $value .
+					echo '" name="' . esc_attr( $field[ 'id' ] ) .
+					'" id="' . esc_attr( $field[ 'id' ] ) .
+					'" value="' . esc_attr( $value ) .
 					'" size="30"';
 					if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
 						echo ' disabled="disabled"';
 					}
-					echo ' /><select class="day js-hide js-hide" id="' . $field[ 'id' ] . '_day" name="' . $field[ 'id' ] . '_day"';
+					echo ' /><select class="day js-hide js-hide" id="' . esc_attr( $field[ 'id' ] ) . '_day" name="' . esc_attr( $field[ 'id' ] ) . '_day"';
 					if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
 						echo ' disabled="disabled"';
 					}
 					echo '>';
 					for ( $i = 1; $i < 32; $i++ ) {
 						$string = str_pad( $i, 2, '0', STR_PAD_LEFT );
-						echo '<option value="' . $string . '"';
+						echo '<option value="' . esc_attr( $string ) . '"';
 						if ( $day_val === $string ) {
 							echo ' selected="selected"';
 						}
 						echo '>' .
-						$string . '&nbsp;' .
+						esc_attr( $string ) . '&nbsp;' .
 						'</option>';
 					}
-					echo '</select><select class="months js-hide js-hide" id="' . $field[ 'id' ] . '_month" name="' . $field[ 'id' ] . '_month"';
+					echo '</select><select class="months js-hide js-hide" id="' . esc_attr( $field[ 'id' ] ) . '_month" name="' . esc_attr( $field[ 'id' ] ) . '_month"';
 					if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
 						echo ' disabled="disabled"';
 					}
@@ -539,10 +545,10 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 							echo ' selected="selected"';
 						}
 						echo '>' .
-						$string . '&nbsp;' .
+						esc_attr( $string ) . '&nbsp;' .
 						'</option>';
 					}
-					echo '</select><select class="year js-hide js-hide" id="' . $field[ 'id' ] . '_year" name="' . $field[ 'id' ] . '_year"';
+					echo '</select><select class="year js-hide js-hide" id="' . esc_attr( $field[ 'id' ] ) . '_year" name="' . esc_attr( $field[ 'id' ] ) . '_year"';
 					if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
 						echo ' disabled="disabled"';
 					}
@@ -554,7 +560,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 							echo ' selected="selected"';
 						}
 						echo '>' .
-						$string . '&nbsp;' .
+						esc_attr( $string ) . '&nbsp;' .
 						'</option>';
 					}
 					echo '</select>';
@@ -563,10 +569,10 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 				case 'text':
 				default:
 					echo '<input type="text"' .
-					'name="' . $field[ 'name' ] .
-					'" id="' . $field[ 'id' ] .
+					'name="' . esc_attr( $field[ 'name' ] ) .
+					'" id="' . esc_attr( $field[ 'id' ] ) .
 					'" class="input regular-text"' .
-					'" value="' . $field[ 'value' ] . '" size="40"';
+					'" value="' . esc_html( $field[ 'value' ] ) . '" size="40"';
 					if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
 						echo ' disabled="disabled"';
 					}
@@ -576,10 +582,10 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 				case 'text_long':
 				default:
 					echo '<input type="text" style="width: 100%;"' .
-					'name="' . $field[ 'name' ] .
-					'" id="' . $field[ 'id' ] .
+					'name="' . esc_attr( $field[ 'name' ] ) .
+					'" id="' . esc_attr( $field[ 'id' ] ) .
 					'" class="input regular-text"' .
-					'" value="' . $field[ 'value' ] . '" size="40"';
+					'" value="' . esc_html( $field[ 'value' ] ) . '" size="40"';
 					if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
 						echo ' disabled="disabled"';
 					}
@@ -589,10 +595,10 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 				case 'password':
 				default:
 					echo '<input type="password"' .
-					'name="' . $field[ 'name' ] .
-					'" id="' . $field[ 'id' ] .
+					'name="' . esc_attr( $field[ 'name' ] ) .
+					'" id="' . esc_attr( $field[ 'id' ] ) .
 					'" class="input regular-text"' .
-					'" value="' . $field[ 'value' ] . '" size="40"';
+					'" value="' . esc_attr( $field[ 'value' ] ) . '" size="40"';
 					if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
 						echo ' disabled="disabled"';
 					}
@@ -602,15 +608,15 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 				case 'single-pic-upload':
 					if ( isset( $field[ 'value' ] ) && !empty( $field[ 'value' ] ) ) {
 						echo '<input type="hidden" ' .
-						'name="' . $field[ 'id' ] . '-tmp" ' .
-						'id="' . $field[ 'id' ] . '-tmp" ' .
+						'name="' . esc_attr( $field[ 'id' ] ) . '-tmp" ' .
+						'id="' . esc_attr( $field[ 'id' ] ) . '-tmp" ' .
 						'value="' . $field[ 'value' ] . '" />' .
 						'<img alt="Your Pic" src="' .
-						$field[ 'value' ] .
+						esc_attr( $field[ 'value' ] ) .
 						'" style="height:150px;"/><br>';
 					}
-					echo '<input type="file" name="' . $field[ 'id' ] .
-					'" id="' . $field[ 'id' ] .
+					echo '<input type="file" name="' . esc_attr( $field[ 'id' ] ) .
+					'" id="' . esc_attr( $field[ 'id' ] ) .
 					'" accept="image/jpeg,image/gif,image/png"';
 					if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
 						echo ' disabled="disabled"';
@@ -619,8 +625,8 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					break;
 
 				case 'csv-file-upload':
-					echo '<input type="file" name="' . $field[ 'id' ] .
-					'" id="' . $field[ 'id' ] .
+					echo '<input type="file" name="' . esc_attr( $field[ 'id' ] ) .
+					'" id="' . esc_attr( $field[ 'id' ] ) .
 					'" accept=".csv"';
 					if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
 						echo ' disabled="disabled"';
@@ -630,7 +636,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 
 				case 'content':
 				default:
-					echo $field[ 'value' ];
+					echo wp_kses_post( $field[ 'value' ] );
 					break;
 			} // type switch
 
@@ -639,7 +645,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					if ( !in_array( $field[ 'type' ], array( 'hidden', 'checkbox_group', 'checkbox-group', 'html_div' ) ) ) {
 						echo '<br />';
 					}
-					echo '<span class="description">' . $field[ 'desc' ] . '</span>';
+					echo '<span class="description">' . wp_kses_post( $field[ 'desc' ] ) . '</span>';
 				}
 				echo '</td></tr>';
 			}

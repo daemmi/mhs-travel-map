@@ -19,8 +19,8 @@ class MHS_TM_Maps {
      * @since 1.0
      * @access public
      */
-    public function Page_Map( $atts = '' ) {
-            global $wpdb, $MHS_TM_Admin_Settings;
+    public function show_map( $atts = '' ) {
+            global $wpdb, $MHS_TM_Utilities;
 
             extract( shortcode_atts( array(
                     'map_id'            => 0,
@@ -29,12 +29,19 @@ class MHS_TM_Maps {
                     'height'            => 500
             ), $atts ) );
 
+			//validate shortcode_atts
+			$map_id = (int)$map_id;
+			$height = (int)$height;
+			$coord_center_lng = (float)$coord_center_lng;
+			$coord_center_lat = (float)$coord_center_lat;
+			
             $coordinates = array();
             $coordinates = $this->get_coordinates($map_id, 'map');
             
-            $output .= '<div class="mhs_tm-map" id="map-canvas_' . $map_id . '" style="height: ' . $height . 'px; margin: 0; padding: 0;"></div>';
+            $output .= '<div class="mhs_tm-map" id="mhs_tm_map_canvas_' . esc_attr( $map_id ) . '" style="height: ' . 
+			esc_attr( $height ) . 'px; margin: 0; padding: 0;"></div>';
 
-			$key = $MHS_TM_Admin_Settings->get_gmaps_api_key();
+			$key = $MHS_TM_Utilities->get_gmaps_api_key();
 			
             wp_register_script( 'googlemap', 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAcxQgsVr_SEK2rUape65zv7v6Jn0ElZHc', true );
             wp_enqueue_script( 'googlemap' );
@@ -45,7 +52,8 @@ class MHS_TM_Maps {
                     'coord_center_lat'	=> $coord_center_lat,
                     'coord_center_lng'	=> $coord_center_lng,
                     'auto_load'			=> true,
-                    'map_id'			=> $map_id 
+                    'map_id'			=> $map_id,
+                    'plugin_dir'		=> MHS_TM_RELPATH 
                     )
             );
 
@@ -64,51 +72,49 @@ class MHS_TM_Maps {
      */
     public function get_coordinates( $id = NULL, $type = 'map' ) {
         global $wpdb;
-        
-        $route_ids = array();
-        
-        if($type == 'map' && $id != NULL){
-            $route_ids = $this->get_routes_of_map( $id );
-        } elseif( $id != NULL ) {
-            $route_ids[0] = $id;
-        }
-		
-        $coordinates = array();
-		$key = 0;
-        if(!$route_ids == Null)
-        {
-            foreach( $route_ids as $route_id)
-            {
-                $temp_coordinates = array();
-                $temp_coordinates = $wpdb->get_var(
-                                        "SELECT coordinates FROM " .
-                                        $wpdb->prefix."mhs_tm_routes ".
-                                        "WHERE active = 1 AND id = '".$route_id."' ".
-                                        " ORDER BY id DESC"
-                                    );
-                $temp_coordinates = json_decode($temp_coordinates, true);
-				
-				if( $temp_coordinates !== Null ) {
-					$route_options = array();
-					$route_options = $wpdb->get_var(
-											"SELECT options FROM " .
-											$wpdb->prefix."mhs_tm_routes ".
-											"WHERE active = 1 AND id = '".$route_id."' ".
-											" ORDER BY id DESC"
-										);
-					$route_options = json_decode($route_options, true);
 
-					$coordinates[$key]['options'] = $route_options;
-					$coordinates[$key]['coordinates'] = $temp_coordinates;
-					$key++;
+			$route_ids = array();
+
+			if ( $type == 'map' && $id != NULL ) {
+				$route_ids = $this->get_routes_of_map( $id );
+			} elseif ( $id != NULL ) {
+				$route_ids[ 0 ] = $id;
+			}
+
+			$coordinates = array();
+			$key		 = 0;
+			if ( !$route_ids == Null ) {
+				foreach ( $route_ids as $route_id ) {
+					$temp_coordinates	 = array();
+					$temp_coordinates	 = $wpdb->get_var(
+					"SELECT coordinates FROM " .
+					$wpdb->prefix . "mhs_tm_routes " .
+					"WHERE active = 1 AND id = '" . (int)$route_id . "' " .
+					" ORDER BY id DESC"
+					);
+					$temp_coordinates	 = json_decode( $temp_coordinates, true );
+
+					if ( $temp_coordinates !== Null ) {
+						$route_options	 = array();
+						$route_options	 = $wpdb->get_var(
+						"SELECT options FROM " .
+						$wpdb->prefix . "mhs_tm_routes " .
+						"WHERE active = 1 AND id = '" . (int)$route_id . "' " .
+						" ORDER BY id DESC"
+						);
+						$route_options	 = json_decode( $route_options, true );
+
+						$coordinates[ $key ][ 'options' ]		 = $route_options;
+						$coordinates[ $key ][ 'coordinates' ]	 = $temp_coordinates;
+						$key++;
+					}
 				}
-            }
-        }
-		
-        return $coordinates;
-    }
-		
-	/**
+			}
+
+			return $coordinates;
+		}
+
+		/**
 	 * get routes of map
 	 * 
 	 * returns an array of all route ids of a map
@@ -136,7 +142,7 @@ class MHS_TM_Maps {
 	 * @access public
 	 */
 	public function __construct() {
-		add_shortcode( 'mhs-travel-map', array( $this, 'Page_Map' ) );	
+		add_shortcode( 'mhs-travel-map', array( $this, 'show_map' ) );	
 	}
 
 } // class

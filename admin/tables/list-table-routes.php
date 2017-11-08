@@ -121,18 +121,19 @@ class List_Table_Routes extends WP_List_Table_My {
      * @return string Text to be placed inside the column <td> (movie title only)
      **************************************************************************/
     function column_name($item){
+        $delete_nonce = wp_create_nonce( 'mhs_tm_delete_route' );
         
         //Build row actions
         $actions = array(
-                'edit'      => sprintf('<a href="?page=%s&todo=edit&id=%s">Edit</a>',$_REQUEST['page'],$item['id']),
-                'delete'    => sprintf('<a onclick="if ( confirm(\'Really delete %s?\') ) { return true; } return false;"' . 
-					'			href="?page=%s&action=delete&id=%s">Delete</a>',$item['name'],$_REQUEST['page'],$item['id']),
-                'info'      => sprintf('<a id="info_%s" href="javascript:void(0);">Info</a>',$item['id']),
+                'edit'				=> sprintf('<a href="?page=%s&todo=edit&id=%s">Edit</a>', esc_attr( $_REQUEST['page'] ), absint( $item['id'] ) ),
+                'delete'			=> sprintf('<a onclick="if ( confirm(\'Really delete %s?\') ) { return true; } return false;"' . 
+												'href="?page=%s&action=delete&id=%s&_wpnonce=%s">Delete</a>', esc_html( $item['name'] ), esc_attr( $_REQUEST['page'] ), absint( $item['id'] ), $delete_nonce),
+                'mhs_tm_info'		=> sprintf('<a id="mhs_tm_info_%s" href="javascript:void(0);">Info</a>',absint( $item['id'] ) ),
         );
 
         //Return the title contents
         return sprintf('%1$s %2$s',
-                /*$1%s*/ $item['name'],
+                /*$1%s*/ esc_html( $item['name'] ),
                 /*$2%s*/ $this->row_actions($actions)
         );
         
@@ -149,7 +150,7 @@ class List_Table_Routes extends WP_List_Table_My {
      **************************************************************************/
     function column_cb($item){
         return sprintf(
-		 '<input type="checkbox" name="route_id[]" value="%s" />', $item['id']
+		 '<input type="checkbox" name="route_id[]" value="%s" />', absint( $item['id'] ) 
             // '<input type="checkbox" name="%1$s[]" value="%2$s" />',
             // /*$1%s*/ $this->_args['singular'],  //$this->_args['singular'] Let's simply repurpose the table's singular label ("movie")
             // /*$2%s*/ $item['ID']                //The value of the checkbox should be the record's id
@@ -217,42 +218,6 @@ class List_Table_Routes extends WP_List_Table_My {
 
     function extra_tablenav( $which ) {
         if ( $which == "top" ){
-//                    global $wpdb;
-//                    $table_name = $wpdb->prefix . 'kurse';
-//                    if($_GET[page]==Kurse){
-//                            $result = $wpdb->get_results(
-//                                    "SELECT kurs_name FROM ". $table_name .
-//                                    " WHERE kurs_status = 1" ,
-//                                    ARRAY_A
-//                            );
-//                    }else{
-//                            $result = $wpdb->get_results(
-//                                    "SELECT kurs_name FROM ". $table_name,
-//                                    ARRAY_A
-//                            );
-//                    }
-//                    $kurs_name_all = array();
-//                    $kurs_name_all[] = dummy1;
-//                    $kurs_name_all[] = dummy2;
-//                    foreach( $result as $name ) {
-//                            if( !in_array($name[kurs_name], $kurs_name_all)) {
-//                                    $kurs_name_all[] = $name[kurs_name];
-//                            }
-//                    } 
-//                    $kurs_name_all = array_slice($kurs_name_all, 2);
-//
-//                    $output.='	<div class="alignleft actions extra1">
-//                                            <select name="filter_name" id="selector-extra1">
-//                                            <option value="-1" selected="selected">Kursname wählen</option>
-//                                                    <option value="all">Alle anzeigen</option>';
-//                                            foreach($kurs_name_all as $kursname){
-//                                                    $output.='<option value="'.$kursname.'">'.$kursname.'</option>';
-//                                            };
-//                    $output.='	</select>
-//                                            <input type="submit" id="filter_name" class="button action" value="Filtern">
-//                                                            </div>';
-//
-//                    echo $output;
         }
         if ( $which == "bottom" ){
             //The code that goes after the table is there
@@ -292,55 +257,66 @@ class List_Table_Routes extends WP_List_Table_My {
      * @see $this->prepare_items()
      **************************************************************************/
     function process_bulk_action() {
-        global $wpdb;
-	$table_name = $wpdb->prefix . 'mhs_tm_routes';
+        global $wpdb, $MHS_TM_Admin;
+		$table_name = $wpdb->prefix . 'mhs_tm_routes';
+		$nonce = esc_attr( $_REQUEST['_wpnonce'] );
         
         //Detect when a bulk action is being triggered...
         if( 'delete'===$this->current_action() ) {
-		
-            if ( $_GET['id'] ) {
-                
+			if ( is_numeric( $_GET['id'] ) && wp_verify_nonce( $nonce, 'mhs_tm_delete_route' ) ) {
                 $wpdb->update(
                     $table_name,
                     array(
                             'active' => 0
                     ),
-                    array( 'id'=> $_GET['id'] ),
+                    array( 'id'=> absint( $_GET['id'] ) ),
                     array( '%s' ),
                     array( '%d' )
             );
-		
-                echo '<div class="updated"><p><strong>'.__('Route has been deleted!', 'menu' ).'</strong></p></div>';
+				$messages[] = array(
+					'type'		 => 'updated',
+					'message'	 => __( 'Route have been deleted!', 'mhs_tm' )
+				);
+				echo $MHS_TM_Admin->convert_messages( $messages );
             }else{
-		
-                echo '<div class="error"><p><strong>'.__('Something went wrong!', 'menu' ).'</strong></p></div>';
+				$messages[] = array(
+					'type'		 => 'error',
+					'message'	 => __( 'Something went wrong!', 'mhs_tm' )
+				);
+				echo $MHS_TM_Admin->convert_messages( $messages );
                 
             }
 	
         }
 		
         if( 'delete_bulk'===$this->current_action() ) {
-
-            foreach($_GET['route_id'] as $id) {
-                
-                if ( $id ) {
-                
-                    $wpdb->update(
-                        $table_name,
-                        array(
-                                'active' => 0
-                        ),
-                        array( 'id'=> $id ),
-                        array( '%s' ),
-                        array( '%d' )
-                    );
-                }
-                    
-            }
-            
-            echo '<div class="updated"><p><strong>'.__('Routes have been deleted!', 'menu' ).'</strong></p></div>';
-        }
-        
+			if( wp_is_numeric_array( $_GET['route_id'] ) ) {
+				foreach( $_GET['route_id'] as $id ) {
+					if ( is_numeric( $id ) ) {
+						$wpdb->update(
+							$table_name,
+							array(
+									'active' => 0
+							),
+							array( 'id'=> absint( $id ) ),
+							array( '%s' ),
+							array( '%d' )
+						);
+					}
+				}
+				$messages[] = array(
+					'type'		 => 'updated',
+					'message'	 => __( 'Routes have been deleted!', 'mhs_tm' )
+				);
+				echo $MHS_TM_Admin->convert_messages( $messages );
+			} else {
+				$messages[] = array(
+					'type'		 => 'error',
+					'message'	 => __( 'Something went wrong!', 'mhs_tm' )
+				);
+				echo $MHS_TM_Admin->convert_messages( $messages );	
+			}
+		}
     }
 
 
@@ -447,17 +423,18 @@ class List_Table_Routes extends WP_List_Table_My {
          * to a custom query. The returned data will be pre-sorted, and this array
          * sorting technique would be unnecessary.
          */
-        function usort_reorder($a,$b){
-            $orderby = (!empty($_REQUEST['orderby'])) ? $_REQUEST['orderby'] : 'update'; //If no sort, default to title
-            $order = (!empty($_REQUEST['order'])) ? $_REQUEST['order'] : 'desc'; //If no order, default to asc
-            $result = strcmp($a[$orderby], $b[$orderby]); //Determine sort order
-            return ($order==='asc') ? $result : -$result; //Send final sort direction to usort
-        }
-        if ($data != NULL){
-			usort($data, 'usort_reorder');
+        function usort_reorder( $a, $b ) {
+			$orderby = (!empty( $_REQUEST[ 'orderby' ] )) ? $_REQUEST[ 'orderby' ] : 'update'; //If no sort, default to title
+			$order	 = (!empty( $_REQUEST[ 'order' ] )) ? $_REQUEST[ 'order' ] : 'desc'; //If no order, default to asc
+			$result	 = strcmp( $a[ $orderby ], $b[ $orderby ] ); //Determine sort order
+			return ($order === 'asc') ? $result : -$result; //Send final sort direction to usort
 		}
-                
-        /**
+
+		if ( $data != NULL ) {
+			usort( $data, 'usort_reorder' );
+		}
+
+		/**
          * REQUIRED for pagination. Let's figure out what page the user is currently 
          * looking at. We'll need this later, so you should always include it in 
          * your own package classes.
@@ -478,14 +455,14 @@ class List_Table_Routes extends WP_List_Table_My {
          * to ensure that the data is trimmed to only the current page. We can use
          * array_slice() to 
          */
-		 if ($data != NULL){
-			 $data = array_slice($data,(($current_page-1)*$per_page),$per_page);
+		 if ( $data != NULL ) {
+			$data = array_slice( $data, ( ( $current_page - 1 ) * $per_page ), $per_page );
 		}
-       
-        
-        
-        
-        /**
+
+
+
+
+		/**
          * REQUIRED. Now we can add our *sorted* data to the items property, where 
          * it can be used by the rest of the class.
          */
@@ -498,7 +475,7 @@ class List_Table_Routes extends WP_List_Table_My {
         $this->set_pagination_args( array(
             'total_items' => $total_items,                  //WE have to calculate the total number of items
             'per_page'    => $per_page,                     //WE have to determine how many items to show on a page
-            'total_pages' => ceil($total_items/$per_page)   //WE have to calculate the total number of pages
+            'total_pages' => ceil( $total_items/$per_page )   //WE have to calculate the total number of pages
         ) );	
     }
 }//class

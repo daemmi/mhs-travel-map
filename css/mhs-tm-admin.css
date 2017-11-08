@@ -40,7 +40,7 @@ input.mhs_tm_prim_button.button {
     color: #ffffff;
 }
 
-#list .ui-accordion-header-active {
+#mhs_tm_list .ui-accordion-header-active {
     border: 1px solid #5a5a5a;
     background: #5a5a5a;
     color: #ffffff;

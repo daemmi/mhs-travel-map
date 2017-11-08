@@ -20,7 +20,7 @@ if ( !class_exists( 'MHS_TM_Admin' ) ) :
 		 * @access public
 		 */
 		public function display_admin_menu() {
-			Global $MHS_TM_Admin_Maps, $MHS_TM_Admin_Routes, $MHS_TM_Admin_Settings;
+			global $MHS_TM_Admin_Maps, $MHS_TM_Admin_Routes, $MHS_TM_Admin_Settings;
 
 			add_menu_page(
 			__( 'MHS Travel Map', 'MHS_TM' ), 
@@ -103,6 +103,8 @@ if ( !class_exists( 'MHS_TM_Admin' ) ) :
 		 * @access public
 		 */
 		public function __construct() {
+			global $MHS_TM_Admin_Routes;
+			
 			add_action( 'admin_menu', array( &$this, 'display_admin_menu', ) );
 		}
 	}

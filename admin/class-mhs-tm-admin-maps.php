@@ -24,66 +24,108 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			
 			$messages = array();
 			$url = 'admin.php?page=MHS_TM-maps';
+			
+			//save Get and Post
+			$todo	= sanitize_text_field( $_GET[ 'todo' ] );
+			$id		= absint( $_GET[ 'id' ] );
 
-			$todo = isset( $_GET[ 'todo' ] ) ? $_GET[ 'todo' ] : 'default';
+			$todo = isset( $todo ) ? $todo : 'default';
 
 			switch ( $todo ) {
 
 				case 'delete':
-					// delete are defined in list_table_aps.php
+					// delete are defined in list_table_maps.php
 					break;
 
 				case 'select':
-					// get old selected map and set it to unselected
-					$selected_id = $this->get_selected_map();
-					
-					if($selected_id !== NULL) {
+					//validate the input
+					if( is_numeric( $id ) ) {
+						// get old selected map and set it to unselected
+						$selected_id = $this->get_selected_map();
+
+						if($selected_id !== NULL) {
+							$wpdb->update(
+							$wpdb->prefix . 'mhs_tm_maps', array(
+								'selected' => 0
+							), array( 'id' => $selected_id ), array( '%d' ), array( '%d' )
+							);
+						}
+
+						// Set new map to selected
 						$wpdb->update(
 						$wpdb->prefix . 'mhs_tm_maps', array(
-							'selected' => 0
-						), array( 'id' => $selected_id ), array( '%d' ), array( '%d' )
+							'selected' => 1
+						), array( 'id' => $id ), array( '%d' ), array( '%d' )
+						);
+
+						$messages[] = array(
+							'type'		 => 'updated',
+							'message'	 => __( 'Map successfully selected!', 'mhs_tm' )
+						);
+					} else {
+						$messages[] = array(
+							'type'		 => 'error',
+							'message'	 => __( 'Something went wrong!', 'mhs_tm' )
 						);
 					}
-					
-					// Set new map to selected
-					$wpdb->update(
-					$wpdb->prefix . 'mhs_tm_maps', array(
-						'selected' => 1
-					), array( 'id' => $_GET[ 'id' ] ), array( '%d' ), array( '%d' )
-					);
-					
-					$messages[] = array(
-						'type'		 => 'updated',
-						'message'	 => __( 'Map successfully selected!', 'mhs_tm' )
-					);
 					
 					$this->maps_menu( $messages );
 
 					break;
 
 				case 'unselect':
-					// Set new map to unselected
-					$wpdb->update(
-					$wpdb->prefix . 'mhs_tm_maps', array(
-						'selected' => 0
-					), array( 'id' => $_GET[ 'id' ] ), array( '%d' ), array( '%d' )
-					);
-					
-					$messages[] = array(
-						'type'		 => 'updated',
-						'message'	 => __( 'Map successfully unselected!', 'mhs_tm' )
-					);
+					//validate the input
+					if( is_numeric( $id ) ) {
+						// Set new map to unselected
+						$wpdb->update(
+						$wpdb->prefix . 'mhs_tm_maps', array(
+							'selected' => 0
+						), array( 'id' => $id ), array( '%d' ), array( '%d' )
+						);
+
+						$messages[] = array(
+							'type'		 => 'updated',
+							'message'	 => __( 'Map successfully unselected!', 'mhs_tm' )
+						);
+					} else {
+						$messages[] = array(
+							'type'		 => 'error',
+							'message'	 => __( 'Something went wrong!', 'mhs_tm' )
+						);
+					}
 					
 					$this->maps_menu( $messages );
 					
 					break;
 
 				case 'save':
-					$this->maps_save( $_GET[ 'id' ] );
+					//validate the input
+					if( is_numeric( $id ) ) {
+						$this->maps_save( $id );
+					} elseif ( $id == 0 ) {
+						$this->maps_save( );
+					} else {
+						$messages[] = array(
+							'type'		 => 'error',
+							'message'	 => __( 'Something went wrong!', 'mhs_tm' )
+						);
+					
+						$this->maps_menu( $messages );
+					}
 					break;
 
 				case 'edit':
-					$this->maps_edit( $_GET[ 'id' ] );
+					//validate the input
+					if( is_numeric( $id ) ) {
+						$this->maps_edit( $id );
+					} else {
+						$messages[] = array(
+							'type'		 => 'error',
+							'message'	 => __( 'Something went wrong!', 'mhs_tm' )
+						);
+					
+						$this->maps_menu( $messages );
+					}
 					break;
 
 				case 'new':
@@ -110,9 +152,7 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 				'messages'	 => $messages,
 				'url'		 => $url
 			) );
-
-
-
+			
 			$button = '<form method="post" action="' . $url . '&todo=new">' .
 			'<input type="submit" class="mhs_tm_prim_button button" value="+ ' . __( 'add new map', 'mhs_tm' ) . '" />' .
 			'</form>';
@@ -128,7 +168,7 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			'<!-- Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions -->
                      <form id="list_table" method="get">
                      <!-- For plugins, we also need to ensure that the form posts back to our current page -->
-                     <input type="hidden" name="page" value="' . $_REQUEST[ 'page' ] . '" />
+                     <input type="hidden" name="page" value="' . esc_attr( $_REQUEST[ 'page' ] ) . '" />
                      <!-- Now we can render the completed list table -->';
 //                echo $ListTable->search_box( 'search', 'search_id' );
 			echo $ListTable->display();
@@ -150,11 +190,10 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			$url		 = 'admin.php?page=MHS_TM-maps';
 			$form_action = $url . "&amp;todo=save&amp;id=" . $id;
 
-			$maps = $wpdb->get_results(
-			"SELECT * FROM " . $table_name .
-			" WHERE id = " . $id . " order by create_date DESC", ARRAY_A
+			$maps = $wpdb->get_results( $wpdb->prepare( 
+			"SELECT * FROM " . $table_name . " WHERE id = %d order by create_date DESC", $id ), ARRAY_A
 			);
-
+			
 			$map_option_string	 = $maps[ 0 ][ 'options' ];
 			$map_options		 = array();
 			$map_options		 = json_decode( $map_option_string, true );
@@ -268,15 +307,13 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			);
 
 			if ( !is_numeric( $id ) ) {
-
 				return $maps_fields;
 			} else {
+				$table_name = $wpdb->prefix . 'mhs_tm_maps';
 
-				$data	 = $wpdb->get_results(
-				"SELECT * FROM " .
-				$wpdb->prefix . "mhs_tm_maps " .
-				"WHERE id = " . $id . " LIMIT 1", ARRAY_A
-				);
+				$data	 = $wpdb->get_results( 
+					$wpdb->prepare( "SELECT * FROM $table_name WHERE id = %d LIMIT 1", $id ), 
+					ARRAY_A );
 				$data	 = $data[ 0 ];
 
 				$json_array = json_decode( $data[ 'options' ], true );
@@ -293,18 +330,10 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 				for ( $i = 0; $i < $mcount; $i++ ) {
 					$fcount = count( $maps_fields[ $i ][ 'fields' ] );
 					for ( $j = 0; $j < $fcount; $j++ ) {
-						if ( empty( $_POST[ 'submitted' ] ) ) {
-							if ( $maps_fields[ $i ][ 'fields' ][ $j ][ 'id' ] == 'route_ids[]' ) {
-								$maps_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = json_decode( $data[ 'route_ids' ], true );
-							} else {
-								$maps_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = stripslashes( $data[ $maps_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] );
-							}
+						if ( $maps_fields[ $i ][ 'fields' ][ $j ][ 'id' ] == 'route_ids[]' ) {
+							$maps_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = json_decode( $data[ 'route_ids' ], true );
 						} else {
-							if ( $maps_fields[ $i ][ 'fields' ][ $j ][ 'id' ] == 'route_ids[]' ) {
-								$maps_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = json_decode( $data[ 'route_ids' ], true );
-							} else {
-								$maps_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = stripslashes( $data[ $maps_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] );
-							}
+							$maps_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = stripslashes( $data[ $maps_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] );
 						}
 					}
 				}
@@ -320,14 +349,21 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 		 * @access private
 		 */
 		private function maps_save( $id = NULL ) {
-			global $wpdb;
+			global $wpdb, $MHS_TM_Admin_Utilities;
 
-			if ( !isset( $_POST[ 'todo_check' ] ) ) {
+			// save variables
+			$todo_check		= sanitize_text_field( $_POST[ 'todo_check' ] );
+			$name			= sanitize_text_field( $_POST[ 'name' ] );
+			$selected		= (int)$_POST[ 'selected' ];
+			$route_ids		= $MHS_TM_Admin_Utilities->sanitize_id_array(($_POST[ 'route_ids' ]));
+			
+			//validate data
+			if ( !isset( $todo_check ) ) {
 				$this->maps_menu();
 				return;
 			}
 			
-			if ( !isset( $_POST[ 'name' ] ) || $_POST[ 'name' ] === NULL ) {
+			if ( !isset( $name ) || $name === NULL || $name == '' ) {
 				$messages[] = array(
 					'type'		 => 'error',
 					'message'	 => __( 'Map not added! Enter a name at least!', 'mhs_tm' )
@@ -335,17 +371,27 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 				$this->maps_menu( $messages );
 				return;
 			}
-
-			if ( $_GET[ 'id' ] != NULL ) {
-				$options = array( 'name' => $_POST[ 'name' ]
+			
+			if ( $selected != 0 && $selected != 1 ||
+			!wp_is_numeric_array( $route_ids ) && $route_ids !== null ) {
+				$messages[] = array(
+					'type'		 => 'error',
+					'message'	 => __( 'Something went wrong!', 'mhs_tm' )
+				);
+				$this->maps_menu( $messages );
+				return;
+			}
+			
+			if ( $id != NULL ) {
+				$options = array( 'name' => $name
 				);
 			} else {
-				$options = array( 'name' => $_POST[ 'name' ]
+				$options = array( 'name' => $name
 				);
 			}
 			$options = json_encode( $options );
 
-			if ( $_POST[ 'selected' ] == 1 ) {
+			if ( $selected == 1 ) {
 				$selected_id = $wpdb->get_results(
 				"SELECT id FROM " . $wpdb->prefix . "mhs_tm_maps " .
 				"WHERE selected = 1", ARRAY_A
@@ -360,14 +406,14 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 				);
 			}
 
-			if ( isset( $_GET[ 'id' ] ) && $_GET[ 'id' ] != NULL ) {
+			if ( isset( $id ) && $id != NULL ) {
 				$wpdb->update(
 				$wpdb->prefix . 'mhs_tm_maps', array(
 					'active'	 => 1,
-					'route_ids'	 => json_encode( $_POST[ 'route_ids' ] ),
+					'route_ids'	 => json_encode( $route_ids ),
 					'options'	 => $options,
-					'selected'	 => $_POST[ 'selected' ]
-				), array( 'id' => $_GET[ 'id' ] ), array( '%d', '%s', '%s', '%d' ), array( '%d' )
+					'selected'	 => $selected
+				), array( 'id' => $id ), array( '%d', '%s', '%s', '%d' ), array( '%d' )
 				);
 				$messages[] = array(
 					'type'		 => 'updated',
@@ -377,9 +423,9 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 				$wpdb->insert(
 				$wpdb->prefix . 'mhs_tm_maps', array(
 					'active'		 => 1,
-					'route_ids'		 => json_encode( $_POST[ 'route_ids' ] ),
+					'route_ids'		 => json_encode( $route_ids ),
 					'options'		 => $options,
-					'selected'		 => $_POST[ 'selected' ],
+					'selected'		 => $selected,
 					'create_date'	 => date( "Y-m-d H:i:s" )
 				), array( '%d', '%s', '%s', '%d', '%s' )
 				);
@@ -402,8 +448,8 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 		function get_routes_array() {
 			global $wpdb;
 
-			$route_array = [ ];
-			$routes		 = [ ];
+			$route_array = [];
+			$routes		 = [];
 
 			$routes = $wpdb->get_results(
 			"SELECT * FROM " . $wpdb->prefix . "mhs_tm_routes " .

@@ -7,21 +7,21 @@ Stable tag: 1.0.0
 License: GPL3
 License URI: http://www.gnu.org/licenses/gpl.html
 
-Create your travel map and import backups from the Android app `My Hitchhiking Spots`
+Create your travel map with use of google maps and import backups from the Android app `My Hitchhiking Spots`
 
 == Description ==
 
-Create your travel map by adding coordinates to a map, make your route public, write a story for each coordinate and import backup files from the Android app [My Hitchhiking Spots](https://play.google.com/store/apps/details?id=com.myhitchhikingspots)
+Create your travel map with use of google maps by adding coordinates to a map, make your route public, write a story for each coordinate and import backup files from the Android app [My Hitchhiking Spots](https://play.google.com/store/apps/details?id=com.myhitchhikingspots)
 
 = Features =
 
-* create you own travel map
+* create you own travel map with use of google maps
+* import backup files from the Android app `My Hitchhiking Spots`
 * add coordinates to the route
 * add coordinates which are not on the route
 * write to each coordinate a story by using the wordpress text editor
 * add to each coordinate start time and waiting time
 * for each route the total waiting time and the number of lifts will be calculated
-* import backup files from the Android app `My Hitchhiking Spots`
 
 == Installation ==
 
@@ -36,15 +36,11 @@ This section describes how to install and use the plugin.
 
 == Screenshots ==
 
-1. Black Studio TinyMCE Widget in Visual mode
-2. Black Studio TinyMCE Widget in HTML mode
-3. Black Studio TinyMCE Widget combined with WP Edit plugin
-
 == Frequently Asked Questions ==
 
 == Changelog ==
 
-= 1.0.0 (2017-10-10) =
+= 1.0.1 (2017-11-02) =
 *first release
 
 == Upgrade Notice ==
