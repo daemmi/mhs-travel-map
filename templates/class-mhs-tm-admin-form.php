@@ -114,7 +114,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 				echo '<input type="hidden" name="submitted" value="y"/>' .
 				'<input type="hidden" name="edit_val" value="' . esc_attr( $id ) . '"/>';
 				if ( 'post' === $method ) {
-					echo wp_nonce_field( $nonce, $nonce . '-nonce', false, false ) .
+					echo wp_nonce_field( $nonce, $nonce . '_nonce', false, false ) .
 					wp_nonce_field( 'meta-box-order', 'meta-box-order-nonce', false, false ) .
 					wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false, false );
 				}
@@ -471,7 +471,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 							jQuery(function ($) { 
 								$(document).ready(function() {
 									$( "#' . esc_attr( $field[ 'id' ] ) . '" ).datepicker(
-										"setDate", new Date( ' . (int)$field[ 'value' ] . '  )
+										"setDate", new Date( ' . esc_attr( $field[ 'value' ] ) . '  )
 									  );
 								} ); 
 							} );
@@ -487,7 +487,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					if ( !empty( $field[ 'value' ] ) ) {
 						$timezone = date_default_timezone_get();
 						date_default_timezone_set('UTC');
-						echo 'value="' . date( "Y/m/d H:i", (int)$field[ 'value' ] / 1000 ) . '"> ';
+						echo 'value="' . date( "Y/m/d H:i", esc_attr( $field[ 'value' ] ) ) . '"> ';
 						date_default_timezone_set($timezone);
 					} else {
 						echo '> ';

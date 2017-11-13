@@ -4,7 +4,7 @@
 Plugin Name: My Hitchhiking Spot Travel Map (MHS Travel Map)
 Plugin URI: 
 Description: Create your travel map with use of google maps by adding coordinates to a map, make your route public, write a story for each coordinate and import backup files from the Android app "<a title="My Hitchhiking Spots" href="https://play.google.com/store/apps/details?id=com.myhitchhikingspots" target="_blank" rel="noopener">My Hitchhiking Spots</a>"
-Version: 1.0.1
+Version: 1.0.2
 Author: Jonas Damhuis
 Author URI: 
 License: GPL3
@@ -224,7 +224,7 @@ $MHS_TM_db_version = "1.0";
 function MHS_TM_install() {
    global $wpdb, $MHS_TM_db_version;
         
-        $installed_ver = get_option( "$MHS_TM_db_version" );
+        $installed_ver = get_option( "MHS_TM_db_version" );
 
 		// if the plugin is not installed the db version is false
         if ( $installed_ver === false ) {

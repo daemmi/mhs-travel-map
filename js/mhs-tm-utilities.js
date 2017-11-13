@@ -88,34 +88,33 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = function(
         '<p class="map-message-title"><b style="font-size: 120%;">';
     if ( coordinate.country )
     {
-        contentString = contentString + coordinate.country;
+        contentString += coordinate.country;
     }
     if ( coordinate.state && coordinate.country )
     {
-        contentString = contentString + ' - ' + coordinate.state;
+        contentString += ' - ' + coordinate.state;
     } else {
-        contentString = contentString + coordinate.state;
+        contentString += coordinate.state;
     }
     if ( coordinate.city && coordinate.country || coordinate.city && coordinate.state )
     {
-        contentString = contentString + ' - ' + coordinate.city;
+        contentString += ' - ' + coordinate.city;
     } else {
-        contentString = contentString + coordinate.city;
+        contentString += coordinate.city;
     }
     var coordinate_date = new Date( mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset( parseInt( coordinate.starttime ) ) )
         .toLocaleString();
-
-    contentString = contentString + '</b> </br>' +
+    
+    contentString += '</b> </br>' +
         // cut the last 3 chars because it's the seconds we won't display
         coordinate_date.slice(0, coordinate_date.length - 3) +
         mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview(coordinate, coordinates) +
         '</p> <hr>';
 
     if ( coordinate.note !== null && coordinate.note !== undefined ) {
-        contentString = contentString + mhs_tm_utilities.utilities.stripslashes( coordinate.note );
+        contentString += mhs_tm_utilities.utilities.stripslashes( coordinate.note );
     }
-    contentString = contentString +
-        '</div>';
+    contentString += '</div>';
 
     return contentString;
 }
@@ -143,19 +142,22 @@ mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview = function(
         waiting_time_total_minutes = Math.floor(waiting_time_total_minutes);
         
         var coordinate_time_total = coordinates[coordinates.length - 1].starttime - coordinates[0].starttime;
-        var coordinate_time_total_hours = coordinate_time_total / (60 * 60 * 1000);
+        var coordinate_time_total_hours = coordinate_time_total / (60 * 60 );
         coordinate_time_total_hours = Math.floor(coordinate_time_total_hours);
-        var coordinate_time_total_minutes = ( coordinate_time_total - coordinate_time_total_hours * 60 * 60 * 1000 ) / ( 60 * 1000 );
+        var coordinate_time_total_minutes = ( coordinate_time_total - coordinate_time_total_hours * 60 * 60 ) / ( 60 );
         coordinate_time_total_minutes = Math.floor(coordinate_time_total_minutes);
         
-        return ' (Total: ' + lifts + ' lifts | ' + coordinate_time_total_hours + 'h ' + coordinate_time_total_minutes + 'min | waited ' + waiting_time_total_hours +'h ' + waiting_time_total_minutes + 'min)'; 
+        return ' (Total: ' + lifts + ' lifts | ' + coordinate_time_total_hours + 'h ' + 
+            coordinate_time_total_minutes + 'min | waited ' + waiting_time_total_hours +'h ' + 
+            waiting_time_total_minutes + 'min)'; 
     }else {
         // get time in hours and minutes
         var waiting_time_total_hours = coordinate.waitingtime / 60;
         waiting_time_total_hours = Math.floor(waiting_time_total_hours);
         var waiting_time_total_minutes = coordinate.waitingtime - waiting_time_total_hours * 60;
         waiting_time_total_minutes = Math.floor(waiting_time_total_minutes);
-        return ' (waiting time: ' + waiting_time_total_hours +'h ' + waiting_time_total_minutes + 'min)';        
+        return ' (waiting time: ' + waiting_time_total_hours +'h ' + 
+            waiting_time_total_minutes + 'min)';        
     }
 }
  
@@ -232,25 +234,23 @@ mhs_tm_utilities.utilities.sortResults = function( arr, key, asc ) {
 
 // Function to get a timestamp in milliseconds - the local timezone offset
 mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset = function( timestamp ) {
-    return timestamp + ( new Date().getTimezoneOffset() * 60 * 1000 );
+    return timestamp * 1000 + ( new Date().getTimezoneOffset() * 60 * 1000 );
 }
 
 // Function to get a timestamp in milliseconds + the local timezone offset
 mhs_tm_utilities.utilities.get_timestamp_plus_timezone_offset = function( timestamp ) {
-    return timestamp - ( new Date().getTimezoneOffset() * 60 * 1000 );
+    return timestamp * 1000 - ( new Date().getTimezoneOffset() * 60 * 1000 );
 }
 
 jQuery( function ( $ ) {
-    $( document ).ready( function () {
-        $( "#mhs_tm_dialog_loading" ).dialog( {
-            modal: true,
-            dialogClass: 'mhs_tm_dialog_loading',
-            open: function ( event, ui ) {
-                $( ".ui-dialog-titlebar-close" ).hide();
-                $( ".ui-dialog-titlebar" ).hide();
-            },
-            autoOpen: false,
-            position: { my: "center", at: "center+" + $( "#adminmenuback" ).width() / 2, of: window }
-        } );
+    $( "#mhs_tm_dialog_loading" ).dialog( {
+        modal: true,
+        dialogClass: 'mhs_tm_dialog_loading',
+        open: function ( event, ui ) {
+            $( ".ui-dialog-titlebar-close" ).hide();
+            $( ".ui-dialog-titlebar" ).hide();
+        },
+        autoOpen: false,
+        position: { my: "center", at: "center+" + $( "#adminmenuback" ).width() / 2, of: window }
     } );
 } );

@@ -26,8 +26,8 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			$url = 'admin.php?page=MHS_TM-maps';
 			
 			//save Get and Post
-			$todo	= sanitize_text_field( $_GET[ 'todo' ] );
-			$id		= absint( $_GET[ 'id' ] );
+			$todo	= sanitize_text_field( $_GET['todo'] );
+			$id		= absint( $_GET['id'] );
 
 			$todo = isset( $todo ) ? $todo : 'default';
 
@@ -134,6 +134,7 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 
 				default:
 					$this->maps_menu();
+					break;
 			}
 		}
 
@@ -168,7 +169,7 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			'<!-- Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions -->
                      <form id="list_table" method="get">
                      <!-- For plugins, we also need to ensure that the form posts back to our current page -->
-                     <input type="hidden" name="page" value="' . esc_attr( $_REQUEST[ 'page' ] ) . '" />
+                     <input type="hidden" name="page" value="' . esc_attr( $_REQUEST['page'] ) . '" />
                      <!-- Now we can render the completed list table -->';
 //                echo $ListTable->search_box( 'search', 'search_id' );
 			echo $ListTable->display();
@@ -188,23 +189,25 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			$table_name = $wpdb->prefix . 'mhs_tm_maps';
 
 			$url		 = 'admin.php?page=MHS_TM-maps';
-			$form_action = $url . "&amp;todo=save&amp;id=" . $id;
+			$form_action = $url . '&amp;todo=save&amp;id=' . $id;
 
-			$maps = $wpdb->get_results( $wpdb->prepare( 
-			"SELECT * FROM " . $table_name . " WHERE id = %d order by create_date DESC", $id ), ARRAY_A
+			$maps = $wpdb->get_results( $wpdb->prepare(
+			'SELECT * FROM ' . $table_name . ' WHERE id = %d order by create_date DESC', $id ), ARRAY_A
 			);
-			
-			$map_option_string	 = $maps[ 0 ][ 'options' ];
+
+			$map_option_string	 = $maps[0]['options'];
 			$map_options		 = array();
 			$map_options		 = json_decode( $map_option_string, true );
-			$name				 = $map_options[ 'name' ];
+			$name				 = $map_options['name'];
 
 			if ( !is_numeric( $id ) ) {
 				$title	 = sprintf( __( 'Add New Map', 'mhs_tm' ) );
 				$fields	 = $this->maps_fields();
+				$nonce	 = 'mhs_tm_maps_save';
 			} else {
 				$title	 = sprintf( __( 'Edit &quot;%s&quot;', 'mhs_tm' ), $name );
 				$fields	 = $this->maps_fields( $id );
+				$nonce	 = 'mhs_tm_maps_save_' . $id;
 			}
 
 			$adminpage = new MHS_TM_Admin_Page( array(
@@ -220,7 +223,8 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 				'id'		 => $id,
 				'back'		 => true,
 				'back_url'	 => $url,
-				'fields'	 => $fields
+				'fields'	 => $fields,
+				'nonce'		 => $nonce
 			);
 			$form	 = new MHS_TM_Admin_Form( $args );
 
@@ -232,7 +236,7 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			$route_ids		 = $this->get_routes_array();
 			$coordinates_all = array();
 			foreach ( $route_ids as $route ) {
-				$coordinates_all[ $route[ 'value' ] ] = $MHS_TM_Maps->get_coordinates( $route[ 'value' ], 'route' );
+				$coordinates_all[ $route['value'] ] = $MHS_TM_Maps->get_coordinates( $route['value'], 'route' );
 			}
 			
 			wp_enqueue_script( 'mhs_tm_admin_maps' );
@@ -309,14 +313,12 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			if ( !is_numeric( $id ) ) {
 				return $maps_fields;
 			} else {
-				$table_name = $wpdb->prefix . 'mhs_tm_maps';
-
 				$data	 = $wpdb->get_results( 
-					$wpdb->prepare( "SELECT * FROM $table_name WHERE id = %d LIMIT 1", $id ), 
+					$wpdb->prepare( 'SELECT * FROM ' . $wpdb->prefix . 'mhs_tm_maps' . ' WHERE id = %d LIMIT 1', $id ), 
 					ARRAY_A );
-				$data	 = $data[ 0 ];
-
-				$json_array = json_decode( $data[ 'options' ], true );
+				$data	 = $data[0];
+				
+				$json_array = json_decode( $data['options'], true );
 				if ( !empty( $json_array ) ) {
 					$json_array_keys = array_keys( $json_array );
 					$json_id		 = 0;
@@ -328,12 +330,12 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 
 				$mcount = count( $maps_fields );
 				for ( $i = 0; $i < $mcount; $i++ ) {
-					$fcount = count( $maps_fields[ $i ][ 'fields' ] );
+					$fcount = count( $maps_fields[ $i ]['fields'] );
 					for ( $j = 0; $j < $fcount; $j++ ) {
-						if ( $maps_fields[ $i ][ 'fields' ][ $j ][ 'id' ] == 'route_ids[]' ) {
-							$maps_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = json_decode( $data[ 'route_ids' ], true );
+						if ( $maps_fields[ $i ]['fields'][ $j ]['id'] == 'route_ids[]' ) {
+							$maps_fields[ $i ]['fields'][ $j ]['value'] = json_decode( $data['route_ids'], true );
 						} else {
-							$maps_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = stripslashes( $data[ $maps_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] );
+							$maps_fields[ $i ]['fields'][ $j ]['value'] = stripslashes( $data[ $maps_fields[ $i ]['fields'][ $j ]['id'] ] );
 						}
 					}
 				}
@@ -352,10 +354,17 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			global $wpdb, $MHS_TM_Admin_Utilities;
 
 			// save variables
-			$todo_check		= sanitize_text_field( $_POST[ 'todo_check' ] );
-			$name			= sanitize_text_field( $_POST[ 'name' ] );
-			$selected		= (int)$_POST[ 'selected' ];
-			$route_ids		= $MHS_TM_Admin_Utilities->sanitize_id_array(($_POST[ 'route_ids' ]));
+			$todo_check		= sanitize_text_field( $_POST['todo_check'] );
+			$name			= sanitize_text_field( $_POST['name'] );
+			$selected		= (int)$_POST['selected'];
+			$route_ids		= $MHS_TM_Admin_Utilities->sanitize_id_array(($_POST['route_ids']));
+			if ( $id != NULL ) {
+				$nonce		= 'mhs_tm_maps_save_' . $id;
+				$nonce_key	= esc_attr( $_REQUEST['mhs_tm_maps_save_' . $id . '_nonce'] );
+			} else {
+				$nonce = 'mhs_tm_maps_save';
+				$nonce_key	= esc_attr( $_REQUEST['mhs_tm_maps_save_nonce'] );
+			}
 			
 			//validate data
 			if ( !isset( $todo_check ) ) {
@@ -373,7 +382,8 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			}
 			
 			if ( $selected != 0 && $selected != 1 ||
-			!wp_is_numeric_array( $route_ids ) && $route_ids !== null ) {
+			!wp_is_numeric_array( $route_ids ) && $route_ids !== null || 
+			!wp_verify_nonce( $nonce_key, $nonce ) ) {
 				$messages[] = array(
 					'type'		 => 'error',
 					'message'	 => __( 'Something went wrong!', 'mhs_tm' )
@@ -393,11 +403,11 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 
 			if ( $selected == 1 ) {
 				$selected_id = $wpdb->get_results(
-				"SELECT id FROM " . $wpdb->prefix . "mhs_tm_maps " .
-				"WHERE selected = 1", ARRAY_A
+				'SELECT id FROM ' . $wpdb->prefix . 'mhs_tm_maps ' .
+				'WHERE selected = 1', ARRAY_A
 				);
 
-				$selected_id = $selected_id[ 0 ][ 'id' ];
+				$selected_id = $selected_id[0]['id'];
 				
 				$wpdb->update(
 				$wpdb->prefix . 'mhs_tm_maps', array(
@@ -426,7 +436,7 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 					'route_ids'		 => json_encode( $route_ids ),
 					'options'		 => $options,
 					'selected'		 => $selected,
-					'create_date'	 => date( "Y-m-d H:i:s" )
+					'create_date'	 => date( 'Y-m-d H:i:s' )
 				), array( '%d', '%s', '%s', '%d', '%s' )
 				);
 				$messages[] = array(
@@ -452,15 +462,15 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			$routes		 = [];
 
 			$routes = $wpdb->get_results(
-			"SELECT * FROM " . $wpdb->prefix . "mhs_tm_routes " .
-			"WHERE active = 1 ORDER BY updated DESC", ARRAY_A
+			'SELECT * FROM ' . $wpdb->prefix . 'mhs_tm_routes ' .
+			'WHERE active = 1 ORDER BY updated DESC', ARRAY_A
 			);
 
 			foreach ( $routes as $route ) {
-				$route_option = json_decode( $route[ 'options' ], true );
+				$route_option = json_decode( $route['options'], true );
 
-				$route_array[] = ['value'	 => $route[ 'id' ],
-					'label'	 => 'id: ' . $route[ 'id' ] . ' | ' . $route_option[ 'name' ]
+				$route_array[] = ['value'	 => $route['id'],
+					'label'	 => 'id: ' . $route['id'] . ' | ' . $route_option['name']
 				];
 			}
 
@@ -478,11 +488,11 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			
 			// get old selected map and set it to unselected
 			$selected_id = $wpdb->get_results(
-			"SELECT id FROM " . $wpdb->prefix . "mhs_tm_maps " .
-			"WHERE selected = 1", ARRAY_A
+			'SELECT id FROM ' . $wpdb->prefix . 'mhs_tm_maps ' .
+			'WHERE selected = 1', ARRAY_A
 			);
 
-			return $selected_id[ 0 ][ 'id' ];
+			return $selected_id[0]['id'];
 		}
 
 	}

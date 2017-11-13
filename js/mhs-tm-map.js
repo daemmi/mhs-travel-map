@@ -26,20 +26,17 @@ mhs_tm_map.linePath = new google.maps.Polyline( {
 } );
 
 jQuery( function ( $ ) {
-    $( document ).ready( function () {
-
-        $( '.mhs_tm-map' ).each( function ( index ) {
-            var map_canvas_id = parseInt( $( this ).attr( 'id' ).replace( 'mhs_tm_map_canvas_', '' ) );
-            mhs_tm_map.coordinates[map_canvas_id] = window["mhs_tm_app_vars_" + map_canvas_id].coordinates;
-            mhs_tm_map.coord_center_lat[map_canvas_id] = parseFloat( window["mhs_tm_app_vars_" + map_canvas_id].coord_center_lat );
-            mhs_tm_map.coord_center_lng[map_canvas_id] = parseFloat( window["mhs_tm_app_vars_" + map_canvas_id].coord_center_lng );
-            mhs_tm_map.auto_load[map_canvas_id] = window["mhs_tm_app_vars_" + map_canvas_id].auto_load;
-            mhs_tm_map.plugin_dir = window["mhs_tm_app_vars_" + map_canvas_id].plugin_dir;
-            if ( mhs_tm_map.auto_load[map_canvas_id] )
-            {
-                google.maps.event.addDomListener( window, 'load', mhs_tm_map.gmap_initialize( map_canvas_id ) );
-            }
-        } );
+    $( '.mhs_tm-map' ).each( function ( index ) {
+        var map_canvas_id = parseInt( $( this ).attr( 'id' ).replace( 'mhs_tm_map_canvas_', '' ) );
+        mhs_tm_map.coordinates[map_canvas_id] = window["mhs_tm_app_vars_" + map_canvas_id].coordinates;
+        mhs_tm_map.coord_center_lat[map_canvas_id] = parseFloat( window["mhs_tm_app_vars_" + map_canvas_id].coord_center_lat );
+        mhs_tm_map.coord_center_lng[map_canvas_id] = parseFloat( window["mhs_tm_app_vars_" + map_canvas_id].coord_center_lng );
+        mhs_tm_map.auto_load[map_canvas_id] = window["mhs_tm_app_vars_" + map_canvas_id].auto_load;
+        mhs_tm_map.plugin_dir = window["mhs_tm_app_vars_" + map_canvas_id].plugin_dir;
+        if ( mhs_tm_map.auto_load[map_canvas_id] )
+        {
+            google.maps.event.addDomListener( window, 'load', mhs_tm_map.gmap_initialize( map_canvas_id ) );
+        }
     } );
 } );
 
@@ -150,6 +147,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
 
 mhs_tm_map.bindInfoWindow = function( marker, marker_all, map, contentString ) {
     google.maps.event.addListener( marker, 'click', function () {
+        var index
 
         for ( index = 0; index < marker_all.length; ++index ) {
             marker_all[index].infowindow.close();

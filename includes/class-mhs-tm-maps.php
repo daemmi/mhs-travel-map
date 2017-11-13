@@ -65,7 +65,7 @@ class MHS_TM_Maps {
  ******************************************************************************/
          
     /**
-     * Funktion to to get coordinates by map_id odr route_id
+     * Funktion to get coordinates by map_id odr route_id
      *
      * @since 1.0
      * @access public
@@ -86,22 +86,22 @@ class MHS_TM_Maps {
 			if ( !$route_ids == Null ) {
 				foreach ( $route_ids as $route_id ) {
 					$temp_coordinates	 = array();
-					$temp_coordinates	 = $wpdb->get_var(
-					"SELECT coordinates FROM " .
-					$wpdb->prefix . "mhs_tm_routes " .
-					"WHERE active = 1 AND id = '" . (int)$route_id . "' " .
-					" ORDER BY id DESC"
-					);
+					$temp_coordinates	 = $wpdb->get_var( $wpdb->prepare( 
+					'SELECT coordinates FROM ' .
+					$wpdb->prefix . 'mhs_tm_routes ' .
+					'WHERE active = 1 AND id = %d ORDER BY id DESC',
+					(int)$route_id
+					) );
 					$temp_coordinates	 = json_decode( $temp_coordinates, true );
 
 					if ( $temp_coordinates !== Null ) {
 						$route_options	 = array();
-						$route_options	 = $wpdb->get_var(
-						"SELECT options FROM " .
-						$wpdb->prefix . "mhs_tm_routes " .
-						"WHERE active = 1 AND id = '" . (int)$route_id . "' " .
-						" ORDER BY id DESC"
-						);
+						$route_options	 = $wpdb->get_var( $wpdb->prepare( 
+						'SELECT options FROM ' .
+						$wpdb->prefix . 'mhs_tm_routes ' .
+						'WHERE active = 1 AND id = %d ORDER BY id DESC',
+						(int)$route_id
+						) );
 						$route_options	 = json_decode( $route_options, true );
 
 						$coordinates[ $key ][ 'options' ]		 = $route_options;
@@ -125,12 +125,12 @@ class MHS_TM_Maps {
 	function get_routes_of_map( $map_id ) {
         global $wpdb;
 		
-		$route_ids = $wpdb->get_var(
-			"SELECT route_ids FROM " .
-			$wpdb->prefix."mhs_tm_maps ".
-			"WHERE active = 1 AND id = '".$map_id."' ".
-			" ORDER BY id DESC"
-		);
+		$route_ids = $wpdb->get_var( $wpdb->prepare( 
+			'SELECT route_ids FROM ' .
+			$wpdb->prefix.'mhs_tm_maps '.
+			'WHERE active = 1 AND id = %d ORDER BY id DESC',
+			(int)$map_id
+		) );
 		
 		return json_decode($route_ids, true);
 	}

@@ -67,9 +67,9 @@ class MHS_TM_Utilities {
 		global $wpdb;
 
 		$data	 = $wpdb->get_results(
-		"SELECT * FROM " .
-		$wpdb->prefix . "mhs_tm_maps " .
-		"WHERE id = 1 LIMIT 1", ARRAY_A
+		'SELECT * FROM ' .
+		$wpdb->prefix . 'mhs_tm_maps ' .
+		'WHERE id = 1 LIMIT 1', ARRAY_A
 		);
 		$data	 = $data[ 0 ];
 

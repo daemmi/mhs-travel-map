@@ -7,11 +7,15 @@ Stable tag: 1.0.0
 License: GPL3
 License URI: http://www.gnu.org/licenses/gpl.html
 
-Create your travel map with use of google maps and import backups from the Android app `My Hitchhiking Spots`
+Create your travel map with use of google maps and import backups from the 
+Android app `My Hitchhiking Spots`
 
 == Description ==
 
-Create your travel map with use of google maps by adding coordinates to a map, make your route public, write a story for each coordinate and import backup files from the Android app [My Hitchhiking Spots](https://play.google.com/store/apps/details?id=com.myhitchhikingspots)
+Create your travel map with use of [google maps api](https://developers.google.com/maps/terms) 
+by adding coordinates to a map, make your route public, write a story for each 
+coordinate and import backup files from the Android app 
+[My Hitchhiking Spots](https://play.google.com/store/apps/details?id=com.myhitchhikingspots)
 
 = Features =
 
@@ -45,5 +49,5 @@ This section describes how to install and use the plugin.
 
 == Upgrade Notice ==
 
-= 1.0.0 =
+= 1.0.1 =
 First release

@@ -32,26 +32,14 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			switch ( $todo ) {
 
 				// delete are defined in list_table_aps.php
-//				case "delete":
+//				case 'delete':
 //					break;
 //					
-				//saveis just ajax
-//				case "save":
-//					if( is_numeric( $id ) ) {
-//						$this->routes_save( $id );
-//					} elseif ( $id == 0 ) {
-//						$this->routes_save( );
-//					} else {
-//						$messages[] = array(
-//							'type'		 => 'error',
-//							'message'	 => __( 'Something went wrong!', 'mhs_tm' )
-//						);
-//					
-//						$this->routes_menu( $messages );
-//					}
+				//save is just ajax
+//				case 'save':
 //					break;
 
-				case "edit":
+				case 'edit':
 					//validate the input
 					if( is_numeric( $id ) ) {
 						$this->routes_edit( $id );
@@ -65,11 +53,11 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 					}
 					break;
 
-				case "new":
+				case 'new':
 					$this->routes_edit();
 					break;
 
-				case "import":
+				case 'import':
 					$this->routes_import();
 					break;
 
@@ -98,8 +86,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			) );
 
 			$routes = $wpdb->get_results(
-			"SELECT * FROM " . $table_name .
-			" WHERE active = 1 order by updated DESC", ARRAY_A
+			'SELECT * FROM ' . $table_name .
+			' WHERE active = 1 order by updated DESC', ARRAY_A
 			);
 			
 			$button = '<form method="post" action="' . $url . '&todo=new">' .
@@ -163,7 +151,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$table_name = $wpdb->prefix . 'mhs_tm_routes';
 
 			$url		 = 'admin.php?page=MHS_TM-routes';
-			$form_action = "javascript:void(0);";
+			$form_action = 'javascript:void(0);';
 
 			$coordinates = array();
 			$coordinates = $MHS_TM_Maps->get_coordinates( $id, 'route' );
@@ -185,10 +173,12 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				$title	 = sprintf( __( 'Add New Route', 'mhs_tm' ) );
 				$fields_the_route	 = $this->routes_fields(NULL, 'The Route' );
 				$fields_coordinates	 = $this->routes_fields(NULL, NULL );
+				$nonce	 = 'mhs_tm_route_save';
 			} else {
 				$title	 = sprintf( __( 'Edit &quot;%s&quot;', 'mhs_tm' ), $name );
 				$fields_the_route	 = $this->routes_fields($id, 'The Route' );
 				$fields_coordinates	 = $this->routes_fields($id, NULL );
+				$nonce	 = 'mhs_tm_route_save_' . $id;
 			}
 
 			$adminpage = new MHS_TM_Admin_Page( array(
@@ -213,7 +203,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				'fields'		 => $fields_the_route,
 				'top_button'	 => true,
 				'bottom_button'	 => false,
-				'hide'			 => true
+				'hide'			 => true,
+				'nonce'			 => $nonce
 			);
 			$form_the_route	 = new MHS_TM_Admin_Form( $args );
 
@@ -327,7 +318,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				'back_url'	 => $url,
 				'has_cap'	 => false,
 				'button'	 => 'Start import',
-				'fields'	 => $this->routes_import_fields()
+				'fields'	 => $this->routes_import_fields(),
+				'nonce'		 => 'mhs_tm_route_save'
 			);
 			$form	 = new MHS_TM_Admin_Form( $args );
 
@@ -421,7 +413,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 		private function routes_fields( $id = NULL, $part = '' ) {
 			global $wpdb;
 			
-			$table_name = $wpdb->prefix . "mhs_tm_routes ";
+			$table_name = $wpdb->prefix . 'mhs_tm_routes ';
 			
 			// static route fields
 			// by adding new fields also change the sanitize function!
@@ -534,7 +526,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			if ( is_numeric( $id ) ) {
 
 				$data	 = $wpdb->get_results( $wpdb->prepare( 
-				"SELECT * FROM " . $table_name . " WHERE id = %d LIMIT 1", $id ), ARRAY_A
+				'SELECT * FROM ' . $table_name . ' WHERE id = %d LIMIT 1', $id ), ARRAY_A
 				);
 				$data	 = $data[ 0 ];
 
@@ -672,14 +664,20 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$coordinates = $MHS_TM_Admin_Routes->sanitize_coordinates_array( json_decode( stripslashes( $_POST[ 'route' ] ) ) );
 			$path		 = $MHS_TM_Admin_Routes->sanitize_path_array( json_decode( stripslashes( $_POST[ 'path' ] )  ) );
 			$name		 = sanitize_text_field( $_POST[ 'name' ] );
-			$todo_check	 = sanitize_text_field( $_POST[ 'todo_check' ] );
 			$id			 = absint( $_GET[ 'id' ] );
+			$nonce_key	= esc_attr( $_REQUEST[ 'mhs_tm_route_save_nonce' ] );
+			
+			if ( $id != NULL ) {
+				$nonce		= 'mhs_tm_route_save_' . $id;
+			} else {
+				$nonce = 'mhs_tm_route_save';
+			}
 			
 			// check if page not refreshed
-			if ( !isset( $todo_check ) || $todo_check == '' ) {
+			if ( !wp_verify_nonce( $nonce_key, $nonce ) ) {
 				$messages = array(
 					'type'		 => 'error',
-					'message'	 => __( 'Route not added! Something went wrong!', 'mhs_tm' )
+					'message'	 => __( 'Route not saved! Something went wrong!', 'mhs_tm' )
 				);
 				echo json_encode( $messages );
 				wp_die(); 
@@ -690,7 +688,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			if ( !isset( $name ) || $name === NULL || $name == '' ) {
 				$messages = array(
 					'type'		 => 'error',
-					'message'	 => __( 'Route not added! Enter a name at least!', 'mhs_tm' )
+					'message'	 => __( 'Route not saved! Enter a name at least!', 'mhs_tm' )
 				);
 				echo json_encode( $messages );
 				wp_die(); 
@@ -725,7 +723,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 					'active'		 => 1,
 					'options'		 => $options,
 					'coordinates'	 => $coordinates,
-					'create_date'	 => date( "Y-m-d H:i:s" )
+					'create_date'	 => date( 'Y-m-d H:i:s' )
 				), array( '%d', '%s', '%s', '%s' )
 				);
 				
@@ -746,7 +744,9 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				
 				$messages = array(
 					'type'		 => 'updated',
-					'message'	 => __( 'Route successfully added!', 'mhs_tm' )
+					'message'	 => __( 'Route successfully added!', 'mhs_tm' ),
+					'coordinate_json' => json_decode( stripslashes( $_POST[ 'route' ] ) ),
+					'coordinate' => $coordinates
 				);
 			}
 			
@@ -813,27 +813,27 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 								'country'			=> sanitize_text_field( $val->country ), 
 								'ishitchhikingspot' => $MHS_TM_Admin_Utilities->sanitize_checkbox( $val->ishitchhikingspot ), 
 								'ispartofaroute'	=> $MHS_TM_Admin_Utilities->sanitize_checkbox( $val->ispartofaroute ), 
-								'latitude'			=> (float)$val->latitude, 
-								'longitude'			=> (float)$val->longitude, 
+								'latitude'			=> floatval( $val->latitude ), 
+								'longitude'			=> floatval( $val->longitude ), 
 								'note'				=> balanceTags( wp_kses_post( $val->note ), true), 
-								'starttime'			=> (int)$val->starttime, 
+								'starttime'			=> substr( sanitize_text_field( $val->starttime ), 0, 10), 
 								'state'				=> sanitize_text_field( $val->state ), 
 								'street'			=> sanitize_text_field( $val->street ), 
-								'waitingtime'		=> (int)$val->waitingtime, 
+								'waitingtime'		=> intval( $val->waitingtime ), 
 							);
 						} elseif( is_array( $array[ $key ] ) ) {
 							$new_input[ $key ] = array( 
-								'city'				=> sanitize_text_field( $val['city'] ), 
-								'country'			=> sanitize_text_field( $val['country'] ), 
-								'ishitchhikingspot' => $MHS_TM_Admin_Utilities->sanitize_checkbox( $val['ishitchhikingspot'] ), 
-								'ispartofaroute'	=> $MHS_TM_Admin_Utilities->sanitize_checkbox( $val['ispartofaroute'] ), 
-								'latitude'			=> (float)$val['latitude'], 
-								'longitude'			=> (float)$val['longitude'], 
-								'note'				=> balanceTags( wp_kses_post( $val['note'] ), true), 
-								'starttime'			=> (int)$val['starttime'], 
-								'state'				=> sanitize_text_field( $val['state'] ), 
-								'street'			=> sanitize_text_field( $val['street'] ), 
-								'waitingtime'		=> (int)$val['waitingtime'], 
+								'city'				=> sanitize_text_field( $val[ 'city' ] ), 
+								'country'			=> sanitize_text_field( $val[ 'country' ] ), 
+								'ishitchhikingspot' => $MHS_TM_Admin_Utilities->sanitize_checkbox( $val[ 'ishitchhikingspot' ] ), 
+								'ispartofaroute'	=> $MHS_TM_Admin_Utilities->sanitize_checkbox( $val[ 'ispartofaroute' ] ), 
+								'latitude'			=> floatval( $val[ 'latitude' ] ), 
+								'longitude'			=> floatval( $val[ 'longitude' ] ), 
+								'note'				=> balanceTags( wp_kses_post( $val[ 'note' ] ), true), 
+								'starttime'			=> substr( sanitize_text_field( $val[ 'starttime' ] ), 0, 10), 
+								'state'				=> sanitize_text_field( $val['state' ] ), 
+								'street'			=> sanitize_text_field( $val[ 'street' ] ), 
+								'waitingtime'		=> intval( $val[ 'waitingtime' ] ), 
 							);							
 						}
 					}

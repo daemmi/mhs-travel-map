@@ -32,7 +32,7 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 
 			switch ( $todo ) {
 
-				case "save":
+				case 'save':
 					$this->settings_save();
 					break;
 
@@ -53,9 +53,14 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 			//save Get and Post and sanitize
 			$todo_check	= sanitize_text_field( $_POST[ 'todo_check' ] );
 			$api_key_gmap	= sanitize_text_field( $_POST[ 'api_key_gmap' ] );
+			$nonce_key	= esc_attr( $_REQUEST[ 'mhs_tm_settings_save_nonce' ] );
 
-			if ( !isset( $todo_check ) ) {
-				$this->settings_menu();
+			if ( !isset( $todo_check ) && !wp_verify_nonce( $nonce_key, 'mhs_tm_settings_save' ) ) {
+				$messages[] = array(
+					'type'		 => 'error',
+					'message'	 => __( 'Something went wrong!', 'mhs_tm' )
+				);
+				$this->settings_menu( $messages );
 				return;
 			}
 
@@ -133,7 +138,7 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 			switch ( $tab ){
 				case 'settings' :
 					$url = 'admin.php?page=MHS_TM-settings';
-					$form_action = $url . "&amp;todo=save";
+					$form_action = $url . '&amp;todo=save';
 					$fields	 = $this->settings_fields();
 					
 					$args	 = array(
@@ -143,7 +148,8 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 						'action'	 => $form_action,
 						'back'		 => true,
 						'back_url'	 => $url,
-						'fields'	 => $fields
+						'fields'	 => $fields,
+						'nonce'		 => 'mhs_tm_settings_save'
 					);
 					$form	 = new MHS_TM_Admin_Form( $args );
 					
