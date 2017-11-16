@@ -221,11 +221,7 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 			for ( $i = 0; $i < $mcount; $i++ ) {
 				$fcount = count( $settings_fields[ $i ][ 'fields' ] );
 				for ( $j = 0; $j < $fcount; $j++ ) {
-					if ( empty( $_POST[ 'submitted' ] ) ) {
-						$settings_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = stripslashes( $data[ $settings_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] );
-					} else {
-						$settings_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = stripslashes( $data[ $settings_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] );
-					}
+					$settings_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = stripslashes( $data[ $settings_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] );
 				}
 			}
 

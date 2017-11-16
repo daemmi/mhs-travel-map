@@ -667,14 +667,14 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$id			 = absint( $_GET[ 'id' ] );
 			$nonce_key	= esc_attr( $_REQUEST[ 'mhs_tm_route_save_nonce' ] );
 			
-			if ( $id != NULL ) {
+			if ( NULL != $id ) {
 				$nonce		= 'mhs_tm_route_save_' . $id;
 			} else {
 				$nonce = 'mhs_tm_route_save';
 			}
 			
 			// check if page not refreshed
-			if ( !wp_verify_nonce( $nonce_key, $nonce ) ) {
+			if ( ! wp_verify_nonce( $nonce_key, $nonce ) && ! current_user_can('manage_options') ) {
 				$messages = array(
 					'type'		 => 'error',
 					'message'	 => __( 'Route not saved! Something went wrong!', 'mhs_tm' )
@@ -685,7 +685,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			}
 			
 			// at least there should be name
-			if ( !isset( $name ) || $name === NULL || $name == '' ) {
+			if ( ! isset( $name ) || $name === NULL || $name == '' ) {
 				$messages = array(
 					'type'		 => 'error',
 					'message'	 => __( 'Route not saved! Enter a name at least!', 'mhs_tm' )

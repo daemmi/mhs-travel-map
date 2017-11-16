@@ -398,8 +398,17 @@ class List_Table_Routes extends WP_List_Table_My {
 		 * sorting technique would be unnecessary.
 		 */
 		function usort_reorder( $a, $b ) {
-			$orderby = ( ! empty( $_REQUEST['orderby'] ) ) ? $_REQUEST['orderby'] : 'update'; //If no sort, default to title
-			$order	 = ( ! empty( $_REQUEST['order'] ) ) ? $_REQUEST['order'] : 'desc'; //If no order, default to asc
+			$orderby_options = ['update', 'date', 'name', 'id'];
+			$order_options   = ['DESC', 'ASC', 'desc', 'asc'];
+			
+			if ( in_array( $_REQUEST['orderby'], $orderby_options ) && in_array( $_REQUEST['order'], $order_options ) ) {
+				$orderby = esc_attr( $_REQUEST['orderby'] );
+				$order   = esc_attr( $_REQUEST['order'] );
+			} else {
+				$orderby = 'update';
+				$order   = 'desc';
+			}
+			
 			$result	 = strcmp( $a[ $orderby ], $b[ $orderby ] ); //Determine sort order
 			return ( $order === 'asc' ) ? $result : -$result; //Send final sort direction to usort
 		}
