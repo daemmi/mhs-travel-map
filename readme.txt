@@ -3,7 +3,9 @@ Contributors: daemmi
 Donate link: https://profiles.wordpress.org/daemmi
 Tags: map, google maps, hitchhike, hitchhiking, travel, backpacking, traveling
 Tested up to: 4.8.2
-Stable tag: 1.0.0
+Requires at least: 4.8.0
+Requires PHP: 5.2.0
+Stable tag: 1.0.3
 License: GPL3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -34,9 +36,9 @@ This section describes how to install and use the plugin.
 1. Install automatically through the `Plugins` menu and `Add New` button (or upload the entire `mhs-travel-map` folder to the `/wp-content/plugins/` directory)
 2. Activate the plugin
 3. Go to `MHS Travel Map`
-4. Create a route or import a backup file from the Android app "<a title="My Hitchhiking Spots" href="https://play.google.com/store/apps/details?id=com.myhitchhikingspots" target="_blank" rel="noopener">My Hitchhiking Spots</a>"
+4. Create a route or import a backup file from the Android app [My Hitchhiking Spots](https://play.google.com/store/apps/details?id=com.myhitchhikingspots)
 5. Create a map an add the route to the map
-6. Use the shortcode in a article or page to make the map public
+6. Use the shortcode in a post or page to make the map public
 
 == Screenshots ==
 
@@ -44,10 +46,10 @@ This section describes how to install and use the plugin.
 
 == Changelog ==
 
-= 1.0.1 (2017-11-02) =
+= 1.0.3 (2017-11-20) =
 *first release
 
 == Upgrade Notice ==
 
-= 1.0.1 =
+= 1.0.3 =
 First release

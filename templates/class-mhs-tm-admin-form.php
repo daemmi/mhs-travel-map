@@ -567,7 +567,6 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					break;
 
 				case 'text':
-				default:
 					echo '<input type="text"' .
 					'name="' . esc_attr( $field[ 'name' ] ) .
 					'" id="' . esc_attr( $field[ 'id' ] ) .
@@ -580,7 +579,6 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					break;
 
 				case 'text_long':
-				default:
 					echo '<input type="text" style="width: 100%;"' .
 					'name="' . esc_attr( $field[ 'name' ] ) .
 					'" id="' . esc_attr( $field[ 'id' ] ) .
@@ -593,7 +591,6 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					break;
 
 				case 'password':
-				default:
 					echo '<input type="password"' .
 					'name="' . esc_attr( $field[ 'name' ] ) .
 					'" id="' . esc_attr( $field[ 'id' ] ) .
