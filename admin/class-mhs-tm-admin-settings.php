@@ -26,9 +26,7 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 			$url = 'admin.php?page=MHS_TM-settings';
 			
 			//save Get and Post and sanitize
-			$todo	= sanitize_text_field( $_GET[ 'todo' ] );
-
-			$todo = isset( $todo ) ? $todo : 'default';
+			$todo	= isset( $_GET[ 'todo' ] ) ? sanitize_text_field( $_GET[ 'todo' ] ) : 'default';
 
 			switch ( $todo ) {
 
@@ -51,9 +49,9 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 			global $wpdb;
 			
 			//save Get and Post and sanitize
-			$todo_check	= sanitize_text_field( $_POST[ 'todo_check' ] );
-			$api_key_gmap	= sanitize_text_field( $_POST[ 'api_key_gmap' ] );
-			$nonce_key	= esc_attr( $_REQUEST[ 'mhs_tm_settings_save_nonce' ] );
+			$todo_check	  = isset( $_POST[ 'todo_check' ] ) ? sanitize_text_field( $_POST[ 'todo_check' ] ) : null;
+			$api_key_gmap = isset( $_POST[ 'api_key_gmap' ] ) ? sanitize_text_field( $_POST[ 'api_key_gmap' ] ) : null;
+			$nonce_key	  = isset( $_POST[ 'mhs_tm_settings_save_nonce' ] ) ? esc_attr( $_POST[ 'mhs_tm_settings_save_nonce' ] ) : null;
 
 			if ( !isset( $todo_check ) && !wp_verify_nonce( $nonce_key, 'mhs_tm_settings_save' ) ) {
 				$messages[] = array(
@@ -95,14 +93,7 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 			$url = 'admin.php?page=MHS_TM-settings';
 			
 			//save Get and Post and sanitize
-			$tab	= sanitize_text_field( $_GET['tab'] );
-			
-			// get the active tab
-			if ( isset ( $tab ) && $tab != '' ) {
-				$active_tab = $tab; 
-			} else {
-				$active_tab = 'settings';
-			}
+			$active_tab	= isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'settings';
 			
 			// create the admin page header
 			$adminpage = new MHS_TM_Admin_Page( array(

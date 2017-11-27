@@ -27,11 +27,9 @@ input.mhs_tm_prim_button.button {
     background-color: #5A5A5A;
     color: #ffffff;
 }
-.js .postbox_mhs_tm h3.no-hover:hover,
-.js .postbox_mhs_tm h3.no-hover:active,
-.js .postbox_mhs_tm h3.no-hover:focus {
-    color: #464646;
-    cursor: default;
+
+#normal-sortables .ui-icon { 
+    background-image: url(jquery-ui/images/ui-icons_ffffff_256x240.png); 
 }
 
 #normal-sortables .ui-accordion-header-active {

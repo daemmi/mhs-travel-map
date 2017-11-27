@@ -49,9 +49,9 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 		 * @since 1.0
 		 * @access public
 		 */
-		public function MHS_TM_Admin_Form( $args ) {
-			$this->__construct( $args );
-		}
+//		public function MHS_TM_Admin_Form( $args ) {
+//			$this->__construct( $args );
+//		}
 
 		/**
 		 * PHP5 style constructor
@@ -63,15 +63,6 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 			$this->default_args[ 'button' ] = __( 'Save', 'mhs_tm' );
 
 			$this->args = wp_parse_args( $args, $this->default_args );
-
-			if ( true === $this->args[ 'js' ] ) {
-				wp_enqueue_script( 'postbox' );
-				add_action( 'admin_footer', array( $this, 'print_script' ) );
-			}
-		}
-
-		public function print_script() {
-//		echo '<script>jQuery(document).ready(function(){ postboxes.add_postbox_toggles(pagenow); });</script>';
 		}
 
 		/**
@@ -131,7 +122,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 						echo ' ' . esc_attr( $box[ 'class' ] );
 					}
 					echo '"';
-					if ( $box[ 'display' ] == 'none' ) {
+					if ( isset( $box[ 'display' ] ) && $box[ 'display' ] == 'none' ) {
 						echo ' style="display: none;" ';
 					}
 
@@ -142,7 +133,11 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					} else {
 						echo '<h2 class="no-hover"';
 					}
-					echo '><span class="postbox_title">' . esc_attr( $box[ 'title' ] ) . '</span></h2>' .
+					echo '>';
+					if ( isset( $sortable_handler ) ){
+						echo '<span class="' . $sortable_handler . '"></span>';
+					}
+					echo '<span class="postbox_title">' . esc_attr( $box[ 'title' ] ) . '</span></h2>' .
 					'<div class="inside">' .
 					'<table class="form-table pool-form"><tbody>';
 
@@ -299,13 +294,15 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 						'quicktags'		 => true // load Quicktags, can be used to pass settings directly to Quicktags using an array()
 					);
 					//filter to increase the allowed tags from wp_kses_post
-					add_filter( 'wp_kses_allowed_html', array( 'MHS_TM_Admin_Utilities', 'add_wpkses_tags' ), 10, 2 );
+					$class = new MHS_TM_Admin_Utilities();
+					add_filter( 'wp_kses_allowed_html', array( $class, 'add_wpkses_tags' ), 10, 2 );
 					wp_editor( wp_kses_post( $content ), $editor_id, $settings );
 					break;
 
 				case 'html_div':
 					//filter to increase the allowed tags from wp_kses_post
-					add_filter( 'wp_kses_allowed_html', array( 'MHS_TM_Admin_Utilities', 'add_wpkses_tags' ), 10, 2 );
+					$class = new MHS_TM_Admin_Utilities();
+					add_filter( 'wp_kses_allowed_html', array( $class, 'add_wpkses_tags' ), 10, 2 );
 					echo '<div  class="html_div" name="' . esc_attr( $field[ 'name' ] ) .
 					'" id="' . esc_attr( $field[ 'id' ] );
 					echo '">' . wp_kses_post( $field[ 'value' ] ) . '</div>';

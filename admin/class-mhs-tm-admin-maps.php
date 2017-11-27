@@ -26,10 +26,8 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			$url = 'admin.php?page=MHS_TM-maps';
 			
 			//save Get and Post
-			$todo	= sanitize_text_field( $_GET['todo'] );
-			$id		= absint( $_GET['id'] );
-
-			$todo = isset( $todo ) ? $todo : 'default';
+			$todo = isset(  $_GET[ 'todo' ] ) ? sanitize_text_field( $_GET[ 'todo' ] ) : 'default';
+			$id	  = isset(  $_GET[ 'id' ] ) ? absint( $_GET[ 'id' ] ) : null;
 
 			switch ( $todo ) {
 
@@ -354,16 +352,16 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			global $wpdb, $MHS_TM_Admin_Utilities;
 
 			// save variables
-			$todo_check		= sanitize_text_field( $_POST['todo_check'] );
-			$name			= sanitize_text_field( $_POST['name'] );
-			$selected		= (int)$_POST['selected'];
-			$route_ids		= $MHS_TM_Admin_Utilities->sanitize_id_array(($_POST['route_ids']));
+			$todo_check		= isset( $_POST['todo_check'] ) ? sanitize_text_field( $_POST['todo_check'] ) : null;
+			$name			= isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : null;
+			$selected		= isset( $_POST['selected'] ) ? (int)$_POST['selected'] : null;
+			$route_ids		= isset( $_POST['route_ids'] ) ? $MHS_TM_Admin_Utilities->sanitize_id_array( ( $_POST['route_ids'] ) ) : [];
 			if ( $id != NULL ) {
 				$nonce		= 'mhs_tm_maps_save_' . $id;
-				$nonce_key	= esc_attr( $_REQUEST['mhs_tm_maps_save_' . $id . '_nonce'] );
+				$nonce_key	= isset( $_POST['mhs_tm_maps_save_' . $id . '_nonce'] ) ? esc_attr( $_POST['mhs_tm_maps_save_' . $id . '_nonce'] ) : null;
 			} else {
 				$nonce = 'mhs_tm_maps_save';
-				$nonce_key	= esc_attr( $_REQUEST['mhs_tm_maps_save_nonce'] );
+				$nonce_key	= isset( $_POST['mhs_tm_maps_save_nonce'] ) ? esc_attr( $_POST['mhs_tm_maps_save_nonce'] ) : null;
 			}
 			
 			//validate data
@@ -375,7 +373,7 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			if ( !isset( $name ) || $name === NULL || $name == '' ) {
 				$messages[] = array(
 					'type'		 => 'error',
-					'message'	 => __( 'Map not added! Enter a name at least!', 'mhs_tm' )
+					'message'	 => __( 'Map not saved! Enter a name at least!', 'mhs_tm' )
 				);
 				$this->maps_menu( $messages );
 				return;

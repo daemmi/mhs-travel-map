@@ -257,9 +257,9 @@ class List_Table_Maps extends WP_List_Table_My {
 		global $wpdb, $MHS_TM_Admin, $MHS_TM_Admin_Utilities;
 		$table_name = $wpdb->prefix . 'mhs_tm_maps';
 
-		$nonce	 = esc_attr( $_REQUEST['_wpnonce'] );
-		$id		 = absint( $_GET['id'] );
-		$map_ids = $MHS_TM_Admin_Utilities->sanitize_id_array( $_GET['map_id'] );
+		$nonce	 = isset( $_GET['_wpnonce'] ) ? esc_attr( $_GET['_wpnonce'] ) : null;
+		$id		 = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
+		$map_ids = isset( $_GET['map_id'] ) ? $MHS_TM_Admin_Utilities->sanitize_id_array( $_GET['map_id'] ) : null;
 
 		//Detect when a bulk action is being triggered...
 		switch ( $this->current_action() ) {
@@ -402,13 +402,13 @@ class List_Table_Maps extends WP_List_Table_My {
 			if ( $selected ) {
 				$data[ $id ]['active'] = 'Map is selected! <br> <span class="edit"><a title="' .
 				__( 'Unselect this Map!', 'mhs_tm' ) .
-				'" href="?page=MHS_TM-maps&todo=unselect&amp;id=' . $map[ id ] . '">' .
+				'" href="?page=MHS_TM-maps&todo=unselect&amp;id=' . $map['id'] . '">' .
 				__( 'Set as unselected!', 'mhs_tm' ) .
 				'</a></span>';
 			} else {
 				$data[ $id ]['active'] = 'Map is unselected! <br> <span class="edit"><a title="' .
 				__( 'Select this Map!', 'mhs_tm' ) .
-				'" href="?page=MHS_TM-maps&todo=select&amp;id=' . $map[ id ] . '">' .
+				'" href="?page=MHS_TM-maps&todo=select&amp;id=' . $map['id'] . '">' .
 				__( 'Set as selected!', 'mhs_tm' ) .
 				'</a></span>';
 			}
@@ -428,9 +428,9 @@ class List_Table_Maps extends WP_List_Table_My {
 			$orderby_options = ['update', 'date', 'name', 'short_code'];
 			$order_options   = ['DESC', 'ASC', 'desc', 'asc'];
 			
-			if ( in_array( $_REQUEST['orderby'], $orderby_options ) && in_array( $_REQUEST['order'], $order_options ) ) {
-				$orderby = esc_attr( $_REQUEST['orderby'] );
-				$order   = esc_attr( $_REQUEST['order'] );
+			if ( isset( $_GET['orderby'], $_GET['order'] ) && in_array( $_GET['orderby'], $orderby_options ) && in_array( $_GET['order'], $order_options ) ) {
+				$orderby = esc_attr( $_GET['orderby'] );
+				$order   = esc_attr( $_GET['order'] );
 			} else {
 				$orderby = 'update';
 				$order   = 'desc';

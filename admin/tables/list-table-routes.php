@@ -253,9 +253,9 @@ class List_Table_Routes extends WP_List_Table_My {
 		global $wpdb, $MHS_TM_Admin, $MHS_TM_Admin_Utilities;
 		$table_name = $wpdb->prefix . 'mhs_tm_routes';
 
-		$id			 = absint( $_GET['id'] );
-		$route_ids	 = $MHS_TM_Admin_Utilities->sanitize_id_array( $_GET['route_id'] );
-		$nonce		 = esc_attr( $_REQUEST['_wpnonce'] );
+		$id			 = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
+		$route_ids	 = isset( $_GET['route_id'] ) ? $MHS_TM_Admin_Utilities->sanitize_id_array( $_GET['route_id'] ) : null;
+		$nonce		 = isset( $_GET['_wpnonce'] ) ? esc_attr( $_GET['_wpnonce'] ) : null;
 
 		//Detect when a bulk action is being triggered...
 		if ( 'delete' === $this->current_action() ) {
@@ -401,9 +401,9 @@ class List_Table_Routes extends WP_List_Table_My {
 			$orderby_options = ['update', 'date', 'name', 'id'];
 			$order_options   = ['DESC', 'ASC', 'desc', 'asc'];
 			
-			if ( in_array( $_REQUEST['orderby'], $orderby_options ) && in_array( $_REQUEST['order'], $order_options ) ) {
-				$orderby = esc_attr( $_REQUEST['orderby'] );
-				$order   = esc_attr( $_REQUEST['order'] );
+			if ( isset( $_GET['orderby'], $_GET['order'] ) && in_array( $_GET['orderby'], $orderby_options ) && in_array( $_GET['order'], $order_options ) ) {
+				$orderby = esc_attr( $_GET['orderby'] );
+				$order   = esc_attr( $_GET['order'] );
 			} else {
 				$orderby = 'update';
 				$order   = 'desc';

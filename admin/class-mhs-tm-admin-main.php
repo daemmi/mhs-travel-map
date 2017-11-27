@@ -92,9 +92,9 @@ if ( !class_exists( 'MHS_TM_Admin' ) ) :
 		 * @since 1.0
 		 * @access public
 		 */
-		public function MHS_TM_Admin() {
-			$this->__construct();
-		}
+//		public function MHS_TM_Admin() {
+//			$this->__construct();
+//		}
 
 		/**
 		 * PHP5 style constructor

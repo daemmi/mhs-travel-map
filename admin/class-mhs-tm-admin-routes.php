@@ -24,10 +24,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$messages = array();
 			
 			//save Get and Post and sanitize
-			$todo	= sanitize_text_field( $_GET[ 'todo' ] );
-			$id		= absint( $_GET[ 'id' ] );
-			
-			$todo = isset( $todo ) ? $todo : 'default';
+			$todo = isset(  $_GET['todo'] ) ? sanitize_text_field( $_GET['todo'] ) : 'default';
+			$id	  = isset(  $_GET['id'] ) ? absint( $_GET['id'] ) : null;
 
 			switch ( $todo ) {
 
@@ -109,7 +107,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			'<!-- Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions -->
                      <form id="list_table" method="get">
                      <!-- For plugins, we also need to ensure that the form posts back to our current page -->
-                     <input type="hidden" name="page" value="' . esc_attr( $_REQUEST[ 'page' ] ) . '" />
+                     <input type="hidden" name="page" value="' . esc_attr( $_REQUEST['page'] ) . '" />
                      <!-- Now we can render the completed list table -->';
 //                echo $ListTable->search_box( 'search', 'search_id' );
 			echo $ListTable->display();
@@ -213,21 +211,22 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				'form'			 => true,
 				'js'			 => true,
 				'metaboxes'		 => true,
-				'action'		 => $form_action,
-				'id'			 => $id,
-				'back'			 => false,
-				'custom_buttons' => [],
-				'back_url'		 => NULL,
-				'fields'		 => $fields_coordinates,
-				'top_button'	 => false,
-				'bottom_button'	 => true,
-				'hide'			 => true
+				'action'		   => $form_action,
+				'id'			   => $id,
+				'back'			   => false,
+				'custom_buttons'   => [],
+				'back_url'		   => NULL,
+				'fields'		   => $fields_coordinates,
+				'top_button'	   => false,
+				'bottom_button'	   => true,
+				'hide'			   => true,
+				'sortable_handler' => 'mhs-tm-sortable-handler ui-icon ui-icon-arrowthick-2-n-s'
 			);
 			$form_coordinates	 = new MHS_TM_Admin_Form( $args );
 			
 			$height		 = 500;
 
-			$output .= '<div id="mhs_tm_map_canvas_0" style="height: ' . esc_attr( $height ) . 'px; margin: 0; padding: 0;"></div>';
+			$output = '<div id="mhs_tm_map_canvas_0" style="height: ' . esc_attr( $height ) . 'px; margin: 0; padding: 0;"></div>';
 
 			echo $adminpage->top();
 			// Make an div over the whole content when loading the page
@@ -531,7 +530,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				$data	 = $data[ 0 ];
 
 				// Load Option JSON data
-				$json_array = json_decode( $data[ 'options' ], true );
+				$json_array = json_decode( $data['options'], true );
 				if ( !empty( $json_array ) ) {
 					$json_array_keys = array_keys( $json_array );
 					$json_id		 = 0;
@@ -542,7 +541,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				}
 
 				// Load Coordinates JSON data
-				$json_array_coordinates = json_decode( $data[ 'coordinates' ], true );
+				$json_array_coordinates = json_decode( $data['coordinates'], true );
 
 				// display coordinates only if there are one and we will not get the "The Route" fields
 				$coordinate_id = 0;
@@ -641,9 +640,13 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 
 				$mcount = count( $routes_fields );
 				for ( $i = 0; $i < $mcount; $i++ ) {
-					$fcount = count( $routes_fields[ $i ][ 'fields' ] );
-					for ( $j = 0; $j < $fcount; $j++ ) {
-						$routes_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = stripslashes( $data[ $routes_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] );
+					if( isset( $routes_fields[ $i ]['fields'] ) ) {
+						$fcount = count( $routes_fields[ $i ]['fields'] );
+						for ( $j = 0; $j < $fcount; $j++ ) {
+							if( isset( $data[ $routes_fields[ $i ]['fields'][ $j ]['id'] ] ) ) {
+								$routes_fields[ $i ]['fields'][ $j ]['value'] = stripslashes( $data[ $routes_fields[ $i ]['fields'][ $j ]['id'] ] );
+							}
+						}
 					}
 				}
 			}
@@ -661,14 +664,15 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			global $wpdb, $MHS_TM_Admin_Maps, $MHS_TM_Maps, $MHS_TM_Admin_Routes;
 			
 			// save variables and sanitize 
-			$coordinates = $MHS_TM_Admin_Routes->sanitize_coordinates_array( json_decode( stripslashes( $_POST[ 'route' ] ) ) );
-			$path		 = $MHS_TM_Admin_Routes->sanitize_path_array( json_decode( stripslashes( $_POST[ 'path' ] )  ) );
-			$name		 = sanitize_text_field( $_POST[ 'name' ] );
-			$id			 = absint( $_GET[ 'id' ] );
-			$nonce_key	= esc_attr( $_REQUEST[ 'mhs_tm_route_save_nonce' ] );
+			$coordinates = isset( $_POST['route'] ) ? $MHS_TM_Admin_Routes->sanitize_coordinates_array( json_decode( stripslashes( $_POST['route'] ) ) ) : [];
+			$path		 = isset( $_POST['path'] ) ? $MHS_TM_Admin_Routes->sanitize_path_array( json_decode( stripslashes( $_POST['path'] )  ) ) : [];
+			$route       = isset( $_POST['route'] ) ? json_decode( stripslashes( $_POST['route'] ) ) : [];
+			$name		 = isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : null;
+			$nonce_key	 = isset( $_POST['mhs_tm_route_save_nonce'] ) ? esc_attr( $_POST['mhs_tm_route_save_nonce'] ) : null;
+			$id			 = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
 			
 			if ( NULL != $id ) {
-				$nonce		= 'mhs_tm_route_save_' . $id;
+				$nonce = 'mhs_tm_route_save_' . $id;
 			} else {
 				$nonce = 'mhs_tm_route_save';
 			}
@@ -745,7 +749,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				$messages = array(
 					'type'		 => 'updated',
 					'message'	 => __( 'Route successfully added!', 'mhs_tm' ),
-					'coordinate_json' => json_decode( stripslashes( $_POST[ 'route' ] ) ),
+					'coordinate_json' => $route,
 					'coordinate' => $coordinates
 				);
 			}
@@ -801,7 +805,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$new_input = array();
 			
 			//filter to increase the allowed tags from wp_kses_post
-			add_filter( 'wp_kses_allowed_html', array( 'MHS_TM_Admin_Utilities', 'add_wpkses_tags' ), 10, 2 );
+			$class = new MHS_TM_Admin_Utilities();
+			add_filter( 'wp_kses_allowed_html', array( $class, 'add_wpkses_tags' ), 10, 2 );
 
 			if( is_array( $array ) ) {
 				// Loop through the input and sanitize each of the values
@@ -823,17 +828,17 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 							);
 						} elseif( is_array( $array[ $key ] ) ) {
 							$new_input[ $key ] = array( 
-								'city'				=> sanitize_text_field( $val[ 'city' ] ), 
-								'country'			=> sanitize_text_field( $val[ 'country' ] ), 
-								'ishitchhikingspot' => $MHS_TM_Admin_Utilities->sanitize_checkbox( $val[ 'ishitchhikingspot' ] ), 
-								'ispartofaroute'	=> $MHS_TM_Admin_Utilities->sanitize_checkbox( $val[ 'ispartofaroute' ] ), 
-								'latitude'			=> floatval( $val[ 'latitude' ] ), 
-								'longitude'			=> floatval( $val[ 'longitude' ] ), 
-								'note'				=> balanceTags( wp_kses_post( $val[ 'note' ] ), true), 
-								'starttime'			=> substr( sanitize_text_field( $val[ 'starttime' ] ), 0, 10), 
-								'state'				=> sanitize_text_field( $val['state' ] ), 
-								'street'			=> sanitize_text_field( $val[ 'street' ] ), 
-								'waitingtime'		=> intval( $val[ 'waitingtime' ] ), 
+								'city'				=> sanitize_text_field( $val['city'] ), 
+								'country'			=> sanitize_text_field( $val['country'] ), 
+								'ishitchhikingspot' => $MHS_TM_Admin_Utilities->sanitize_checkbox( $val['ishitchhikingspot'] ), 
+								'ispartofaroute'	=> $MHS_TM_Admin_Utilities->sanitize_checkbox( $val['ispartofaroute'] ), 
+								'latitude'			=> floatval( $val['latitude'] ), 
+								'longitude'			=> floatval( $val['longitude'] ), 
+								'note'				=> balanceTags( wp_kses_post( $val['note'] ), true), 
+								'starttime'			=> substr( sanitize_text_field( $val['starttime'] ), 0, 10), 
+								'state'				=> sanitize_text_field( $val['state'] ), 
+								'street'			=> sanitize_text_field( $val['street'] ), 
+								'waitingtime'		=> intval( $val['waitingtime'] ), 
 							);							
 						}
 					}

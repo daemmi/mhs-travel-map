@@ -52,7 +52,11 @@ jQuery( function ( $ ) {
     $( '#normal-sortables' ).accordion( {
         header: '> div > h2',
         collapsible: true,
-        heightStyle: 'content'
+        heightStyle: 'content',
+        icons: {
+            header: "ui-icon-plusthick",
+            activeHeader: "ui-icon-minusthick"
+        }
     } );
 
     $('#normal-sortables').on('accordionactivate', function (event, ui) {
@@ -65,6 +69,8 @@ jQuery( function ( $ ) {
 
     $( '#normal-sortables' ).sortable( {
         items: '.coordinate',
+        axis: "y",
+      handle: ".mhs-tm-sortable-handler",
         start: function ( event, ui ) {
             old_order = ui.item.index();
         },

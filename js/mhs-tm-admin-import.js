@@ -1,11 +1,6 @@
 jQuery( function ( $ ) {
     var routes = [];
-    var ajax_url = mhs_tm_import_vars.ajax_url;        
-
-    $( "#mhs_tm_list" ).accordion( {
-        header: "> div > h3",
-        collapsible: true
-    } );
+    var ajax_url = mhs_tm_import_vars.ajax_url; 
 
     $( "#mhs_tm_list" ).on( 'click', '.mhs_tm_button_delete', function () {
         $( this ).parent().parent().parent().remove();
@@ -80,7 +75,7 @@ jQuery( function ( $ ) {
                 if ( !end_date ) {
                     end_date = new Date();
                 }
-
+                
                 $.each( data, function ( key, value ) {
 
                     if ( value['_id'] != '' && !( typeof value['_id'] === "undefined" ) ) {
@@ -99,7 +94,7 @@ jQuery( function ( $ ) {
                             ispartofaroute: value['IS_PART_OF_AROUTE'],
                             waitingtime: value['WAITING_TIME']
                         } );
-                        //START_DATE_TIME is always factor 1000 too high
+                        //START_DATE_TIME is in milliseconds and devided by 1000 to be in seconds for php
                         coordinate.starttime = coordinate.starttime / 1000;
                         
                         route.push( coordinate );
@@ -157,6 +152,8 @@ jQuery( function ( $ ) {
     } );
 
     $( "#mhs_tm_list" ).accordion( {
+        header: "> div > h3",
+        collapsible: true,
         activate: function ( event, ui ) {
             var id_number = $( '.ui-accordion-header-active' ).parent().attr( 'id' );
 
@@ -229,11 +226,11 @@ jQuery( function ( $ ) {
         {
             html += route[route.length - 1]['country'];
         }
-
+        // time * 1000 because time is in seconds and Date() calculates in milliseconds
         html += ' (' +
-            new Date( parseInt( route[0]['starttime'] ) ).
+            new Date( parseInt( route[0]['starttime'] * 1000 ) ).
             toLocaleString( [ ], { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' } ) +
-            ' / ' + new Date( parseInt( route[route.length - 1]['starttime'] ) ).
+            ' / ' + new Date( parseInt( route[route.length - 1]['starttime'] * 1000 ) ).
             toLocaleString( [ ], { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' } ) + ')';
 
         html += mhs_tm_utilities.utilities.get_buttons( id );
@@ -298,8 +295,9 @@ jQuery( function ( $ ) {
         {
             name = name + routes[id_number][routes[id_number].length - 1]['country'];
         }
-
-        name = name + ' (' + new Date( parseInt( routes[id_number][routes[id_number].length - 1]['starttime'] ) ).
+        
+        // time * 1000 because time is in seconds and Date() calculates in milliseconds
+        name = name + ' (' + new Date( parseInt( routes[id_number][routes[id_number].length - 1]['starttime'] * 1000 ) ).
             toLocaleString( [ ], { year: '2-digit', month: '2-digit', day: '2-digit' } ) + ')';
         
         //check if a path already calculated
