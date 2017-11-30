@@ -121,7 +121,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
             mhs_tm_map.map[map_canvas_id].fitBounds( mhs_tm_map.bounds[map_canvas_id] );
             mhs_tm_map.map[map_canvas_id].panToBounds( mhs_tm_map.bounds[map_canvas_id] );
 
-            mhs_tm_map.bindInfoWindow( mhs_tm_map.marker[map_canvas_id][mark_counter], 
+            mhs_tm_map.bind_info_window( mhs_tm_map.marker[map_canvas_id][mark_counter], 
             mhs_tm_map.marker[map_canvas_id], mhs_tm_map.map[map_canvas_id], contentString );
             
             mark_counter++;
@@ -145,7 +145,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
     
 }
 
-mhs_tm_map.bindInfoWindow = function( marker, marker_all, map, contentString ) {
+mhs_tm_map.bind_info_window = function( marker, marker_all, map, contentString ) {
     google.maps.event.addListener( marker, 'click', function () {
         var index
 

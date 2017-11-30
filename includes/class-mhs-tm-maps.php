@@ -38,7 +38,7 @@ class MHS_TM_Maps {
             $coordinates = array();
             $coordinates = $this->get_coordinates($map_id, 'map');
             
-            $output .= '<div class="mhs_tm-map" id="mhs_tm_map_canvas_' . esc_attr( $map_id ) . '" style="height: ' . 
+            $output = '<div class="mhs_tm-map" id="mhs_tm_map_canvas_' . esc_attr( $map_id ) . '" style="height: ' . 
 			esc_attr( $height ) . 'px; margin: 0; padding: 0;"></div>';
 
 			$key = $MHS_TM_Utilities->get_gmaps_api_key();

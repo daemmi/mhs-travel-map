@@ -85,9 +85,13 @@ class MHS_TM_Admin_Page {
 					$output .= '<h2 class="nav-tab-wrapper">';
 					$i = 0;
 					foreach ( $tabs as $tab ) {
-						$output .= '<a href="' . esc_url( $url ) . '&tab=' . esc_attr( $tab['value'] ) . '" class="nav-tab ' . ( $tab['value'] === $active_tab || ( $tab['value'] === '' && 0 === $i ) ? 'nav-tab-active' : '' ) . '">' .
-								'<div class="nav-tab-icon nt-' . esc_attr( $tab['icon'] ) . '"></div>' .
-								esc_html( $tab['title'] ) .
+						$icon	= isset( $tab['icon'] ) ? esc_attr( $tab['icon'] ) : '';
+						$value	= isset( $tab['value'] ) ? esc_attr( $tab['value'] ) : '';
+						$title	= isset( $tab['title'] ) ? esc_html( $tab['title'] ) : '';
+						
+						$output .= '<a href="' . esc_url( $url ) . '&tab=' . $value . '" class="nav-tab ' . ( $tab['value'] === $active_tab || ( $tab['value'] === '' && 0 === $i ) ? 'nav-tab-active' : '' ) . '">' .
+								'<div class="nav-tab-icon nt-' . $icon . '"></div>' .
+								$title .
 							'</a>';
 						$i++;
 					}

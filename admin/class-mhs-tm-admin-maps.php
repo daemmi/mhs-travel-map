@@ -328,12 +328,18 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 
 				$mcount = count( $maps_fields );
 				for ( $i = 0; $i < $mcount; $i++ ) {
-					$fcount = count( $maps_fields[ $i ]['fields'] );
-					for ( $j = 0; $j < $fcount; $j++ ) {
-						if ( $maps_fields[ $i ]['fields'][ $j ]['id'] == 'route_ids[]' ) {
-							$maps_fields[ $i ]['fields'][ $j ]['value'] = json_decode( $data['route_ids'], true );
-						} else {
-							$maps_fields[ $i ]['fields'][ $j ]['value'] = stripslashes( $data[ $maps_fields[ $i ]['fields'][ $j ]['id'] ] );
+					if( isset( $maps_fields[ $i ]['fields'] ) ) {
+						$fcount = count( $maps_fields[ $i ]['fields'] );
+						for ( $j = 0; $j < $fcount; $j++ ) {
+							if ( $maps_fields[ $i ]['fields'][ $j ]['id'] == 'route_ids[]' ) {
+								if( isset( $data['route_ids'] ) ) {
+									$maps_fields[ $i ]['fields'][ $j ]['value'] = json_decode( $data['route_ids'], true );
+								}
+							} else {
+								if( isset( $data[ $maps_fields[ $i ]['fields'][ $j ]['id'] ] ) ) {
+									$maps_fields[ $i ]['fields'][ $j ]['value'] = stripslashes( $data[ $maps_fields[ $i ]['fields'][ $j ]['id'] ] );
+								}	
+							}
 						}
 					}
 				}

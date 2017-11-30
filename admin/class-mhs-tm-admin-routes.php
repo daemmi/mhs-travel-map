@@ -159,6 +159,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				$coordinates = [];
 				$coordinates[0] = [];
 				$coordinates[0]['coordinates']			= [];
+				$coordinates[0]['options']['name']		= '';
 			} else {
 				$coordinates[0]['coordinates']			= $this->sanitize_coordinates_array( $coordinates[0]['coordinates'] );
 				$coordinates[0]['options']['path']		= $this->sanitize_path_array( $coordinates[0]['options']['path'] );
@@ -207,10 +208,10 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$form_the_route	 = new MHS_TM_Admin_Form( $args );
 
 			$args	 = array(
-				'echo'			 => false,
-				'form'			 => true,
-				'js'			 => true,
-				'metaboxes'		 => true,
+				'echo'			   => false,
+				'form'			   => true,
+				'js'			   => true,
+				'metaboxes'		   => true,
 				'action'		   => $form_action,
 				'id'			   => $id,
 				'back'			   => false,
@@ -272,6 +273,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 
 			wp_register_script( 'googlemap', 'https://maps.googleapis.com/maps/api/js?key=' . $key . '&libraries=drawing', true );
 			wp_enqueue_script( 'googlemap' );
+
+			wp_enqueue_script( 'jquery_ui_touch_punch_min' );
 			
 			wp_enqueue_script( 'mhs_tm_map_edit' );
 			wp_localize_script( 'mhs_tm_map_edit', 'mhs_tm_app_vars', array(
@@ -281,8 +284,6 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				'auto_load'			 => true,
 				'ajax_url'			 => admin_url( 'admin-ajax.php' ),
 			) );
-
-			wp_enqueue_script( 'jquery_ui_touch_punch_min' );
 		}
 
 		/**

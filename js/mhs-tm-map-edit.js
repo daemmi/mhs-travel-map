@@ -27,13 +27,18 @@ jQuery( function ( $ ) {
     marker[map_canvas_id] = [];
 
     $( '#mhs_tm_loading' ).css( "background-color", $( 'body' ).css( "background-color" ) );
-
+    
     // Resize the window resize other  stuff too
     $( window ).resize( function () {
-        $( "#wp_editor_dialog_div" ).dialog( "option", {
-            height: ( $( window ).height() * 0.9 ),
-            width: $( "#wrap_content" ).width()
-        } );
+           // set dialog height min to 500px
+           var height = 500;
+           if( $( window ).height() * 0.9 > 500 ) {
+               height = $( window ).height() * 0.9;
+           }
+           $( "#wp_editor_dialog_div" ).dialog( "option", {
+               height: height,
+               width: $( "#wrap_content" ).width(),
+           } );
     } );
 
     if ( auto_load )
@@ -59,18 +64,10 @@ jQuery( function ( $ ) {
         }
     } );
 
-    $('#normal-sortables').on('accordionactivate', function (event, ui) {
-        if (ui.newPanel.length) {
-            $('#normal-sortables').sortable('disable');
-        } else {
-            $('#normal-sortables').sortable('enable');
-        }
-    });
-
     $( '#normal-sortables' ).sortable( {
         items: '.coordinate',
         axis: "y",
-      handle: ".mhs-tm-sortable-handler",
+        handle: ".mhs-tm-sortable-handler",
         start: function ( event, ui ) {
             old_order = ui.item.index();
         },
@@ -104,7 +101,7 @@ jQuery( function ( $ ) {
     } );
 
     $( '#normal-sortables div' ).disableSelection();
-
+    
     $( '.datetimepicker' ).datetimepicker( {
         step: 10
     } );
@@ -183,25 +180,33 @@ jQuery( function ( $ ) {
             }
         },
         close: function ( event, ui ) {
-            //tinyMCE is just active if the wp-editor loads the visual tab and not the text tab
-            if (tinyMCE.activeEditor) {
+            //check if tinyMCE is active!
+            var tinyMCE_active = (typeof tinyMCE != "undefined") && tinyMCE.activeEditor && 
+                !tinyMCE.activeEditor.isHidden();
+           
+            if ( tinyMCE_active ) {
                 // Ok, the active tab is Visual, get the content from tinyMCE
                 coordinates[map_canvas_id]['coordinates'][coordinate_index_global]['note'] = tinyMCE.activeEditor.getContent();
-            $( "#note_" + ( coordinate_index_global + 1 ) ).html( tinyMCE.activeEditor.getContent() );
+                $( "#note_" + ( coordinate_index_global + 1 ) ).html( tinyMCE.activeEditor.getContent() );
             } else {
                 // The active tab is HTML, get the content from the textarea
                 coordinates[map_canvas_id]['coordinates'][coordinate_index_global]['note'] = $('#wp_editor_dialog').val();
-            $( "#note_" + ( coordinate_index_global + 1 ) ).html( $('#wp_editor_dialog').val() );
+                $( "#note_" + ( coordinate_index_global + 1 ) ).html( $('#wp_editor_dialog').val() );
             }
             var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[map_canvas_id]['coordinates'][coordinate_index_global], coordinates[map_canvas_id]['coordinates'] );
             marker[map_canvas_id][coordinate_index_global].infowindow.setContent( contentString );
-            bindInfoWindow( marker[map_canvas_id][coordinate_index_global], marker[map_canvas_id],
+            bind_info_window( marker[map_canvas_id][coordinate_index_global], marker[map_canvas_id],
                 map[map_canvas_id], contentString );
         },
         open: function ( event, ui ) {
+            // set dialog height min to 500px
+            var height = 500;
+            if( $( window ).height() * 0.9 > 500 ) {
+                height = $( window ).height() * 0.9;
+            }
             $( this ).dialog( "option", {
-                height: ( $( window ).height() * 0.9 ),
-                width: $( "#wrap_content" ).width()
+                height: height,
+                width: $( "#wrap_content" ).width(),
             } );
         }
     } );
@@ -210,24 +215,24 @@ jQuery( function ( $ ) {
         coordinate_index_global = parseInt( $( this ).attr( 'id' ).replace( 'note' + '_', '' ) - 1 );
         $( "#wp_editor_dialog_div" ).dialog( "open" );
         var div = $( this );
-        setTimeout(function () {
+        setTimeout( function () {
             //tinyMCE is just active if the wp-editor loads the visual tab and not the text tab
-            if (tinyMCE.activeEditor) {
+            if ( tinyMCE.activeEditor ) {
                 // Ok, the active tab is Visual
                 $( '#wp_editor_dialog_ifr' ).css( 'height', $( "#wp_editor_dialog_div" ).height() * 0.7 );
                 tinyMCE.activeEditor.setContent( div.html() );
             } else {
                 // The active tab is HTML, so just query the textarea
                 $( '#wp_editor_dialog' ).css( 'height', $( "#wp_editor_dialog_div" ).height() * 0.7 );
-                $('#wp_editor_dialog').val( div.html() );
+                $( '#wp_editor_dialog' ).val( div.html() );
             }
-       },50);
+        }, 50 );
     } );
 
     $( ".postbox-container" ).on( 'click', '.mhs_tm_button_delete', function () {
 
         var new_order2 = $( '#normal-sortables .coordinate' ).length;
-        var old_order2 = $( this ).parent().parent().parent().index() - 1;
+        var old_order2 = $( this ).parent().parent().parent().index();
         $( this ).parent().parent().parent().remove();
 
         $( '#normal-sortables' ).find( '.coordinate' ).each( function ( index ) {
@@ -240,6 +245,7 @@ jQuery( function ( $ ) {
         } );
 
         // remove marker from map
+        console.log(old_order2);
         marker[map_canvas_id][old_order2 - 1].setMap( null );
         // swap from bottom to top                       
         for ( id = old_order2; id < new_order2; id++ ) {
@@ -308,7 +314,7 @@ jQuery( function ( $ ) {
         // make the content string for the gmap info window
         var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[map_canvas_id]['coordinates'][coordinate_index], coordinates[map_canvas_id]['coordinates'] );
         marker[map_canvas_id][coordinate_index].infowindow.setContent( contentString );
-        bindInfoWindow( marker[map_canvas_id][coordinate_index], marker[map_canvas_id],
+        bind_info_window( marker[map_canvas_id][coordinate_index], marker[map_canvas_id],
             map[map_canvas_id], contentString );
 
         // set the  gmap marker to the new location
@@ -372,6 +378,8 @@ jQuery( function ( $ ) {
             $( '#mhs_tm_loading' ).slideUp( 1500 );
             //show the form with the coordinates
             $( '#mhs_tm-form ' ).show();
+            //enable sortable, otherwise touch punch doesnt work with sortable
+            $('#normal-sortables').sortable('enable');
         } );
 
         // If new Route, coordinates are NULL and first Pin is 1);
@@ -412,11 +420,11 @@ jQuery( function ( $ ) {
                 // Add new coordinate in coordinate array
                 if ( coordinates[0]['coordinates'].length > 0 ) {
 
-                    Add_Coordinate( event.overlay.getPosition().lat(),
+                    add_coordinate( event.overlay.getPosition().lat(),
                         event.overlay.getPosition().lng(), false );
                 } else {
                     //  Its the first coordinate                        
-                    Add_Coordinate( event.overlay.getPosition().lat(),
+                    add_coordinate( event.overlay.getPosition().lat(),
                         event.overlay.getPosition().lng(), true );
                 }
 
@@ -433,9 +441,9 @@ jQuery( function ( $ ) {
                     content: ''
                 } );
                 var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1], coordinates[0]['coordinates'] );
-                bindInfoWindow( marker[map_canvas_id][marker[map_canvas_id].length - 1], marker[map_canvas_id], map[map_canvas_id], contentString );
+                bind_info_window( marker[map_canvas_id][marker[map_canvas_id].length - 1], marker[map_canvas_id], map[map_canvas_id], contentString );
 
-                Add_Dragend_Listener( event.overlay );
+                add_dragend_listener( event.overlay );
 
                 //create the Pin Icon
                 pin = 'd_map_xpin_letter&chld=pin_star|' + ( coordinates[0]['coordinates'].length ) + '|000000|ffffff|ffffff';
@@ -487,7 +495,7 @@ jQuery( function ( $ ) {
                         draggable: true
                     } );
 
-                    Add_Dragend_Listener( marker[map_canvas_id][mark_counter] );
+                    add_dragend_listener( marker[map_canvas_id][mark_counter] );
 
                     marker[map_canvas_id][mark_counter].infowindow = new google.maps.InfoWindow( {
                         // content: contentString
@@ -497,7 +505,7 @@ jQuery( function ( $ ) {
                     map[map_canvas_id].fitBounds( bounds[map_canvas_id] );
                     map[map_canvas_id].panToBounds( bounds[map_canvas_id] );
 
-                    bindInfoWindow( marker[map_canvas_id][mark_counter], marker[map_canvas_id], map[map_canvas_id], contentString );
+                    bind_info_window( marker[map_canvas_id][mark_counter], marker[map_canvas_id], map[map_canvas_id], contentString );
                     lines.push( marker[map_canvas_id][mark_counter].position );
 
                     mark_counter++;
@@ -518,7 +526,7 @@ jQuery( function ( $ ) {
         }
     }
 
-    function Add_Dragend_Listener( marker ) {
+    function add_dragend_listener( marker ) {
         google.maps.event.addListener( marker, 'dragend', function ( event ) {
 
             $( '#latitude_' + ( marker.id + 1 ) ).val( marker.getPosition().lat() );
@@ -530,7 +538,7 @@ jQuery( function ( $ ) {
         } );
     }
 
-    function Add_Coordinate( lat, lng, first_coordinate ) {
+    function add_coordinate( lat, lng, first_coordinate ) {
         if ( first_coordinate ) {
             coordinates = [ ];
             coordinates[0] = [ ];
@@ -590,7 +598,7 @@ jQuery( function ( $ ) {
         coordinates[0]['coordinates'][coordinate_id - 1]['starttime'] = new Date().getTime();
     }
 
-    function bindInfoWindow( marker, marker_all, map, contentString ) {
+    function bind_info_window( marker, marker_all, map, contentString ) {
         google.maps.event.addListener( marker, 'click', function () {
 
             for ( index = 0; index < marker_all.length; ++index ) {

@@ -84,7 +84,7 @@ mhs_tm_utilities.coordinate_handling.get_only_on_route_coordinates = function( c
 
 mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = function( coordinate, coordinates ) {
     
-    var contentString = '<div class="map-message">' +
+    var contentString = '<div class="mhs-tm-map-message">' +
         '<p class="map-message-title"><b style="font-size: 120%;">';
     if ( coordinate.country )
     {
@@ -128,7 +128,7 @@ mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview = function(
     }
     
     if( mhs_tm_utilities.utilities.is_equivalent(coordinate, coordinates[coordinates.length - 1] ) ) {
-        for( var x = 0; x < coordinates.length; ++x) {
+        for( var x = 1; x < coordinates.length; ++x) {
             if( coordinates[x].ishitchhikingspot && coordinates[x].ispartofaroute ) {
                 waiting_time_total += coordinates[x].waitingtime;
                 ++lifts;

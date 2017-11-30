@@ -1,10 +1,5 @@
 /* UI FIXES
 ----------------------------------------- */
-.map-message img {
-    max-width: 98.5% !important; 
-    height: auto !important;    
-}
-
 input.mhs_tm_prim_button.button {
     float: left;
     margin-right: 6px;

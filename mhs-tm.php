@@ -4,7 +4,7 @@
 Plugin Name: My Hitchhiking Spot Travel Map (MHS Travel Map)
 Plugin URI: 
 Description: Create your travel map with use of google maps by adding coordinates to a map, make your route public, write a story for each coordinate and import backup files from the Android app "<a title="My Hitchhiking Spots" href="https://play.google.com/store/apps/details?id=com.myhitchhikingspots" target="_blank" rel="noopener">My Hitchhiking Spots</a>"
-Version: 1.0.3
+Version: 1.0.4
 Author: Jonas Damhuis
 Author URI: 
 License: GPL3
@@ -57,12 +57,14 @@ function MHS_TM_enqueue() {
 	wp_register_script( 'mhs_tm_utilities', MHS_TM_RELPATH . 'js/mhs-tm-utilities.js', array( 'jquery', 'jquery-ui-dialog' ) );
 	    
 	/* register styles */
-    
+    wp_register_style( 'mhs_tm_map_style', MHS_TM_RELPATH . 'css/mhs-tm-map.css', false, '1.0.1' );
+	
 	/* enqueue scripts */
 	wp_enqueue_script( 'google_jsapi' );
 	wp_enqueue_script( 'mhs_tm_utilities' );
     
 	/* enqueue stylesheets */
+	wp_enqueue_style( 'mhs_tm_map_style' );
     
 }
 add_action( 'wp_enqueue_scripts', 'MHS_TM_enqueue' );
@@ -113,12 +115,12 @@ function MHS_TM_admin_enqueue() {
 	wp_register_script( 'mhs_tm_map_edit', MHS_TM_RELPATH . 'js/mhs-tm-map-edit.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery-ui-datepicker' ) );
         
         /* register styles */
-	wp_register_style( 'jquery_datetimepicker_style', MHS_TM_RELPATH . 'css/jquery.datetimepicker.min.css' );
-	wp_register_style( 'mhs_tm_admin_style', MHS_TM_RELPATH . 'css/mhs-tm-admin.css', false, '1.0.0' );
-	wp_register_style( 'mhs_tm_admin_page_style', MHS_TM_RELPATH . 'css/mhs-tm-admin-page.css', false, '1.0.0' );
-	wp_register_style( 'mhs_tm_admin_form_style', MHS_TM_RELPATH . 'css/mhs-tm-admin-form.css', false, '1.0.0' );
-	wp_register_style( 'mhs_tm_loading_overlay', MHS_TM_RELPATH . 'css/mhs-tm-loading-overlay.css', false, '1.0.0' );
-    wp_register_style( 'mhs_tm_admin_jquery_style', MHS_TM_RELPATH . 'css/jquery-ui-1.12.1/jquery-ui.css', false, '1.12.1' );
+	wp_register_style( 'jquery_datetimepicker_style', MHS_TM_RELPATH . 'css/jquery.datetimepicker.min.css', false, '1.0.0'  );
+	wp_register_style( 'mhs_tm_admin_style', MHS_TM_RELPATH . 'css/mhs-tm-admin.css', false, '1.0.1' );
+	wp_register_style( 'mhs_tm_admin_page_style', MHS_TM_RELPATH . 'css/mhs-tm-admin-page.css', false, '1.0.1' );
+	wp_register_style( 'mhs_tm_admin_form_style', MHS_TM_RELPATH . 'css/mhs-tm-admin-form.css', false, '1.0.1' );
+	wp_register_style( 'mhs_tm_loading_overlay_style', MHS_TM_RELPATH . 'css/mhs-tm-loading-overlay.css', false, '1.0.1' );
+    wp_register_style( 'mhs_tm_admin_jquery_style', MHS_TM_RELPATH . 'css/jquery-ui/jquery-ui.css', false, '1.12.1' );
         
 	/* enqueue scripts */
 	wp_enqueue_script( 'mhs_tm_utilities' );
@@ -130,7 +132,7 @@ function MHS_TM_admin_enqueue() {
 	wp_enqueue_style( 'mhs_tm_admin_style' );
 	wp_enqueue_style( 'mhs_tm_admin_page_style' );
 	wp_enqueue_style( 'mhs_tm_admin_form_style' );
-	wp_enqueue_style( 'mhs_tm_loading_overlay' );
+	wp_enqueue_style( 'mhs_tm_loading_overlay_style' );
 	wp_enqueue_style( 'mhs_tm_admin_jquery_style' ); 
 	wp_enqueue_style( 'jquery_datetimepicker_style' );        
 
