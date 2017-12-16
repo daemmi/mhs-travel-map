@@ -46,16 +46,17 @@ jQuery( function ( $ ) {
         google.maps.event.addDomListener( window, 'load', gmap_initialize );
     }
 
-    if ( $( '.coordinate_new' ).length > 0 ) {
-        $( '.coordinate_new h2' ).append( mhs_tm_utilities.utilities.get_buttons( false ) );
+    // Add delete Button to each postbox
+    if ( $( '.postbox_mhs_tm.coordinate_new' ).length > 0 ) {
+        $( '.postbox_mhs_tm.coordinate_new > h1' ).append( mhs_tm_utilities.utilities.get_buttons( false ) );
     }
 
-    if ( $( '.coordinate' ).length > 0 ) {
-        $( '.coordinate h2' ).append( mhs_tm_utilities.utilities.get_buttons( false ) );
+    if ( $( '.postbox_mhs_tm.coordinate' ).length > 0 ) {
+        $( '.postbox_mhs_tm.coordinate > h1' ).append( mhs_tm_utilities.utilities.get_buttons( false ) );
     }
 
-    $( '#normal-sortables' ).accordion( {
-        header: '> div > h2',
+    $( '.mhs_tm_normal_sortables' ).accordion( {
+        header: '> div > h1',
         collapsible: true,
         heightStyle: 'content',
         icons: {
@@ -64,7 +65,7 @@ jQuery( function ( $ ) {
         }
     } );
 
-    $( '#normal-sortables' ).sortable( {
+    $( '.mhs_tm_normal_sortables' ).sortable( {
         items: '.coordinate',
         axis: "y",
         handle: ".mhs-tm-sortable-handler",
@@ -75,7 +76,7 @@ jQuery( function ( $ ) {
             var new_order = ui.item.index();
 
             if ( new_order != old_order ) {
-                $( '#normal-sortables' ).find( '.coordinate' ).each( function ( index ) {
+                $( '.mhs_tm_normal_sortables' ).find( '.coordinate' ).each( function ( index ) {
                     var id = index + 1;
 
                     if ( id <= Math.max( new_order, old_order ) && id >= Math.min( new_order, old_order ) ) {
@@ -100,7 +101,7 @@ jQuery( function ( $ ) {
         }
     } );
 
-    $( '#normal-sortables div' ).disableSelection();
+    $( '.mhs_tm_normal_sortables div' ).disableSelection();
     
     $( '.datetimepicker' ).datetimepicker( {
         step: 10
@@ -229,13 +230,13 @@ jQuery( function ( $ ) {
         }, 50 );
     } );
 
-    $( ".postbox-container" ).on( 'click', '.mhs_tm_button_delete', function () {
+    $( ".postbox_mhs_tm" ).on( 'click', '.mhs_tm_button_delete', function () {
 
-        var new_order2 = $( '#normal-sortables .coordinate' ).length;
+        var new_order2 = $( '.mhs_tm_normal_sortables .coordinate' ).length;
         var old_order2 = $( this ).parent().parent().parent().index();
         $( this ).parent().parent().parent().remove();
 
-        $( '#normal-sortables' ).find( '.coordinate' ).each( function ( index ) {
+        $( '.mhs_tm_normal_sortables' ).find( '.coordinate' ).each( function ( index ) {
             var id = index + 1;
 
             if ( id <= Math.max( new_order2, old_order2 ) && id >= Math.min( new_order2, old_order2 ) ) {
@@ -379,7 +380,7 @@ jQuery( function ( $ ) {
             //show the form with the coordinates
             $( '#mhs_tm-form ' ).show();
             //enable sortable, otherwise touch punch doesnt work with sortable
-            $('#normal-sortables').sortable('enable');
+            $('.mhs_tm_normal_sortables').sortable('enable');
         } );
 
         // If new Route, coordinates are NULL and first Pin is 1);
@@ -549,7 +550,7 @@ jQuery( function ( $ ) {
             };
 
             var coordinate_id = 1;
-            var new_coordinate = $( '#normal-sortables' ).find( '.coordinate_new' ).clone( true );
+            var new_coordinate = $( '.mhs_tm_normal_sortables' ).find( '.coordinate_new' ).clone( true );
             new_coordinate.removeAttr( 'style' ).removeClass( 'coordinate_new' ).addClass( 'coordinate' );
         } else {
             // Make a copy of the object without any references 
@@ -559,8 +560,8 @@ jQuery( function ( $ ) {
                 longitude: lng
             };
 
-            var coordinate_id = $( '#normal-sortables' ).find( '.coordinate' ).length + 1;
-            var new_coordinate = $( '#normal-sortables' ).find( '.coordinate_new' ).clone( true );
+            var coordinate_id = $( '.mhs_tm_normal_sortables' ).find( '.coordinate' ).length + 1;
+            var new_coordinate = $( '.mhs_tm_normal_sortables' ).find( '.coordinate_new' ).clone( true );
             new_coordinate.removeAttr( 'style' ).removeClass( 'coordinate_new' ).addClass( 'coordinate' );
         }
 
@@ -581,9 +582,9 @@ jQuery( function ( $ ) {
             coordinates[0]['coordinates'][coordinate_id - 1][input_id] = '';
         } );
 
-        $( '#normal-sortables' ).append( new_coordinate );
+        $( '.mhs_tm_normal_sortables' ).append( new_coordinate );
 
-        $( '#normal-sortables' ).accordion( 'refresh' );
+        $( '.mhs_tm_normal_sortables' ).accordion( 'refresh' );
 
         $( '#latitude_' + coordinate_id ).val( lat );
         coordinates[0]['coordinates'][coordinate_id - 1]['latitude'] = lat;
@@ -631,7 +632,7 @@ jQuery( function ( $ ) {
 
         } );
         // change coordinate header name
-        coordinate.find( 'h2 > span.postbox_title' ).text( 'Coordinate ' + new_id );
+        coordinate.find( 'h1 > span.postbox_title' ).text( 'Coordinate ' + new_id );
     }
 
     function get_marker_icon( coordinate, number ) {

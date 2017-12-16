@@ -1,3 +1,57 @@
+.postbox_mhs_tm {
+    border: 1px solid #e5e5e5;
+    background: #fff;    
+    margin-bottom: 20px;
+}
+
+.postbox_mhs_tm > h1 {    
+    font-size: 14px;
+    padding: 8px 12px;
+    margin: 0;
+    line-height: 1.4;
+    border-bottom: 1px solid #eee;
+    background-color: #5A5A5A;
+    color: #ffffff;
+}
+
+.postbox_mhs_tm .inside {
+    padding: 0 12px 12px;
+    line-height: 1.4em;
+    font-size: 13px;
+}
+
+.mhs_tm_normal_sortables .ui-icon { 
+    background-image: url(jquery-ui/images/ui-icons_ffffff_256x240.png); 
+}
+
+.mhs_tm_normal_sortables .ui-state-hover .ui-icon { 
+    background-image: url(jquery-ui/images/ui-icons_777777_256x240.png); 
+}
+
+.mhs_tm_normal_sortables .ui-accordion-header-active {
+    border: 1px solid #5a5a5a;
+    background: #5a5a5a;
+    color: #ffffff;
+}
+
+#mhs_tm_list .ui-accordion-header-active {
+    border: 1px solid #5a5a5a;
+    background: #5a5a5a;
+    color: #ffffff;
+}
+
+#mhs_tm-form .button-secondary.margin {
+    margin-bottom: 20px;
+    margin-top: 10px;
+    margin-right: 6px;
+}
+
+#mhs_tm-form .button-primary {
+    margin-bottom: 20px;
+    margin-top: 10px;
+    margin-right: 6px;
+}
+
 .html_div {
     padding: 3px 5px; 
     border: 1px solid #ddd; 

@@ -112,12 +112,13 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 			}
 
 			if ( $metaboxes ) {
-				echo '<div id="poststuff" class="noflow"><div id="post-body" class="metabox-holder columns-1"><div id="postbox-container-1" class="postbox-container">';
+				echo '<div class="' . $this->slug . '_poststuff noflow"><div class="' . $this->slug . '_metabox_holder">
+					<div class="' . $this->slug . '_postbox_container">';
 				if ( $js ) {
-					echo '<div id="normal-sortables" class="meta-box-sortables ui-sortable ui-accordion">';
+					echo '<div class="' . $this->slug . '_normal_sortables ui-sortable ui-accordion">';
 				}
 				foreach ( $fields as $box ) {
-					echo '<div class="postbox postbox_mhs_tm';
+					echo '<div class="postbox_mhs_tm';
 					if ( isset( $box[ 'class' ] ) ) {
 						echo ' ' . esc_attr( $box[ 'class' ] );
 					}
@@ -129,15 +130,15 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					echo '>';
 
 					if ( $js ) {
-						echo '<h2 style="overflow: auto;" class="hndle"';
+						echo '<h1 style="overflow: auto;" class="hndle"';
 					} else {
-						echo '<h2 class="no-hover"';
+						echo '<h1 class="no-hover"';
 					}
 					echo '>';
 					if ( isset( $sortable_handler ) ){
 						echo '<span class="' . $sortable_handler . '"></span>';
 					}
-					echo '<span class="postbox_title">' . esc_attr( $box[ 'title' ] ) . '</span></h2>' .
+					echo '<span class="postbox_title">' . esc_attr( $box[ 'title' ] ) . '</span></h1>' .
 					'<div class="inside">' .
 					'<table class="form-table pool-form"><tbody>';
 

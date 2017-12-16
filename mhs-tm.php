@@ -121,6 +121,7 @@ function MHS_TM_admin_enqueue() {
 	wp_register_style( 'mhs_tm_admin_form_style', MHS_TM_RELPATH . 'css/mhs-tm-admin-form.css', false, '1.0.1' );
 	wp_register_style( 'mhs_tm_loading_overlay_style', MHS_TM_RELPATH . 'css/mhs-tm-loading-overlay.css', false, '1.0.1' );
     wp_register_style( 'mhs_tm_admin_jquery_style', MHS_TM_RELPATH . 'css/jquery-ui/jquery-ui.css', false, '1.12.1' );
+    wp_register_style( 'mhs_tm_map_style', MHS_TM_RELPATH . 'css/mhs-tm-map.css', false, '1.0.1' );
         
 	/* enqueue scripts */
 	wp_enqueue_script( 'mhs_tm_utilities' );
@@ -134,7 +135,8 @@ function MHS_TM_admin_enqueue() {
 	wp_enqueue_style( 'mhs_tm_admin_form_style' );
 	wp_enqueue_style( 'mhs_tm_loading_overlay_style' );
 	wp_enqueue_style( 'mhs_tm_admin_jquery_style' ); 
-	wp_enqueue_style( 'jquery_datetimepicker_style' );        
+	wp_enqueue_style( 'jquery_datetimepicker_style' ); 
+	wp_enqueue_style( 'mhs_tm_map_style' );       
 
 	/* localize */
         

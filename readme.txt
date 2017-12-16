@@ -2,10 +2,10 @@
 Contributors: daemmi
 Donate link: https://profiles.wordpress.org/daemmi
 Tags: map, google maps, hitchhike, hitchhiking, travel, backpacking, traveling
-Tested up to: 4.8.2
-Requires at least: 4.8.0
+Tested up to: 4.9.1
+Requires at least: 3.8.0
 Requires PHP: 5.2.0
-Stable tag: 1.0.3
+Stable tag: 1.0.5
 License: GPL3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -45,6 +45,18 @@ This section describes how to install and use the plugin.
 == Frequently Asked Questions ==
 
 == Changelog ==
+
+= 1.0.5 =
+- changed loading spinner
+- fixed displaying content in edit routes 
+
+= 1.0.4 =
+- fixed warnings which are shown in the WP debug probe
+- add better support in jquery sortable accordion for mobile handling
+- fixed format of gmap info window content
+- fixed problem with deleting coordinates in a route
+- fixed problems with tinyMCE editor
+- changed admin-form; there have been too man default tags in a switch statement
 
 = 1.0.3 (2017-11-20) =
 *first release

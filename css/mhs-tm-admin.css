@@ -6,51 +6,6 @@ input.mhs_tm_prim_button.button {
     margin-bottom: 20px;
 }
 
-.admin_title_mhs_tm img {
-    height: 32px;
-    width: 32px;
-    float: left;
-    padding: 0px 10px 0px 5px;
-}
-
-.admin_title_mhs_tm h1 {
-    display: initial;
-}
-
-.postbox_mhs_tm h2 {
-    border-bottom: 1px solid #eee;
-    background-color: #5A5A5A;
-    color: #ffffff;
-}
-
-#normal-sortables .ui-icon { 
-    background-image: url(jquery-ui/images/ui-icons_ffffff_256x240.png); 
-}
-
-#normal-sortables .ui-accordion-header-active {
-    border: 1px solid #5a5a5a;
-    background: #5a5a5a;
-    color: #ffffff;
-}
-
-#mhs_tm_list .ui-accordion-header-active {
-    border: 1px solid #5a5a5a;
-    background: #5a5a5a;
-    color: #ffffff;
-}
-
-#mhs_tm-form .button-secondary.margin {
-    margin-bottom: 20px;
-    margin-top: 10px;
-    margin-right: 6px;
-}
-
-#mhs_tm-form .button-primary {
-    margin-bottom: 20px;
-    margin-top: 10px;
-    margin-right: 6px;
-}
-
 div.ui-dialog_mhs_tm {
     padding: 0px;
 }
