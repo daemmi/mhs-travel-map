@@ -135,7 +135,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
         mhs_tm_map.linePath[i] = new google.maps.Polyline( {
             path: lines,
             geodesic: true,
-            strokeColor: '#000000',
+            strokeColor: mhs_tm_map.coordinates[map_canvas_id][i]['options']['route_color'],
             strokeOpacity: 1.0,
             strokeWeight: 3
         } );

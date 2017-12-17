@@ -4,7 +4,7 @@
 Plugin Name: My Hitchhiking Spot Travel Map (MHS Travel Map)
 Plugin URI: 
 Description: Create your travel map with use of google maps by adding coordinates to a map, make your route public, write a story for each coordinate and import backup files from the Android app "<a title="My Hitchhiking Spots" href="https://play.google.com/store/apps/details?id=com.myhitchhikingspots" target="_blank" rel="noopener">My Hitchhiking Spots</a>"
-Version: 1.0.5
+Version: 1.0.6
 Author: Jonas Damhuis
 Author URI: 
 License: GPL3
@@ -53,8 +53,8 @@ if ( !defined( 'MHS_TM_DIRNAME' ) )
 function MHS_TM_enqueue() {
 	/* register scripts */ 
 	wp_register_script( 'google_jsapi','https://www.google.com/jsapi', true ); 
-	wp_register_script( 'mhs_tm_map', MHS_TM_RELPATH . 'js/mhs-tm-map.js' ); 
-	wp_register_script( 'mhs_tm_utilities', MHS_TM_RELPATH . 'js/mhs-tm-utilities.js', array( 'jquery', 'jquery-ui-dialog' ) );
+	wp_register_script( 'mhs_tm_map', MHS_TM_RELPATH . 'js/mhs-tm-map.js', array(), '1.0.1' ); 
+	wp_register_script( 'mhs_tm_utilities', MHS_TM_RELPATH . 'js/mhs-tm-utilities.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.1' );
 	    
 	/* register styles */
     wp_register_style( 'mhs_tm_map_style', MHS_TM_RELPATH . 'css/mhs-tm-map.css', false, '1.0.1' );
@@ -103,16 +103,17 @@ function MHS_TM_admin_enqueue() {
 	);
         
 	/* register scripts */
-	wp_register_script( 'jquery_datetimepicker', MHS_TM_RELPATH . 'js/jquery.datetimepicker.full.min.js', array( 'jquery' ) );
-	wp_register_script( 'papaparse', MHS_TM_RELPATH . 'js/papaparse-4.1.2.js', array( 'jquery' ) );
-	wp_register_script( 'mhs_tm_admin_import', MHS_TM_RELPATH . 'js/mhs-tm-admin-import.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery-ui-datepicker' ) );
-	wp_register_script( 'mhs_tm_utilities', MHS_TM_RELPATH . 'js/mhs-tm-utilities.js', array( 'jquery', 'jquery-ui-dialog' ) );
-	wp_register_script( 'mhs_tm_admin_maps', MHS_TM_RELPATH . 'js/mhs-tm-admin-maps.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable' ) );
-	wp_register_script( 'mhs_tm_admin_routes', MHS_TM_RELPATH . 'js/mhs-tm-admin-routes.js', array( 'jquery', 'jquery-ui-dialog' ) );
+	wp_register_script( 'jquery_datetimepicker', MHS_TM_RELPATH . 'js/jquery.datetimepicker.full.min.js', array( 'jquery' ), '1.0.1' );
+	wp_register_script( 'papaparse', MHS_TM_RELPATH . 'js/papaparse-4.1.2.js', array( 'jquery' ), '4.1.2' );
+	wp_register_script( 'mhs_tm_admin_import', MHS_TM_RELPATH . 'js/mhs-tm-admin-import.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery-ui-datepicker' ), '1.0.1' );
+	wp_register_script( 'mhs_tm_utilities', MHS_TM_RELPATH . 'js/mhs-tm-utilities.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.1' );
+	wp_register_script( 'mhs_tm_admin_maps', MHS_TM_RELPATH . 'js/mhs-tm-admin-maps.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable' ), '1.0.1' );
+	wp_register_script( 'mhs_tm_admin_routes', MHS_TM_RELPATH . 'js/mhs-tm-admin-routes.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.1' );
 	wp_register_script( 'google_jsapi','https://www.google.com/jsapi', true ); 
-	wp_register_script( 'jquery_ui_touch_punch_min', MHS_TM_RELPATH . 'js/jquery.ui.touch-punch.min.js' );
-	wp_register_script( 'mhs_tm_map', MHS_TM_RELPATH . 'js/mhs-tm-map.js' );
-	wp_register_script( 'mhs_tm_map_edit', MHS_TM_RELPATH . 'js/mhs-tm-map-edit.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery-ui-datepicker' ) );
+	wp_register_script( 'jquery_ui_touch_punch_min', MHS_TM_RELPATH . 'js/jquery.ui.touch-punch.min.js', array(), '1.0.1' );
+	wp_register_script( 'mhs_tm_map', MHS_TM_RELPATH . 'js/mhs-tm-map.js', array(), '1.0.1' );
+	wp_register_script( 'mhs_tm_map_edit', MHS_TM_RELPATH . 'js/mhs-tm-map-edit.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery-ui-datepicker' ), '1.0.1' );
+	wp_register_script( 'spectrum', MHS_TM_RELPATH . 'js/spectrum.js', array(), '1.0.0' );
         
         /* register styles */
 	wp_register_style( 'jquery_datetimepicker_style', MHS_TM_RELPATH . 'css/jquery.datetimepicker.min.css', false, '1.0.0'  );
@@ -122,12 +123,14 @@ function MHS_TM_admin_enqueue() {
 	wp_register_style( 'mhs_tm_loading_overlay_style', MHS_TM_RELPATH . 'css/mhs-tm-loading-overlay.css', false, '1.0.1' );
     wp_register_style( 'mhs_tm_admin_jquery_style', MHS_TM_RELPATH . 'css/jquery-ui/jquery-ui.css', false, '1.12.1' );
     wp_register_style( 'mhs_tm_map_style', MHS_TM_RELPATH . 'css/mhs-tm-map.css', false, '1.0.1' );
+	wp_register_style( 'spectrum', MHS_TM_RELPATH . 'css/spectrum.css', false, '1.0.0' );
         
 	/* enqueue scripts */
 	wp_enqueue_script( 'mhs_tm_utilities' );
 	wp_enqueue_script( 'jquery_datetimepicker' );
 	wp_enqueue_script( 'papaparse' );
     wp_enqueue_script( 'google_jsapi' );
+    wp_enqueue_script( 'spectrum' );
         
 	/* enqueue stylesheets */
 	wp_enqueue_style( 'mhs_tm_admin_style' );
@@ -136,7 +139,8 @@ function MHS_TM_admin_enqueue() {
 	wp_enqueue_style( 'mhs_tm_loading_overlay_style' );
 	wp_enqueue_style( 'mhs_tm_admin_jquery_style' ); 
 	wp_enqueue_style( 'jquery_datetimepicker_style' ); 
-	wp_enqueue_style( 'mhs_tm_map_style' );       
+	wp_enqueue_style( 'mhs_tm_map_style' );    
+	wp_enqueue_style( 'spectrum' );       
 
 	/* localize */
         

@@ -129,6 +129,7 @@ jQuery( function ( $ ) {
                         ajax_url + '?action=routes_save&id=' + getUrlParameter( 'id' ),
                         { 
                             name: $( "#name" ).val(),
+                            route_color: $( "#route_color" ).val(),
                             route: JSON.stringify( coordinates[map_canvas_id]['coordinates'] ),
                             path: JSON.stringify(path),
                             mhs_tm_route_save_nonce: $( '#mhs_tm_route_save_' + getUrlParameter( 'id' ) + '_nonce' ).val(),
@@ -154,6 +155,7 @@ jQuery( function ( $ ) {
                         ajax_url + '?action=routes_save',
                         { 
                             name: $( "#name" ).val(),
+                            route_color: $( "#route_color" ).val(),
                             route: JSON.stringify( coordinates[map_canvas_id]['coordinates'] ),
                             path: JSON.stringify(path),
                             mhs_tm_route_save_nonce: $( '#mhs_tm_route_save_nonce' ).val(),

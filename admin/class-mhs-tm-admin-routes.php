@@ -431,6 +431,12 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 								'desc'	 => __( 'The name or title of the route.', 'mhs_tm' )
 							),
 							array(
+								'type'	 => 'color_picker',
+								'label'	 => __( 'Color of Route', 'mhs_tm' ),
+								'id'	 => 'route_color',
+								'desc'	 => __( 'The color of the route.', 'mhs_tm' )
+							),
+							array(
 								'type'	 => 'hidden',
 								'hidden' => true,
 								'id'	 => 'todo_check',
@@ -669,6 +675,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$path		 = isset( $_POST['path'] ) ? $MHS_TM_Admin_Routes->sanitize_path_array( json_decode( stripslashes( $_POST['path'] )  ) ) : [];
 			$route       = isset( $_POST['route'] ) ? json_decode( stripslashes( $_POST['route'] ) ) : [];
 			$name		 = isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : null;
+			$route_color = isset( $_POST['route_color'] ) ? sanitize_text_field( $_POST['route_color'] ) : '#fff';
 			$nonce_key	 = isset( $_POST['mhs_tm_route_save_nonce'] ) ? esc_attr( $_POST['mhs_tm_route_save_nonce'] ) : null;
 			$id			 = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
 			
@@ -701,8 +708,9 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			}
 
 			$options = array( 
-				'name' => $name,
-				'path' => $path
+				'name'        => $name,
+				'route_color' => $route_color,
+				'path'        => $path
 			);
 
 			$options = wp_json_encode( $options );

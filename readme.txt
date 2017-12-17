@@ -46,11 +46,11 @@ This section describes how to install and use the plugin.
 
 == Changelog ==
 
-= 1.0.5 =
+= 1.0.5 (2017-12-16) =
 - changed loading spinner
 - fixed displaying content in edit routes 
 
-= 1.0.4 =
+= 1.0.4 (2017-12-04) =
 - fixed warnings which are shown in the WP debug probe
 - add better support in jquery sortable accordion for mobile handling
 - fixed format of gmap info window content
