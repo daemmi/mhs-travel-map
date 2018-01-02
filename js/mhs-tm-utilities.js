@@ -7,14 +7,14 @@ var mhs_tm_utilities = mhs_tm_utilities || {};
 mhs_tm_utilities.gmaps = {};
 
 //snap path of coordinate array to road
-mhs_tm_utilities.gmaps.route_snap_to_road = function( coordinates, i, route_array, callback ) {
+mhs_tm_utilities.gmaps.route_snap_to_road = function( coordinates, i, route_array, disabled_snap_to_road, callback ) {
     if( i < coordinates.length - 1 ) {
         i++;
         //the gmaps direction service is async so use a callback
-        //call thesame function again if the callback from gmaps occured
+        //call the same function again if the callback from gmaps occured
         //if you went through the whole coordinations array, call callback and pass over the result
-        mhs_tm_utilities.gmaps.get_route(coordinates[i - 1], coordinates[i], route_array, function() {
-            mhs_tm_utilities.gmaps.route_snap_to_road(coordinates, i, route_array, callback);
+        mhs_tm_utilities.gmaps.get_route(coordinates[i - 1], coordinates[i], route_array, disabled_snap_to_road, function() {
+            mhs_tm_utilities.gmaps.route_snap_to_road(coordinates, i, route_array, disabled_snap_to_road, callback);
         } );
     } else {
           callback(route_array);
@@ -22,46 +22,62 @@ mhs_tm_utilities.gmaps.route_snap_to_road = function( coordinates, i, route_arra
 }
 
 //use direction service of gmaps to get coordinates of a route between 2 coordinates
-mhs_tm_utilities.gmaps.get_route = function(from, to, path, callback) {
+mhs_tm_utilities.gmaps.get_route = function(from, to, path, disabled_snap_to_road, callback) {
     var service = new google.maps.DirectionsService();
 
-    //the gmaps direction service is async so use a callback
-    service.route( {
-        origin: new google.maps.LatLng(from.latitude, from.longitude),
-        destination: new google.maps.LatLng(to.latitude, to.longitude),
-        travelMode: google.maps.DirectionsTravelMode.DRIVING
-    }, function(result, status) {
-        //if gmaps could calculate a direction get thearray with all coordinates and push it to the array
-        if (status == google.maps.DirectionsStatus.OK) {
-            for (var i = 0, len = result.routes[0].overview_path.length; i < len; i++) {
-            path.push( { 
-                lat: result.routes[0].overview_path[i].lat(),
-                lng: result.routes[0].overview_path[i].lng(),
-              } );
+    //check if snap to road is disabed
+    if( !disabled_snap_to_road && !to.dissnaptoroad ) {
+        //the gmaps direction service is async so use a callback
+        service.route( {
+            origin: new google.maps.LatLng(from.latitude, from.longitude),
+            destination: new google.maps.LatLng(to.latitude, to.longitude),
+            travelMode: google.maps.DirectionsTravelMode.DRIVING
+        }, function(result, status) {
+            //if gmaps could calculate a direction get thearray with all coordinates and push it to the array
+            if (status == google.maps.DirectionsStatus.OK) {
+                for (var i = 0, len = result.routes[0].overview_path.length; i < len; i++) {
+                path.push( { 
+                    lat: result.routes[0].overview_path[i].lat(),
+                    lng: result.routes[0].overview_path[i].lng(),
+                  } );
+                }
+
+                callback(); 
+            } else if (status == google.maps.DirectionsStatus.OVER_QUERY_LIMIT) {
+                //wait 2s if there is a OVER_QUERY_LIMIT error
+                //and call function again
+                setTimeout(function(){
+                    mhs_tm_utilities.gmaps.get_route(from, to, path, callback); 
+                }, 2000); 
+            } else {
+                //if gmaps couldn't finde a direction put coordinates from origin and destination to the array
+                path.push( { 
+                    lat: from.latitude,
+                    lng: from.longitude,
+                } );
+
+                path.push( { 
+                    lat: to.latitude,
+                    lng: to.longitude,
+                } );
+
+                callback();
             }
-        
-            callback(); 
-        } else if (status == google.maps.DirectionsStatus.OVER_QUERY_LIMIT) {
-            //wait 2s if there is a OVER_QUERY_LIMIT error
-            //and call function again
-            setTimeout(function(){
-                mhs_tm_utilities.gmaps.get_route(from, to, path, callback); 
-            }, 2000); 
-        } else {
-            //if gmaps couldn't finde a direction put coordinates from origin and destination to the array
-            path.push( { 
-                lat: from.latitude,
-                lng: from.longitude,
-            } );
-            
-            path.push( { 
-                lat: to.latitude,
-                lng: to.longitude,
-            } );
-        
-            callback();
-        }
-    } );
+        } );
+    } else {
+        //if disabled then just push the coordinates to the path and run callback
+        path.push( { 
+            lat: from.latitude,
+            lng: from.longitude,
+        } );
+
+        path.push( { 
+            lat: to.latitude,
+            lng: to.longitude,
+        } );
+
+        callback();
+    }
 }
  
 /**************************************************************************************************

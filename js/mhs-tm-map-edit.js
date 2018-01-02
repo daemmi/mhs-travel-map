@@ -118,59 +118,16 @@ jQuery( function ( $ ) {
     $( ".mhs_tm_admin_form_submit" ).on( 'click', $( this ), function () {
         var coordinates_on_route = mhs_tm_utilities.coordinate_handling.get_only_on_route_coordinates( coordinates[map_canvas_id]['coordinates'] );
         var path = [];
-
-        if ( getUrlParameter( 'id' ) !== undefined ) {
-            if ( $( "#name" ).val() ) {
-                $( "#mhs_tm_dialog_loading" ).dialog( "open" );
-                
-                // snap the route to the roads via gmaps directions
-                mhs_tm_utilities.gmaps.route_snap_to_road(coordinates_on_route, 0, path, function(path) {
-                    $.post( 
-                        ajax_url + '?action=routes_save&id=' + getUrlParameter( 'id' ),
-                        { 
-                            name: $( "#name" ).val(),
-                            route_color: $( "#route_color" ).val(),
-                            route: JSON.stringify( coordinates[map_canvas_id]['coordinates'] ),
-                            path: JSON.stringify(path),
-                            mhs_tm_route_save_nonce: $( '#mhs_tm_route_save_' + getUrlParameter( 'id' ) + '_nonce' ).val(),
-                        },
-                        function ( response ) {
-                            $( ".admin_title_mhs_tm h1" ).html( 'Edit "' + $( "#name" ).val() + '"' );
-                            $( "#mhs_tm_dialog_loading" ).dialog( "close" );
-                            mhs_tm_utilities.utilities.show_message( response.type, response.message );
-                        },
-                        "json"
-                    );
-                } );
-            } else {
-                mhs_tm_utilities.utilities.show_message( 'error', 'Please enter a name at least!' );
-            }
+        
+        if ( $( "#name" ).val() ) {
+            $( "#mhs_tm_dialog_loading" ).dialog( "open" );
+            
+            // snap the route to the roads via gmaps directions
+            mhs_tm_utilities.gmaps.route_snap_to_road(coordinates_on_route, 0, path, $( "#dis_route_snap_to_road" ).is(':checked'), function(path) {
+                save_route( path );
+            } );
         } else {
-            if ( $( "#name" ).val() ) {
-                $( "#mhs_tm_dialog_loading" ).dialog( "open" );
-
-                // snap the route to the roads via gmaps directions
-                mhs_tm_utilities.gmaps.route_snap_to_road(coordinates_on_route, 0, path, function(path) {
-                    $.post( 
-                        ajax_url + '?action=routes_save',
-                        { 
-                            name: $( "#name" ).val(),
-                            route_color: $( "#route_color" ).val(),
-                            route: JSON.stringify( coordinates[map_canvas_id]['coordinates'] ),
-                            path: JSON.stringify(path),
-                            mhs_tm_route_save_nonce: $( '#mhs_tm_route_save_nonce' ).val(),
-                        },
-                        function ( response ) {
-                            $( ".admin_title_mhs_tm h1" ).html( 'Edit "' + $( "#name" ).val() + '"' );
-                            $( "#mhs_tm_dialog_loading" ).dialog( "close" );
-                            mhs_tm_utilities.utilities.show_message( response.type, response.message );
-                        },
-                        "json"
-                    );
-                } );
-            } else {
-                mhs_tm_utilities.utilities.show_message( 'error', 'Please enter a name at least!' );
-            }
+            mhs_tm_utilities.utilities.show_message( 'error', 'Please enter a name at least!' );
         }
     } );
 
@@ -258,6 +215,27 @@ jQuery( function ( $ ) {
         marker[map_canvas_id].splice( new_order2 - 1, 1 );
         coordinates[map_canvas_id]['coordinates'].splice( new_order2 - 1, 1 );
     } );
+    
+    function save_route(path) {
+        console.log($( "#dis_route_snap_to_road" ).is(':checked') ? 1 : 0);
+        $.post( 
+            ajax_url + '?action=routes_save&id=' + getUrlParameter( 'id' ),
+            { 
+                name: $( "#name" ).val(),
+                route_color: $( "#route_color" ).val(),
+                dis_route_snap_to_road: $( "#dis_route_snap_to_road" ).is(':checked') ? 1 : 0,
+                route: JSON.stringify( coordinates[map_canvas_id]['coordinates'] ),
+                path: JSON.stringify(path),
+                mhs_tm_route_save_nonce: $( '#mhs_tm_route_save_' + getUrlParameter( 'id' ) + '_nonce' ).val(),
+            },
+            function ( response ) {
+                $( ".admin_title_mhs_tm h1" ).html( 'Edit "' + $( "#name" ).val() + '"' );
+                $( "#mhs_tm_dialog_loading" ).dialog( "close" );
+                mhs_tm_utilities.utilities.show_message( response.type, response.message );
+            },
+            "json"
+        );
+    }
 
     function focusout_input( element ) {
         var input_id = element.attr( 'id' ).substr( 0, element.attr( 'id' ).search( '_' ) );
@@ -296,6 +274,12 @@ jQuery( function ( $ ) {
                 coordinates[map_canvas_id]['coordinates'][coordinate_index][input_id] = 0;
                 pin_shape = 'd_map_xpin_letter&chld=pin_star|';
                 pin_star_color = '|ffffff';
+            }
+        } else if ( input_id == 'dissnaptoroad' ) {
+            if ( element.is( ':checked' ) ) {
+                coordinates[map_canvas_id]['coordinates'][coordinate_index][input_id] = 1;
+            } else {
+                coordinates[map_canvas_id]['coordinates'][coordinate_index][input_id] = 0;
             }
         } else {
             coordinates[map_canvas_id]['coordinates'][coordinate_index][input_id] = element.val();

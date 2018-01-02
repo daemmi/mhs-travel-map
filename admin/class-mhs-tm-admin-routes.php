@@ -275,7 +275,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			wp_enqueue_script( 'googlemap' );
 
 			wp_enqueue_script( 'jquery_ui_touch_punch_min' );
-			
+			var_dump($coordinates);
 			wp_enqueue_script( 'mhs_tm_map_edit' );
 			wp_localize_script( 'mhs_tm_map_edit', 'mhs_tm_app_vars', array(
 				'coordinates'		 => $coordinates,
@@ -396,6 +396,12 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 							'label'	 => __( 'End date', 'mhs_tm' ),
 							'id'	 => 'mhs_tm_end_date',
 							'desc'	 => __( 'To which day you would like to import? If you leave it blank it will import t the last entr in file.', 'mhs_tm' )
+						),
+						array(
+							'type'	 => 'checkbox',
+							'label'	 => __( 'Disable snap to road?', 'mhs_tm' ),
+							'id'	 => 'mhs_tm_dis_route_snap_to_road',
+							'desc'	 => __( 'If checked all route path will not snapped to the road.', 'mhs_tm' )
 						)
 					)
 				)
@@ -437,6 +443,12 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 								'desc'	 => __( 'The color of the route.', 'mhs_tm' )
 							),
 							array(
+								'type'	 => 'checkbox',
+								'label'	 => __( 'Disable snap to road?', 'mhs_tm' ),
+								'id'	 => 'dis_route_snap_to_road',
+								'desc'	 => __( 'If checked the whole route path will not snapped to the road.', 'mhs_tm' )
+							),
+							array(
 								'type'	 => 'hidden',
 								'hidden' => true,
 								'id'	 => 'todo_check',
@@ -454,6 +466,12 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 					'display'	 => 'none',
 					'fields'	 => array(
 						//!!! No _ in id !!!
+						array(
+							'type'	 => 'checkbox',
+							'label'	 => __( 'Disable snap to road?', 'mhs_tm' ),
+							'id'	 => 'dissnaptoroad_' . $coordinate_id,
+							'desc'	 => __( 'If checked the path to this coordinate will not snapped to the road.', 'mhs_tm' )
+						),
 						array(
 							'type'	 => 'text_long',
 							'label'	 => __( 'Country', 'mhs_tm' ),
@@ -564,6 +582,12 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 							'fields' => array(
 								//!!! No _ in id !!!
 								array(
+									'type'	 => 'checkbox',
+									'label'	 => __( 'Disable snap to road?', 'mhs_tm' ),
+									'id'	 => 'dissnaptoroad_' . $coordinate_id,
+									'desc'	 => __( 'If checked the path to this coordinate will not snapped to the road.', 'mhs_tm' )
+								),
+								array(
 									'type'	 => 'text_long',
 									'label'	 => __( 'Country', 'mhs_tm' ),
 									'id'	 => 'country_' . $coordinate_id,
@@ -671,13 +695,14 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			global $wpdb, $MHS_TM_Admin_Maps, $MHS_TM_Maps, $MHS_TM_Admin_Routes;
 			
 			// save variables and sanitize 
-			$coordinates = isset( $_POST['route'] ) ? $MHS_TM_Admin_Routes->sanitize_coordinates_array( json_decode( stripslashes( $_POST['route'] ) ) ) : [];
-			$path		 = isset( $_POST['path'] ) ? $MHS_TM_Admin_Routes->sanitize_path_array( json_decode( stripslashes( $_POST['path'] )  ) ) : [];
-			$route       = isset( $_POST['route'] ) ? json_decode( stripslashes( $_POST['route'] ) ) : [];
-			$name		 = isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : null;
-			$route_color = isset( $_POST['route_color'] ) ? sanitize_text_field( $_POST['route_color'] ) : '#fff';
-			$nonce_key	 = isset( $_POST['mhs_tm_route_save_nonce'] ) ? esc_attr( $_POST['mhs_tm_route_save_nonce'] ) : null;
-			$id			 = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
+			$coordinates        = isset( $_POST['route'] ) ? $MHS_TM_Admin_Routes->sanitize_coordinates_array( json_decode( stripslashes( $_POST['route'] ) ) ) : [];
+			$path		        = isset( $_POST['path'] ) ? $MHS_TM_Admin_Routes->sanitize_path_array( json_decode( stripslashes( $_POST['path'] )  ) ) : [];
+			$route              = isset( $_POST['route'] ) ? json_decode( stripslashes( $_POST['route'] ) ) : [];
+			$name		        = isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : null;
+			$route_color        = isset( $_POST['route_color'] ) ? sanitize_text_field( $_POST['route_color'] ) : '#fff';
+			$dis_route_snap_to_road = $_POST['dis_route_snap_to_road'] == 1 ? 1 : 0;
+			$nonce_key	        = isset( $_POST['mhs_tm_route_save_nonce'] ) ? esc_attr( $_POST['mhs_tm_route_save_nonce'] ) : null;
+			$id			        = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
 			
 			if ( NULL != $id ) {
 				$nonce = 'mhs_tm_route_save_' . $id;
@@ -708,9 +733,10 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			}
 
 			$options = array( 
-				'name'        => $name,
-				'route_color' => $route_color,
-				'path'        => $path
+				'name'               => $name,
+				'route_color'        => $route_color,
+				'dis_route_snap_to_road' => $dis_route_snap_to_road,
+				'path'               => $path
 			);
 
 			$options = wp_json_encode( $options );
@@ -834,6 +860,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 								'state'				=> sanitize_text_field( $val->state ), 
 								'street'			=> sanitize_text_field( $val->street ), 
 								'waitingtime'		=> intval( $val->waitingtime ), 
+								'dissnaptoroad'     => property_exists( $val, 'dissnaptoroad' ) && $val->dissnaptoroad == 1 ? 1 : 0,
 							);
 						} elseif( is_array( $array[ $key ] ) ) {
 							$new_input[ $key ] = array( 
@@ -848,6 +875,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 								'state'				=> sanitize_text_field( $val['state'] ), 
 								'street'			=> sanitize_text_field( $val['street'] ), 
 								'waitingtime'		=> intval( $val['waitingtime'] ), 
+								'dissnaptoroad'     => array_key_exists( 'dissnaptoroad', $val ) && $val['dissnaptoroad'] == 1 ? 1 : 0,   
 							);							
 						}
 					}

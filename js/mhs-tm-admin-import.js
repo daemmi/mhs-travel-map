@@ -132,7 +132,7 @@ jQuery( function ( $ ) {
                     //calculate path of coordinate
                     var coordinates_on_route = mhs_tm_utilities.coordinate_handling.get_only_on_route_coordinates( routes[0] );
                     var path = [];
-                    mhs_tm_utilities.gmaps.route_snap_to_road(coordinates_on_route, 0, path, function(path) {
+                    mhs_tm_utilities.gmaps.route_snap_to_road(coordinates_on_route, 0, path, $( "#mhs_tm_dis_route_snap_to_road" ).is(':checked'), function(path) {
                         //if calculation finish pass over the path coordinate in gloabl variable
                         //and load map
                         mhs_tm_map.coordinates[0][0]['options']['path'] = path;
@@ -175,7 +175,7 @@ jQuery( function ( $ ) {
                     //calculate path of coordinate
                     var coordinates_on_route = mhs_tm_utilities.coordinate_handling.get_only_on_route_coordinates( routes[id_number] );
                     var path = [];
-                    mhs_tm_utilities.gmaps.route_snap_to_road(coordinates_on_route, 0, path, function(path) {
+                    mhs_tm_utilities.gmaps.route_snap_to_road(coordinates_on_route, 0, path, $( "#mhs_tm_dis_route_snap_to_road" ).is(':checked'), function(path) {
                         //if calculation finish pass over the path coordinate in gloabl variable
                         //and load map
                         mhs_tm_map.coordinates[map_canvas_id][0]['options']['path'] = path;
@@ -312,6 +312,7 @@ jQuery( function ( $ ) {
                         name: name,
                         route: JSON.stringify( routes[id_number] ),
                         path: JSON.stringify( path ),
+                        dis_route_snap_to_road: $( "#mhs_tm_dis_route_snap_to_road" ).is(':checked') ? 1 : 0,
                         mhs_tm_route_save_nonce: $( '#mhs_tm_route_save_nonce' ).val(),
                     },
                     function ( response ) {
@@ -324,14 +325,14 @@ jQuery( function ( $ ) {
         } else {
             var coordinates_on_route = mhs_tm_utilities.coordinate_handling.get_only_on_route_coordinates( routes[id_number] );
             var path = [];
-            mhs_tm_utilities.gmaps.route_snap_to_road(coordinates_on_route, 0, path, function(path) {
+            mhs_tm_utilities.gmaps.route_snap_to_road(coordinates_on_route, 0, path, $( "#mhs_tm_dis_route_snap_to_road" ).is(':checked'), function(path) {
                 $.post( 
                     ajax_url + '?action=routes_save',
                     {
                         name: name,
-                        todo_check: 'check',
                         route: JSON.stringify( routes[id_number] ),
                         path: JSON.stringify( path ),
+                        dis_route_snap_to_road: $( "#mhs_tm_dis_route_snap_to_road" ).is(':checked') ? 1 : 0,
                         mhs_tm_route_save_nonce: $( '#mhs_tm_route_save_nonce' ).val(),
                     },
                     function ( response ) {

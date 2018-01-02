@@ -497,7 +497,8 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					break;
 
 				case 'color_picker':
-					echo '<input type="text" class="color_picker" id="' . esc_attr( $field[ 'id' ] ) . '" >';
+					echo '<input type="text" class="color_picker" id="' . esc_attr( $field[ 'id' ] ) . '"  
+						value="' . esc_attr( $field[ 'value' ] ) . '" >';
 					echo '<script>
 							jQuery( function ($) { 
 								$( document ).ready( function() {
