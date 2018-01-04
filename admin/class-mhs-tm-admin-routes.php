@@ -29,8 +29,12 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 
 			switch ( $todo ) {
 
-				// delete are defined in list_table_aps.php
+				// delete are defined in list-table-routes.php
 //				case 'delete':
+//					break;
+
+				// duplicate are defined in list-table-routes.php
+//				case 'duplicate':
 //					break;
 //					
 				//save is just ajax
@@ -82,11 +86,6 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				'messages'	 => $messages,
 				'url'		 => $url
 			) );
-
-			$routes = $wpdb->get_results(
-			'SELECT * FROM ' . $table_name .
-			' WHERE active = 1 order by updated DESC', ARRAY_A
-			);
 			
 			$button = '<form method="post" action="' . $url . '&todo=new">' .
 			'<input type="submit" style="margin-right: 6px;" class="mhs_tm_prim_button button" value="+ ' . __( 'add new route', 'mhs_tm' ) . '" />' .
@@ -124,6 +123,11 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			wp_register_script( 'googlemap', 'https://maps.googleapis.com/maps/api/js?key=' . $key, true );
 			wp_enqueue_script( 'googlemap' );
 			
+			$routes = $wpdb->get_results(
+				'SELECT * FROM ' . $table_name .
+				' WHERE active = 1 order by updated DESC', ARRAY_A
+			);
+			
 			wp_enqueue_script( 'mhs_tm_map' );
 			wp_localize_script( 'mhs_tm_map', 'mhs_tm_app_vars_0', array(
 				'coordinates'		 => $routes,
@@ -132,8 +136,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				'auto_load'			 => false,
 				'map_id'			 => 0,
                 'plugin_dir'	     => MHS_TM_RELPATH 
-			)
-			);
+			) );
 
 			wp_enqueue_script( 'mhs_tm_admin_routes' );
 		}
@@ -733,10 +736,10 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			}
 
 			$options = array( 
-				'name'               => $name,
-				'route_color'        => $route_color,
+				'name'                   => $name,
+				'route_color'            => $route_color,
 				'dis_route_snap_to_road' => $dis_route_snap_to_road,
-				'path'               => $path
+				'path'                   => $path
 			);
 
 			$options = wp_json_encode( $options );

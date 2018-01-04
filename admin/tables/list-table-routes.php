@@ -120,11 +120,13 @@ class List_Table_Routes extends WP_List_Table_My {
 	 * @return string Text to be placed inside the column <td> (movie title only)
 	 * ************************************************************************ */
 	function column_name( $item ) {
-		$delete_nonce = wp_create_nonce( 'mhs_tm_delete_route_' . absint( $item['id'] ) );
+		$delete_nonce    = wp_create_nonce( 'mhs_tm_delete_route_' . absint( $item['id'] ) );
+		$duplicate_nonce = wp_create_nonce( 'mhs_tm_duplicate_route_' . absint( $item['id'] ) );
 
 		//Build row actions
 		$actions = array(
 			'edit'			 => sprintf( '<a href="?page=%s&todo=edit&id=%s">Edit</a>', esc_attr( $_REQUEST['page'] ), absint( $item['id'] ) ),
+			'duplicate'		 => sprintf( '<a href="?page=%s&action=duplicate&id=%s&_wpnonce=%s">Duplicate</a>', esc_attr( $_REQUEST['page'] ), absint( $item['id'] ), $duplicate_nonce ),
 			'delete'		 => sprintf( '<a onclick="if ( confirm(\'Really delete %s?\') ) { return true; } return false;"' .
 			'href="?page=%s&action=delete&id=%s&_wpnonce=%s">Delete</a>', esc_html( $item['name'] ), esc_attr( $_REQUEST['page'] ), absint( $item['id'] ), $delete_nonce ),
 			'mhs_tm_info'	 => sprintf( '<a id="mhs_tm_info_%s" href="javascript:void(0);">Info</a>', absint( $item['id'] ) ),
@@ -237,7 +239,8 @@ class List_Table_Routes extends WP_List_Table_My {
 	function get_bulk_actions() {
 
 		$actions = array(
-			'delete_bulk' => 'Delete'
+			'delete_bulk'		=> 'Delete',
+			'duplicate_bulk'	=> 'Duplictae'
 		);
 		return $actions;
 	}
@@ -250,7 +253,7 @@ class List_Table_Routes extends WP_List_Table_My {
 	 * @see $this->prepare_items()
 	 * ************************************************************************ */
 	function process_bulk_action() {
-		global $wpdb, $MHS_TM_Admin, $MHS_TM_Admin_Utilities;
+		global $wpdb, $MHS_TM_Admin, $MHS_TM_Admin_Utilities, $MHS_TM_Maps, $MHS_TM_Admin_Routes;
 		$table_name = $wpdb->prefix . 'mhs_tm_routes';
 
 		$id			 = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
@@ -295,6 +298,103 @@ class List_Table_Routes extends WP_List_Table_My {
 					'message'	 => __( 'Routes have been deleted!', 'mhs_tm' )
 				);
 				echo $MHS_TM_Admin->convert_messages( $messages );
+			} else {
+				$messages[] = array(
+					'type'		 => 'error',
+					'message'	 => __( 'Something went wrong!', 'mhs_tm' )
+				);
+				echo $MHS_TM_Admin->convert_messages( $messages );
+			}
+		}
+		
+		if ( 'duplicate' === $this->current_action() ) {
+			if ( is_numeric( $id ) && wp_verify_nonce( $nonce, 'mhs_tm_duplicate_route_' . $id ) ) {
+				$coordinates = array();
+				$coordinates = $MHS_TM_Maps->get_coordinates( $id, 'route' );
+
+				$coordinates[0]['coordinates']			= $MHS_TM_Admin_Routes->sanitize_coordinates_array( $coordinates[0]['coordinates'] );
+				$coordinates[0]['options']['path']		= $MHS_TM_Admin_Routes->sanitize_path_array( $coordinates[0]['options']['path'] );
+				$coordinates[0]['options']['name']		= sanitize_text_field( $coordinates[0]['options']['name'] );
+				$coordinates[0]['options']['name']		= $coordinates[0]['options']['name'] . ' (Copy)';
+
+				$options = wp_json_encode( $coordinates[0]['options'] );
+				$coordinates = wp_json_encode( $coordinates[0]['coordinates'] );
+				
+				// insert duplicated route
+				$wpdb->insert(
+				$wpdb->prefix . 'mhs_tm_routes', array(
+					'active'		 => 1,
+					'options'		 => $options,
+					'coordinates'	 => $coordinates,
+					'create_date'	 => date( 'Y-m-d H:i:s' )
+				), array( '%d', '%s', '%s', '%s' )
+				);
+				
+				$messages[] = array(
+					'type'		 => 'updated',
+					'message'	 => __( 'Route have been duplicated!', 'mhs_tm' )
+				);
+
+				$routes = $wpdb->get_results(
+					'SELECT * FROM ' . $wpdb->prefix . 'mhs_tm_routes' .
+					' WHERE active = 1 order by updated DESC', ARRAY_A
+				);
+
+				echo $MHS_TM_Admin->convert_messages( $messages );
+			} else {
+				$messages[] = array(
+					'type'		 => 'error',
+					'message'	 => __( 'Something went wrong!', 'mhs_tm' )
+				);
+				echo $MHS_TM_Admin->convert_messages( $messages );
+			}
+		}
+
+		if ( 'duplicate_bulk' === $this->current_action() ) {
+			if ( wp_is_numeric_array( $route_ids ) && wp_verify_nonce( $nonce, 'bulk-' . $this->_args['plural'] ) ) {
+				foreach ( $route_ids as $route_id ) {
+					if ( is_numeric( $route_id ) ) {
+						$coordinates = array();
+						$coordinates = $MHS_TM_Maps->get_coordinates( $route_id, 'route' );
+
+						$coordinates[0]['coordinates']			= $MHS_TM_Admin_Routes->sanitize_coordinates_array( $coordinates[0]['coordinates'] );
+						$coordinates[0]['options']['path']		= $MHS_TM_Admin_Routes->sanitize_path_array( $coordinates[0]['options']['path'] );
+						$coordinates[0]['options']['name']		= sanitize_text_field( $coordinates[0]['options']['name'] );
+						$coordinates[0]['options']['name']		= $coordinates[0]['options']['name'] . ' (Copy)';
+
+						$options = wp_json_encode( $coordinates[0]['options'] );
+						$coordinates = wp_json_encode( $coordinates[0]['coordinates'] );
+						
+						// insert duplicated route
+						$wpdb->insert(
+						$wpdb->prefix . 'mhs_tm_routes', array(
+							'active'		 => 1,
+							'options'		 => $options,
+							'coordinates'	 => $coordinates,
+							'create_date'	 => date( 'Y-m-d H:i:s' )
+						), array( '%d', '%s', '%s', '%s' )
+						);
+					}
+				}
+				$messages[] = array(
+					'type'		 => 'updated',
+					'message'	 => __( 'Routes have been duplicated!', 'mhs_tm' )
+				);
+				echo $MHS_TM_Admin->convert_messages( $messages );
+
+				$routes = $wpdb->get_results(
+					'SELECT * FROM ' . $wpdb->prefix . 'mhs_tm_routes' .
+					' WHERE active = 1 order by updated DESC', ARRAY_A
+				);
+				
+				wp_localize_script( 'mhs_tm_map', 'mhs_tm_app_vars_0', array(
+					'coordinates'		 => $routes,
+					'coord_center_lat'	 => 54.023884,
+					'coord_center_lng'	 => 9.377068,
+					'auto_load'			 => false,
+					'map_id'			 => 0,
+					'plugin_dir'	     => MHS_TM_RELPATH 
+				) );
 			} else {
 				$messages[] = array(
 					'type'		 => 'error',
