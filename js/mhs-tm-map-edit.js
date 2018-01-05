@@ -14,15 +14,7 @@ jQuery( function ( $ ) {
             new google.maps.LatLng( 0, 0 ),
             new google.maps.LatLng( 0, 0 )
         ],
-        linePath = [ ];
-        
-    linePath[map_canvas_id] = new google.maps.Polyline( {
-        path: dummyPath,
-        geodesic: true,
-        strokeColor: '#000000',
-        strokeOpacity: 1.0,
-        strokeWeight: 3
-    } );
+        route_path;
     
     marker[map_canvas_id] = [];
 
@@ -214,6 +206,29 @@ jQuery( function ( $ ) {
         marker[map_canvas_id].splice( new_order2 - 1, 1 );
         coordinates[map_canvas_id]['coordinates'].splice( new_order2 - 1, 1 );
     } );
+
+    $( "#mhs_tm_calc_path" ).on( 'click', $( this ), function () {
+        var coordinates_on_route = mhs_tm_utilities.coordinate_handling.get_only_on_route_coordinates( coordinates[map_canvas_id]['coordinates'] );
+        var path = [];
+        
+        $( "#mhs_tm_dialog_loading" ).dialog( "open" );
+        // snap the route to the roads via gmaps directions
+        mhs_tm_utilities.gmaps.route_snap_to_road(coordinates_on_route, 0, path, $( "#dis_route_snap_to_road" ).is(':checked'), function(path) {
+            //update route path
+            route_path.setPath(path); 
+            route_path.setOptions( { strokeColor: $( "#route_color" ).val() } );
+            
+            // make the content string for the gmap info window
+            for( var x = 0; x < marker[map_canvas_id].length; x++ ) {
+                var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[map_canvas_id]['coordinates'][x], coordinates[map_canvas_id]['coordinates'] );
+                marker[map_canvas_id][x].infowindow.setContent( contentString );
+                bind_info_window( marker[map_canvas_id][x], marker[map_canvas_id],
+                    map[map_canvas_id], contentString );
+            }
+
+            $( "#mhs_tm_dialog_loading" ).dialog( "close" );
+        } );
+    } );
     
     function save_route(path) {
         $.post( 
@@ -227,6 +242,18 @@ jQuery( function ( $ ) {
                 mhs_tm_route_save_nonce: $( '#mhs_tm_route_save_' + getUrlParameter( 'id' ) + '_nonce' ).val(),
             },
             function ( response ) {
+                //update route path
+                route_path.setPath(path); 
+                route_path.setOptions( { strokeColor: $( "#route_color" ).val() } );
+            
+                // make the content string for the gmap info window
+                for( var x = 0; x < marker[map_canvas_id].length; x++ ) {
+                    var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[map_canvas_id]['coordinates'][x], coordinates[map_canvas_id]['coordinates'] );
+                    marker[map_canvas_id][x].infowindow.setContent( contentString );
+                    bind_info_window( marker[map_canvas_id][x], marker[map_canvas_id],
+                        map[map_canvas_id], contentString );
+                }
+
                 $( ".admin_title_mhs_tm h1" ).html( 'Edit "' + $( "#name" ).val() + '"' );
                 $( "#mhs_tm_dialog_loading" ).dialog( "close" );
                 mhs_tm_utilities.utilities.show_message( response.type, response.message );
@@ -351,7 +378,7 @@ jQuery( function ( $ ) {
 
     function gmap_initialize() {
         var mapOptions = {
-            center: { lat: coord_center_lat, lng: coord_center_lng }, //lat: 46.3682855, lng: 14.4170272
+            center: { lat: coord_center_lat, lng: coord_center_lng },
             zoom: 5,
             fullscreenControl: true
         };
@@ -444,14 +471,10 @@ jQuery( function ( $ ) {
 
                 //set the Icon to marker
                 marker[map_canvas_id][marker[map_canvas_id].length - 1].setIcon( pinIcon );
-
-                var path = linePath[0].getPath();
-                path.push( event.overlay.getPosition() );
             }
         } );
 
         bounds[map_canvas_id] = new google.maps.LatLngBounds();
-        var lines = [ ];
         var mark_counter = 0;
 
         if ( coordinates.length > 0 ) {
@@ -491,22 +514,24 @@ jQuery( function ( $ ) {
                     map[map_canvas_id].panToBounds( bounds[map_canvas_id] );
 
                     bind_info_window( marker[map_canvas_id][mark_counter], marker[map_canvas_id], map[map_canvas_id], contentString );
-                    lines.push( marker[map_canvas_id][mark_counter].position );
 
                     mark_counter++;
                 }
+        
+                var lines = [];
+                coordinates[i]['options']['path'].forEach(function(item, index) {
+                    lines.push( new google.maps.LatLng( item['lat'], item['lng'] ) );
+                } );
 
-                linePath[i] = new google.maps.Polyline( {
+                route_path = new google.maps.Polyline( {
                     path: lines,
                     geodesic: true,
-                    strokeColor: '#000000',
+                    strokeColor: coordinates[i]['options']['route_color'],
                     strokeOpacity: 1.0,
                     strokeWeight: 3
                 } );
 
-                //                linePath[i].setMap(map[map_canvas_id]);
-
-                lines = [ ];
+                route_path.setMap(map[map_canvas_id]);
             }
         }
     }

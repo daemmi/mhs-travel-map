@@ -15,7 +15,7 @@ mhs_tm_map = {
         new google.maps.LatLng( 0, 0 ),
         new google.maps.LatLng( 0, 0 )
     ],
-    linePath: []
+    route_path: []
 };
 
 jQuery( function ( $ ) {
@@ -39,7 +39,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
         zoom: 5,
         fullscreenControl: true
     };
-    mhs_tm_map.linePath[map_canvas_id] = [];
+    mhs_tm_map.route_path[map_canvas_id] = [];
     mhs_tm_map.map[map_canvas_id] = new google.maps.Map( document.getElementById( 'mhs_tm_map_canvas_' + map_canvas_id ),
         mapOptions );
         
@@ -54,8 +54,8 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
     // click on the map sets the opacity of the paths and markers back to 1 and closes the 
     // info window
     google.maps.event.addListener(mhs_tm_map.map[map_canvas_id], "click", function() {
-        for ( var i = 0; i < mhs_tm_map.linePath[map_canvas_id].length; ++i ) {
-            mhs_tm_map.linePath[map_canvas_id][i].setOptions( { strokeOpacity: 1 } );
+        for ( var i = 0; i < mhs_tm_map.route_path[map_canvas_id].length; ++i ) {
+            mhs_tm_map.route_path[map_canvas_id][i].setOptions( { strokeOpacity: 1 } );
             for ( var j = 0; j < mhs_tm_map.marker[map_canvas_id][i].length; ++j ) {
                 mhs_tm_map.marker[map_canvas_id][i][j].infowindow.close();
                 mhs_tm_map.marker[map_canvas_id][i][j].setOpacity(1);
@@ -124,7 +124,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
             } );
             
             mhs_tm_map.marker[map_canvas_id][i][mark_counter].addListener('click', function() {
-                mhs_tm_map.set_opacity( mhs_tm_map.marker, mhs_tm_map.linePath, map_canvas_id, 'marker',this );
+                mhs_tm_map.set_opacity( mhs_tm_map.marker, mhs_tm_map.route_path, map_canvas_id, 'marker',this );
             } );
             
             mhs_tm_map.marker[map_canvas_id][i][mark_counter].infowindow = new google.maps.InfoWindow( {
@@ -149,7 +149,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
             lines.push( new google.maps.LatLng( item['lat'], item['lng'] ) );
         } );
         
-        mhs_tm_map.linePath[map_canvas_id][i] = new google.maps.Polyline( {
+        mhs_tm_map.route_path[map_canvas_id][i] = new google.maps.Polyline( {
             path: lines,
             geodesic: true,
             strokeColor: mhs_tm_map.coordinates[map_canvas_id][i]['options']['route_color'],
@@ -157,11 +157,11 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
             strokeWeight: 3
         } );
         
-        mhs_tm_map.linePath[map_canvas_id][i].addListener( 'click', function () {
-            mhs_tm_map.set_opacity( mhs_tm_map.marker, mhs_tm_map.linePath, map_canvas_id, 'linePath',this );
+        mhs_tm_map.route_path[map_canvas_id][i].addListener( 'click', function () {
+            mhs_tm_map.set_opacity( mhs_tm_map.marker, mhs_tm_map.route_path, map_canvas_id, 'route_path',this );
         } );
 
-        mhs_tm_map.linePath[map_canvas_id][i].setMap( mhs_tm_map.map[map_canvas_id] );
+        mhs_tm_map.route_path[map_canvas_id][i].setMap( mhs_tm_map.map[map_canvas_id] );
     }
 };
 
@@ -181,7 +181,7 @@ mhs_tm_map.set_opacity = function( marker, line_path, map_canvas_id, from_listen
     // change opacity for all path and markers
     for ( var y = 0; y < line_path[map_canvas_id].length; y++ ) {
         // find route id
-        if( from_listener === 'linePath' ) { 
+        if( from_listener === 'route_path' ) { 
             if( listener === line_path[map_canvas_id][y] ) {
                 var route_id = y;
             }

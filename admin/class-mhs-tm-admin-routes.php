@@ -189,7 +189,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			) );
 			
 			$custom_buttons = array(
-				'<input type="submit" class="button-secondary margin" value="' . __( 'update map', 'mhs_tm' ) . '" />'
+				'<input type="submit" class="button-secondary margin" value="' . __( 'update map', 'mhs_tm' ) . '" />',
+				'<input type="submit" id="mhs_tm_calc_path" class="button-secondary margin" value="' . __( 'calculate and draw path', 'mhs_tm' ) . '" />',
 			);
 
 			$args	 = array(

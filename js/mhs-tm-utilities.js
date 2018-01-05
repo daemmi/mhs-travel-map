@@ -50,7 +50,7 @@ mhs_tm_utilities.gmaps.get_route = function(from, to, path, disabled_snap_to_roa
                 //wait 2s if there is a OVER_QUERY_LIMIT error
                 //and call function again
                 setTimeout(function(){
-                    mhs_tm_utilities.gmaps.get_route(from, to, path, callback); 
+                    mhs_tm_utilities.gmaps.get_route(from, to, path, disabled_snap_to_road, callback); 
                 }, 2000); 
             } else {
                 //if gmaps couldn't finde a direction put coordinates from origin and destination to the array
