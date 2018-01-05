@@ -278,7 +278,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			wp_enqueue_script( 'googlemap' );
 
 			wp_enqueue_script( 'jquery_ui_touch_punch_min' );
-			var_dump($coordinates);
+			
 			wp_enqueue_script( 'mhs_tm_map_edit' );
 			wp_localize_script( 'mhs_tm_map_edit', 'mhs_tm_app_vars', array(
 				'coordinates'		 => $coordinates,
@@ -864,6 +864,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 								'street'			=> sanitize_text_field( $val->street ), 
 								'waitingtime'		=> intval( $val->waitingtime ), 
 								'dissnaptoroad'     => property_exists( $val, 'dissnaptoroad' ) && $val->dissnaptoroad == 1 ? 1 : 0,
+								'distance'		    => property_exists( $val, 'distance' ) ? intval( $val->distance ) : false, 
 							);
 						} elseif( is_array( $array[ $key ] ) ) {
 							$new_input[ $key ] = array( 
@@ -878,7 +879,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 								'state'				=> sanitize_text_field( $val['state'] ), 
 								'street'			=> sanitize_text_field( $val['street'] ), 
 								'waitingtime'		=> intval( $val['waitingtime'] ), 
-								'dissnaptoroad'     => array_key_exists( 'dissnaptoroad', $val ) && $val['dissnaptoroad'] == 1 ? 1 : 0,   
+								'dissnaptoroad'     => array_key_exists( 'dissnaptoroad', $val ) && $val['dissnaptoroad'] == 1 ? 1 : 0, 
+								'distance'		    => array_key_exists( 'distance', $val ) ? intval( $val['distance'] ) : false,   
 							);							
 						}
 					}

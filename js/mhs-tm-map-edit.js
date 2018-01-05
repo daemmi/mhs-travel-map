@@ -205,7 +205,6 @@ jQuery( function ( $ ) {
         } );
 
         // remove marker from map
-        console.log(old_order2);
         marker[map_canvas_id][old_order2 - 1].setMap( null );
         // swap from bottom to top                       
         for ( id = old_order2; id < new_order2; id++ ) {
@@ -217,7 +216,6 @@ jQuery( function ( $ ) {
     } );
     
     function save_route(path) {
-        console.log($( "#dis_route_snap_to_road" ).is(':checked') ? 1 : 0);
         $.post( 
             ajax_url + '?action=routes_save&id=' + getUrlParameter( 'id' ),
             { 

@@ -19,7 +19,7 @@ mhs_tm_utilities.gmaps.route_snap_to_road = function( coordinates, i, route_arra
     } else {
           callback(route_array);
     }
-}
+};
 
 //use direction service of gmaps to get coordinates of a route between 2 coordinates
 mhs_tm_utilities.gmaps.get_route = function(from, to, path, disabled_snap_to_road, callback) {
@@ -35,6 +35,9 @@ mhs_tm_utilities.gmaps.get_route = function(from, to, path, disabled_snap_to_roa
         }, function(result, status) {
             //if gmaps could calculate a direction get thearray with all coordinates and push it to the array
             if (status == google.maps.DirectionsStatus.OK) {
+                //get dstance of path
+                to.distance = result.routes[0].legs[0].distance.value;
+                
                 for (var i = 0, len = result.routes[0].overview_path.length; i < len; i++) {
                 path.push( { 
                     lat: result.routes[0].overview_path[i].lat(),
@@ -51,6 +54,11 @@ mhs_tm_utilities.gmaps.get_route = function(from, to, path, disabled_snap_to_roa
                 }, 2000); 
             } else {
                 //if gmaps couldn't finde a direction put coordinates from origin and destination to the array
+                // get distance
+                to.distance = Math.round( google.maps.geometry.spherical.computeDistanceBetween(
+                    new google.maps.LatLng( from.latitude, from.longitude ), 
+                    new google.maps.LatLng( to.latitude, to.longitude ) ) );
+                    
                 path.push( { 
                     lat: from.latitude,
                     lng: from.longitude,
@@ -66,6 +74,10 @@ mhs_tm_utilities.gmaps.get_route = function(from, to, path, disabled_snap_to_roa
         } );
     } else {
         //if disabled then just push the coordinates to the path and run callback
+        // get distance
+        to.distance = Math.round( google.maps.geometry.spherical.computeDistanceBetween(
+            new google.maps.LatLng( from.latitude, from.longitude ), 
+            new google.maps.LatLng( to.latitude, to.longitude ) ) );
         path.push( { 
             lat: from.latitude,
             lng: from.longitude,
@@ -78,7 +90,7 @@ mhs_tm_utilities.gmaps.get_route = function(from, to, path, disabled_snap_to_roa
 
         callback();
     }
-}
+};
  
 /**************************************************************************************************
 *   Utilities for coordinate handling and informations
@@ -95,8 +107,8 @@ mhs_tm_utilities.coordinate_handling.get_only_on_route_coordinates = function( c
         }
     } );
     
-    return coordinates_on_route
-}
+    return coordinates_on_route;
+};
 
 mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = function( coordinate, coordinates ) {
     
@@ -123,9 +135,25 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = function(
     
     contentString += '</b> </br>' +
         // cut the last 3 chars because it's the seconds we won't display
-        coordinate_date.slice(0, coordinate_date.length - 3) +
-        mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview(coordinate, coordinates) +
-        '</p> <hr>';
+        coordinate_date.slice(0, coordinate_date.length - 3) + '</br>';
+    if( mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview(coordinate, coordinates) || 
+        mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview(coordinate, coordinates) ) {
+        contentString += '(';
+    }
+    
+    if( mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview(coordinate, coordinates) ) {
+        contentString += mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview(coordinate, coordinates);
+        if( mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview(coordinate, coordinates) ) {
+            contentString += ' | ' + mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview(coordinate, coordinates) + 
+            ') </p> <hr>';
+        } else {
+            contentString +=  ') </p> <hr>';
+        }
+    } else if( mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview(coordinate, coordinates) ) {
+        contentString += mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview(coordinate, coordinates) + 
+        ') </p> <hr>';
+    }
+        
 
     if ( coordinate.note !== null && coordinate.note !== undefined ) {
         contentString += mhs_tm_utilities.utilities.stripslashes( coordinate.note );
@@ -133,14 +161,14 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = function(
     contentString += '</div>';
 
     return contentString;
-}
+};
 
 mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview = function( coordinate, coordinates ) {
     var lifts = 0;
     var waiting_time_total = 0;
     
     if( !coordinate.ishitchhikingspot || !coordinate.ispartofaroute ) {
-        return '';
+        return false;
     }
     
     if( mhs_tm_utilities.utilities.is_equivalent(coordinate, coordinates[coordinates.length - 1] ) ) {
@@ -163,25 +191,57 @@ mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview = function(
         var coordinate_time_total_minutes = ( coordinate_time_total - coordinate_time_total_hours * 60 * 60 ) / ( 60 );
         coordinate_time_total_minutes = Math.floor(coordinate_time_total_minutes);
         
-        return ' (Total: ' + lifts + ' lifts | ' + coordinate_time_total_hours + 'h ' + 
-            coordinate_time_total_minutes + 'min | waited ' + waiting_time_total_hours +'h ' + 
-            waiting_time_total_minutes + 'min)'; 
+        return 'Total: ' + lifts + ' lifts | ' + coordinate_time_total_hours + 'h ' + 
+            coordinate_time_total_minutes + 'min | waited: ' + waiting_time_total_hours +'h ' + 
+            waiting_time_total_minutes + 'min'; 
     }else {
         // get time in hours and minutes
         var waiting_time_total_hours = coordinate.waitingtime / 60;
         waiting_time_total_hours = Math.floor(waiting_time_total_hours);
         var waiting_time_total_minutes = coordinate.waitingtime - waiting_time_total_hours * 60;
         waiting_time_total_minutes = Math.floor(waiting_time_total_minutes);
-        return ' (waiting time: ' + waiting_time_total_hours +'h ' + 
-            waiting_time_total_minutes + 'min)';        
+        return 'Waiting time: ' + waiting_time_total_hours +'h ' + 
+            waiting_time_total_minutes + 'min';        
     }
-}
+};
+
+mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview = function( coordinate, coordinates ) {
+    var distance_total = 0;
+    var coordinate_on_route = 0;
+    if( !coordinate.ispartofaroute || typeof coordinate.distance === 'undefined' ) {
+        return false;
+    }
+    
+    // check if it is first coordinate on the route and calculate total distance
+    for( var x = 0; x < coordinates.length; ++x ) {   
+        if( coordinates[x].ispartofaroute ) {
+            coordinate_on_route += 1;
+        }
+        
+        // if only one coordinate on route return false
+        if( mhs_tm_utilities.utilities.is_equivalent( coordinate, coordinates[x] ) && coordinate_on_route < 2 ) {
+            return false;
+        }
+        
+        if( coordinates[x].ispartofaroute &&  typeof coordinate.distance !== 'undefined' ) {
+            distance_total += coordinates[x].distance;
+        }
+        
+        // if reached present coordinate in array break for loop
+        if( mhs_tm_utilities.utilities.is_equivalent( coordinate, coordinates[x] ) ) {
+            break;
+        }
+    }
+    
+    return 'distance: ' + Math.round( coordinate.distance / 1000 ) + 'km | total distance: ' + 
+        Math.round( distance_total / 1000 ) + 'km';
+};
  
 /**************************************************************************************************
 *   Utilities
 *   
 **************************************************************************************************/
-mhs_tm_utilities.utilities = {}
+mhs_tm_utilities.utilities = {};
        
 mhs_tm_utilities.utilities.get_buttons = function( save_button ) {
     var html = '<span style="float:right;"> \n\
@@ -194,7 +254,7 @@ mhs_tm_utilities.utilities.get_buttons = function( save_button ) {
                 </h3>';
 
     return html;
-}
+};
 
 mhs_tm_utilities.utilities.is_equivalent = function( a, b ) {
     // Create arrays of property names
@@ -220,11 +280,11 @@ mhs_tm_utilities.utilities.is_equivalent = function( a, b ) {
     // If we made it this far, objects
     // are considered equivalent
     return true;
-}
+};
 
 mhs_tm_utilities.utilities.stripslashes = function( str ) {
     return str.replace(/\\'/g,'\'').replace(/\"/g,'"').replace(/\\\\/g,'\\').replace(/\\0/g,'\0');
-}
+};
         
 mhs_tm_utilities.utilities.show_message = function( message_class, message ) {
     jQuery( function ( $ ) {
@@ -237,7 +297,7 @@ mhs_tm_utilities.utilities.show_message = function( message_class, message ) {
             $( "#dialog_message" ).slideUp();
         }, 3000);
     } );
-}
+};
 
 mhs_tm_utilities.utilities.sortResults = function( arr, key, asc ) {
     return arr.sort(function (a, b) {
@@ -246,17 +306,17 @@ mhs_tm_utilities.utilities.sortResults = function( arr, key, asc ) {
         if ( asc ) { return ((x < y) ? -1 : ((x > y) ? 1 : 0)); }
         else { return ((x > y) ? -1 : ((x < y) ? 1 : 0)); }
     });
-}
+};
 
 // Function to get a timestamp in milliseconds - the local timezone offset
 mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset = function( timestamp ) {
     return timestamp * 1000 + ( new Date().getTimezoneOffset() * 60 * 1000 );
-}
+};
 
 // Function to get a timestamp in milliseconds + the local timezone offset
 mhs_tm_utilities.utilities.get_timestamp_plus_timezone_offset = function( timestamp ) {
     return timestamp * 1000 - ( new Date().getTimezoneOffset() * 60 * 1000 );
-}
+};
 
 jQuery( function ( $ ) {
     $( "#mhs_tm_dialog_loading" ).dialog( {
