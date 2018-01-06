@@ -193,7 +193,6 @@ jQuery( function ( $ ) {
             if ( id <= Math.max( new_order2, old_order2 ) && id >= Math.min( new_order2, old_order2 ) ) {
                 change_coordinate_id( $( this ), id );
             }
-
         } );
 
         // remove marker from map
@@ -228,6 +227,66 @@ jQuery( function ( $ ) {
 
             $( "#mhs_tm_dialog_loading" ).dialog( "close" );
         } );
+    } );
+    
+    $( ".mhs_tm_update_location_name" ).on( 'click', $( this ), function () {
+        var geocoder = new google.maps.Geocoder; 
+        var element  = $( this ).parent().parent().find('input');
+        var input_id = element.attr( 'id' ).substr( 0, element.attr( 'id' ).search( '_' ) );
+        var coordinate_index = parseInt( element.attr( 'id' ).replace( input_id + '_', '' ) - 1 );
+        var index = [];
+        switch( input_id ) {
+            //set all posible indexes beginning with most relevant
+            case 'country':
+                index[0] = 'country';
+                break;
+            case 'state':
+                index[0] = 'administrative_area_level_1';
+                index[1] = 'administrative_area_level_2';
+                index[2] = 'administrative_area_level_3';
+                index[3] = 'administrative_area_level_4';
+                index[4] = 'administrative_area_level_5';
+                break;
+            case 'city':
+                index[0] = 'locality';
+                index[1] = 'sublocality';
+                index[2] = 'neighborhood';
+                index[3] = 'postal_town';
+                break;
+            default:
+                index[0] = 'country';
+                break;
+        }
+        
+        geocoder.geocode( { 'location': { lat: coordinates[map_canvas_id]['coordinates'][coordinate_index]['latitude'],
+                lng: coordinates[map_canvas_id]['coordinates'][coordinate_index]['longitude'] } },
+            function ( results, status ) {
+                if ( status === google.maps.GeocoderStatus.OK ) {
+                    // success! 
+                    console.log(results);
+                    var address = results[0].address_components;
+                    for ( var p = address.length - 1; p >= 0; p-- ) {
+                        var found = false;
+                        //loop through all indexes of the present field
+                        for ( var x = 0; x < index.length; x++ ) {
+                            if ( address[p].types.indexOf( index[x] ) != -1 ) {
+                                coordinates[map_canvas_id]['coordinates'][coordinate_index][input_id] = address[p]['long_name'];
+                                element.val(address[p]['long_name']);
+                                focusout_input( element );
+                                found = true;
+                                break;
+                            }
+                        }
+                        //if someone found break both for loops
+                        if( found === true ) {
+                            break;
+                        }
+                    }
+                } else {
+                    // failure!
+                }
+            }
+        );
     } );
     
     function save_route(path) {

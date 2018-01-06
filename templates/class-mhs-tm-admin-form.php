@@ -685,7 +685,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					if ( !in_array( $field[ 'type' ], array( 'hidden', 'checkbox_group', 'checkbox-group', 'html_div' ) ) ) {
 						echo '<br />';
 					}
-					echo '<span class="description">' . wp_kses_post( $field[ 'desc' ] ) . '</span>';
+					echo '<span class="description">' . $field[ 'desc' ] . '</span>';
 				}
 				echo '</td></tr>';
 			}

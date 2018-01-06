@@ -480,19 +480,19 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 							'type'	 => 'text_long',
 							'label'	 => __( 'Country', 'mhs_tm' ),
 							'id'	 => 'country_' . $coordinate_id,
-							'desc'	 => __( 'The country name of the coordinate.', 'mhs_tm' )
+							'desc'	 => __( 'The country name of the coordinate. <a class="mhs_tm_update_location_name" href="javascript:void(0);">Update</a>', 'mhs_tm' )
 						),
 						array(
 							'type'	 => 'text_long',
 							'label'	 => __( 'State', 'mhs_tm' ),
 							'id'	 => 'state_' . $coordinate_id,
-							'desc'	 => __( 'The state name of the coordinate.', 'mhs_tm' )
+							'desc'	 => __( 'The state name of the coordinate. <a class="mhs_tm_update_location_name" href="javascript:void(0);">Update</a>', 'mhs_tm' )
 						),
 						array(
 							'type'	 => 'text_long',
 							'label'	 => __( 'City', 'mhs_tm' ),
 							'id'	 => 'city_' . $coordinate_id,
-							'desc'	 => __( 'The city name of the coordinate.', 'mhs_tm' )
+							'desc'	 => __( 'The city name of the coordinate. <a class="mhs_tm_update_location_name" href="javascript:void(0);">Update</a>', 'mhs_tm' )
 						),
 						array(
 							'type'	 => 'html_div',
@@ -595,19 +595,19 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 									'type'	 => 'text_long',
 									'label'	 => __( 'Country', 'mhs_tm' ),
 									'id'	 => 'country_' . $coordinate_id,
-									'desc'	 => __( 'The country name of the coordinate.', 'mhs_tm' )
+									'desc'	 => __( 'The country name of the coordinate. <a class="mhs_tm_update_location_name" href="javascript:void(0);">Update</a>', 'mhs_tm' )
 								),
 								array(
 									'type'	 => 'text_long',
 									'label'	 => __( 'State', 'mhs_tm' ),
 									'id'	 => 'state_' . $coordinate_id,
-									'desc'	 => __( 'The state name of the coordinate.', 'mhs_tm' )
+									'desc'	 => __( 'The state name of the coordinate. <a class="mhs_tm_update_location_name" href="javascript:void(0);">Update</a>', 'mhs_tm' )
 								),
 								array(
 									'type'	 => 'text_long',
 									'label'	 => __( 'City', 'mhs_tm' ),
 									'id'	 => 'city_' . $coordinate_id,
-									'desc'	 => __( 'The city name of the coordinate.', 'mhs_tm' )
+									'desc'	 => __( 'The city name of the coordinate. <a class="mhs_tm_update_location_name" href="javascript:void(0);">Update</a>', 'mhs_tm' )
 								),
 								array(
 									'type'	 => 'html_div',
