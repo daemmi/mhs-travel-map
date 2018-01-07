@@ -28,8 +28,15 @@ jQuery( function ( $ ) {
         mhs_tm_map.plugin_dir = window["mhs_tm_app_vars_" + map_canvas_id].plugin_dir;
         if ( mhs_tm_map.auto_load[map_canvas_id] )
         {
+            //set gmap window size
+            mhs_tm_utilities.utilities.set_div_16_9( '#mhs_tm_map_canvas_' + map_canvas_id );
             google.maps.event.addDomListener( window, 'load', mhs_tm_map.gmap_initialize( map_canvas_id ) );
         }
+        
+        $( window ).resize( function () {
+           //change gmap window size
+           mhs_tm_utilities.utilities.set_div_16_9( '#mhs_tm_map_canvas_' + map_canvas_id );
+       } );
     } );
 } );
 
@@ -62,6 +69,12 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
             }
         }   
     } );
+    
+    // Event listener fires after a resize of the window
+    google.maps.event.addDomListener(window, 'resize', function() {
+        mhs_tm_map.map[map_canvas_id].fitBounds( mhs_tm_map.bounds[map_canvas_id] );
+        mhs_tm_map.map[map_canvas_id].panToBounds( mhs_tm_map.bounds[map_canvas_id] );
+    });
     
     // i = rouute_id
     for ( var i = 0; i < mhs_tm_map.coordinates[map_canvas_id].length; ++i ) {

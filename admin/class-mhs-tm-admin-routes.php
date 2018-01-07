@@ -231,7 +231,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			
 			$height		 = 500;
 
-			$output = '<div id="mhs_tm_map_canvas_0" style="height: ' . esc_attr( $height ) . 'px; margin: 0; padding: 0;"></div>';
+			$output = '<div class="mhs_tm_gmap_div" id="mhs_tm_map_canvas_0" style="height: ' . esc_attr( $height ) . 'px; margin: 0; padding: 0;"></div>';
 
 			echo $adminpage->top();
 			// Make an div over the whole content when loading the page

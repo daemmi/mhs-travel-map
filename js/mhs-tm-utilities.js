@@ -299,6 +299,16 @@ mhs_tm_utilities.utilities.show_message = function( message_class, message ) {
     } );
 };
 
+mhs_tm_utilities.utilities.set_div_16_9 = function( div ) {
+    jQuery( function ( $ ) {
+        var height = $( div ).width() * 9 / 16;
+        if( height > $( window ).height() * 0.8 ) {
+            height = $( window ).height() * 0.8;
+        }
+        $( div ).height( height );
+    } );
+};
+
 mhs_tm_utilities.utilities.sortResults = function( arr, key, asc ) {
     return arr.sort(function (a, b) {
         var x = a[key];

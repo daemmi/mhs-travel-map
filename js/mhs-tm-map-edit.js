@@ -10,31 +10,31 @@ jQuery( function ( $ ) {
         old_order,
         coordinate_index_global = 0,
         marker = [],
-        dummyPath = [
-            new google.maps.LatLng( 0, 0 ),
-            new google.maps.LatLng( 0, 0 )
-        ],
         route_path;
     
     marker[map_canvas_id] = [];
 
     $( '#mhs_tm_loading' ).css( "background-color", $( 'body' ).css( "background-color" ) );
     
-    // Resize the window resize other  stuff too
+    // Resize the window resize other stuff too
     $( window ).resize( function () {
-           // set dialog height min to 500px
-           var height = 500;
-           if( $( window ).height() * 0.9 > 500 ) {
-               height = $( window ).height() * 0.9;
-           }
-           $( "#wp_editor_dialog_div" ).dialog( "option", {
-               height: height,
-               width: $( "#wrap_content" ).width(),
-           } );
+        //change gmap window size
+        mhs_tm_utilities.utilities.set_div_16_9( '#mhs_tm_map_canvas_' + map_canvas_id );
+        // set dialog height min to 500px
+        var height = 500;
+        if( $( window ).height() * 0.9 > 500 ) {
+            height = $( window ).height() * 0.9;
+        }
+        $( "#wp_editor_dialog_div" ).dialog( "option", {
+            height: height,
+            width: $( "#wrap_content" ).width(),
+        } );
     } );
 
     if ( auto_load )
     {
+        //set gmap window size
+        mhs_tm_utilities.utilities.set_div_16_9( '#mhs_tm_map_canvas_' + map_canvas_id );
         google.maps.event.addDomListener( window, 'load', gmap_initialize );
     }
 
@@ -452,6 +452,12 @@ jQuery( function ( $ ) {
             //enable sortable, otherwise touch punch doesnt work with sortable
             $('.mhs_tm_normal_sortables').sortable('enable');
         } );
+        
+        // Event listener fires after a resize of the window
+        google.maps.event.addDomListener(window, 'resize', function() {
+            map[map_canvas_id].fitBounds( bounds[map_canvas_id] );
+            map[map_canvas_id].panToBounds( bounds[map_canvas_id] );
+        });
 
         // If new Route, coordinates are NULL and first Pin is 1);
         if ( coordinates[0]['coordinates'] > 0 ) {
