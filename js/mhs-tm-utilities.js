@@ -216,15 +216,33 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = function(
 mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview = function( coordinate, coordinates ) {
     var lifts = 0;
     var waiting_time_total = 0;
+    var id_last_hitchhikingspot = 0;
+    var id_first_hitchhikingspot = 0;
     
     if( !coordinate.ishitchhikingspot || !coordinate.ispartofaroute ) {
         return false;
     }
     
-    if( mhs_tm_utilities.utilities.is_equivalent(coordinate, coordinates[coordinates.length - 1] ) ) {
-        for( var x = 1; x < coordinates.length; ++x) {
+    //find first hitchhikingspot on the route        
+    for( var x = 0; x < coordinates.length ; x++ ) {
+        if( coordinates[x].ishitchhikingspot && coordinates[x].ispartofaroute ) {
+            id_first_hitchhikingspot = x;
+            break;
+        }
+    }
+    
+    //find last hitchhikingspot on the route        
+    for( var x = coordinates.length - 1; x >= 0 ; x-- ) {
+        if( coordinates[x].ishitchhikingspot && coordinates[x].ispartofaroute ) {
+            id_last_hitchhikingspot = x;
+            break;
+        }
+    }
+    //if coordinate is last hitchhikingspot return lift count etc. 
+    if( mhs_tm_utilities.utilities.is_equivalent(coordinate, coordinates[id_last_hitchhikingspot] ) ) {
+        for( var x = 0; x < coordinates.length; ++x) {
             if( coordinates[x].ishitchhikingspot && coordinates[x].ispartofaroute ) {
-                waiting_time_total += coordinates[x].waitingtime;
+                waiting_time_total += parseInt(coordinates[x].waitingtime);
                 ++lifts;
             }
         }
@@ -234,24 +252,45 @@ mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview = function(
         waiting_time_total_hours = Math.floor(waiting_time_total_hours);
         var waiting_time_total_minutes = waiting_time_total - waiting_time_total_hours * 60;
         waiting_time_total_minutes = Math.floor(waiting_time_total_minutes);
-        
-        var coordinate_time_total = coordinates[coordinates.length - 1].starttime - coordinates[0].starttime;
+        var coordinate_time_total = coordinates[id_last_hitchhikingspot].starttime - 
+            coordinates[id_first_hitchhikingspot].starttime;
         var coordinate_time_total_hours = coordinate_time_total / (60 * 60 );
         coordinate_time_total_hours = Math.floor(coordinate_time_total_hours);
-        var coordinate_time_total_minutes = ( coordinate_time_total - coordinate_time_total_hours * 60 * 60 ) / ( 60 );
+        var coordinate_time_total_minutes = ( coordinate_time_total - 
+            coordinate_time_total_hours * 60 * 60 ) / ( 60 );
         coordinate_time_total_minutes = Math.floor(coordinate_time_total_minutes);
         
-        return 'Total: ' + lifts + ' lifts | ' + coordinate_time_total_hours + 'h ' + 
-            coordinate_time_total_minutes + 'min | Waited: ' + waiting_time_total_hours +'h ' + 
-            waiting_time_total_minutes + 'min'; 
+        var string = 'Total: ' + lifts + ' lifts | ';
+        if( coordinate_time_total_hours !== 0 ) {
+            string += coordinate_time_total_hours + 'h ';
+        }
+        if( coordinate_time_total_minutes !== 0 || coordinate_time_total_hours === 0 ) {
+            string += coordinate_time_total_minutes + 'min ';
+        }
+        string += '| Waited: ';
+        if( waiting_time_total_hours !== 0 ) {
+            string += waiting_time_total_hours + 'h ';
+        }
+        if( waiting_time_total_minutes !== 0 || waiting_time_total_hours === 0 ) {
+            string += waiting_time_total_minutes + 'min ';
+        }
+        return string; 
     }else {
+        // otherwise just witing time
         // get time in hours and minutes
         var waiting_time_total_hours = coordinate.waitingtime / 60;
         waiting_time_total_hours = Math.floor(waiting_time_total_hours);
         var waiting_time_total_minutes = coordinate.waitingtime - waiting_time_total_hours * 60;
         waiting_time_total_minutes = Math.floor(waiting_time_total_minutes);
-        return 'Waiting time: ' + waiting_time_total_hours +'h ' + 
-            waiting_time_total_minutes + 'min';        
+        
+        var string = 'Waiting time: ';
+        if( waiting_time_total_hours !== 0 ) {
+            string += waiting_time_total_hours + 'h ';
+        }
+        if( waiting_time_total_minutes !== 0 || waiting_time_total_hours === 0 ) {
+            string += waiting_time_total_minutes + 'min ';
+        }
+        return string;        
     }
 };
 

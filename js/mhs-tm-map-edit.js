@@ -332,11 +332,17 @@ jQuery( function ( $ ) {
 
         marker[map_canvas_id][coordinate_index].setIcon( pinIcon );
 
-        // make the content string for the gmap info window
-        var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[map_canvas_id]['coordinates'][coordinate_index], coordinates[map_canvas_id]['coordinates'] );
-        marker[map_canvas_id][coordinate_index].infowindow.setContent( contentString );
-        bind_info_window( marker[map_canvas_id][coordinate_index], marker[map_canvas_id],
-            map[map_canvas_id], contentString );
+        // make the content string for all gmap info window
+        for( var x = 0; x < coordinates[map_canvas_id]['coordinates'].length; x++ ) {
+            var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
+                coordinates[map_canvas_id]['coordinates'][x],
+                coordinates[map_canvas_id]['coordinates'] );
+
+            marker[map_canvas_id][x].infowindow.setContent( contentString );
+            
+            bind_info_window( marker[map_canvas_id][x], marker[map_canvas_id],
+                map[map_canvas_id], contentString );
+        }
 
         // set the  gmap marker to the new location
         if ( input_id == 'latitude' || input_id == 'longitude' ) {
@@ -593,7 +599,7 @@ jQuery( function ( $ ) {
             new_coordinate.removeAttr( 'style' ).removeClass( 'coordinate_new' ).addClass( 'coordinate' );
         }
 
-        new_coordinate.find( '.datetimepicker' ).datetimepicker( 'destroy' );
+        new_coordinate.find( '.mhs_tm_datetimepicker' ).datetimepicker( 'destroy' );
 
         change_coordinate_id( new_coordinate, coordinate_id );
 
