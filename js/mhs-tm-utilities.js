@@ -21,6 +21,56 @@ mhs_tm_utilities.gmaps.route_snap_to_road = function( coordinates, i, route_arra
     }
 };
 
+//geocode from lat long to places names
+mhs_tm_utilities.gmaps.geocode_lat_lng = function( lat, lng, place, callback ) {
+    var geocoder = new google.maps.Geocoder;
+    var index = [];
+    switch( place ) {
+        //set all posible indexes beginning with most relevant
+        case 'country':
+            index[0] = 'country';
+            break;
+        case 'state':
+            index[0] = 'administrative_area_level_1';
+            index[1] = 'administrative_area_level_2';
+            index[2] = 'administrative_area_level_3';
+            index[3] = 'administrative_area_level_4';
+            index[4] = 'administrative_area_level_5';
+            break;
+        case 'city':
+            index[0] = 'locality';
+            index[1] = 'sublocality';
+            index[2] = 'neighborhood';
+            index[3] = 'postal_town';
+            break;
+        default:
+            index[0] = 'country';
+            break;
+    }
+
+    geocoder.geocode( { 'location': { lat: lat, lng: lng } },
+        function ( results, status ) {
+            if ( status === google.maps.GeocoderStatus.OK ) {
+                // success! 
+                var address = results[0].address_components;
+                for ( var p = address.length - 1; p >= 0; p-- ) {
+                    //loop through all indexes of the present field
+                    for ( var x = 0; x < index.length; x++ ) {
+                        if ( address[p].types.indexOf( index[x] ) != -1 ) {
+                            callback( address[p]['long_name'] );
+                            return;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                callback( false );
+                return;// failure!
+            }
+        }
+    );
+};
+
 //use direction service of gmaps to get coordinates of a route between 2 coordinates
 mhs_tm_utilities.gmaps.get_route = function(from, to, path, disabled_snap_to_road, callback) {
     var service = new google.maps.DirectionsService();
@@ -130,7 +180,7 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = function(
     } else {
         contentString += coordinate.city;
     }
-    var coordinate_date = new Date( mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset( parseInt( coordinate.starttime ) ) )
+    var coordinate_date = new Date( mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset( parseInt( coordinate.starttime ) ) * 1000 )
         .toLocaleString();
     
     contentString += '</b> </br>' +
@@ -192,7 +242,7 @@ mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview = function(
         coordinate_time_total_minutes = Math.floor(coordinate_time_total_minutes);
         
         return 'Total: ' + lifts + ' lifts | ' + coordinate_time_total_hours + 'h ' + 
-            coordinate_time_total_minutes + 'min | waited: ' + waiting_time_total_hours +'h ' + 
+            coordinate_time_total_minutes + 'min | Waited: ' + waiting_time_total_hours +'h ' + 
             waiting_time_total_minutes + 'min'; 
     }else {
         // get time in hours and minutes
@@ -233,7 +283,7 @@ mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview = function
         }
     }
     
-    return 'distance: ' + Math.round( coordinate.distance / 1000 ) + 'km | total distance: ' + 
+    return 'Distance: ' + Math.round( coordinate.distance / 1000 ) + 'km | Total distance: ' + 
         Math.round( distance_total / 1000 ) + 'km';
 };
  
@@ -318,14 +368,16 @@ mhs_tm_utilities.utilities.sortResults = function( arr, key, asc ) {
     });
 };
 
-// Function to get a timestamp in milliseconds - the local timezone offset
+// Function to get a timestamp - the local timezone offset 
+// (timestamp could be in milliseconds or seconds)
 mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset = function( timestamp ) {
-    return timestamp * 1000 + ( new Date().getTimezoneOffset() * 60 * 1000 );
+    return timestamp + ( new Date().getTimezoneOffset() * 60 );
 };
 
-// Function to get a timestamp in milliseconds + the local timezone offset
+// Function to get a timestamp + the local timezone offset 
+// (timestamp could be in milliseconds or seconds)
 mhs_tm_utilities.utilities.get_timestamp_plus_timezone_offset = function( timestamp ) {
-    return timestamp * 1000 - ( new Date().getTimezoneOffset() * 60 * 1000 );
+    return timestamp - ( new Date().getTimezoneOffset() * 60 );
 };
 
 jQuery( function ( $ ) {

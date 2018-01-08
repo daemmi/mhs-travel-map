@@ -70,13 +70,10 @@ jQuery( function ( $ ) {
             if ( new_order != old_order ) {
                 $( '.mhs_tm_normal_sortables' ).find( '.coordinate' ).each( function ( index ) {
                     var id = index + 1;
-
                     if ( id <= Math.max( new_order, old_order ) && id >= Math.min( new_order, old_order ) ) {
                         change_coordinate_id( $( this ), id );
                     }
-
                 } );
-
                 // change the marker position in the marker array
                 if ( new_order > old_order ) {
                     // swap from bottom to top                       
@@ -95,7 +92,7 @@ jQuery( function ( $ ) {
 
     $( '.mhs_tm_normal_sortables div' ).disableSelection();
     
-    $( '.datetimepicker' ).datetimepicker( {
+    $( '.mhs_tm_datetimepicker' ).datetimepicker( {
         step: 10
     } );
 
@@ -229,64 +226,17 @@ jQuery( function ( $ ) {
         } );
     } );
     
-    $( ".mhs_tm_update_location_name" ).on( 'click', $( this ), function () {
-        var geocoder = new google.maps.Geocoder; 
+    $( ".mhs_tm_update_location_name" ).on( 'click', $( this ), function () { 
         var element  = $( this ).parent().parent().find('input');
         var input_id = element.attr( 'id' ).substr( 0, element.attr( 'id' ).search( '_' ) );
         var coordinate_index = parseInt( element.attr( 'id' ).replace( input_id + '_', '' ) - 1 );
-        var index = [];
-        switch( input_id ) {
-            //set all posible indexes beginning with most relevant
-            case 'country':
-                index[0] = 'country';
-                break;
-            case 'state':
-                index[0] = 'administrative_area_level_1';
-                index[1] = 'administrative_area_level_2';
-                index[2] = 'administrative_area_level_3';
-                index[3] = 'administrative_area_level_4';
-                index[4] = 'administrative_area_level_5';
-                break;
-            case 'city':
-                index[0] = 'locality';
-                index[1] = 'sublocality';
-                index[2] = 'neighborhood';
-                index[3] = 'postal_town';
-                break;
-            default:
-                index[0] = 'country';
-                break;
-        }
         
-        geocoder.geocode( { 'location': { lat: coordinates[map_canvas_id]['coordinates'][coordinate_index]['latitude'],
-                lng: coordinates[map_canvas_id]['coordinates'][coordinate_index]['longitude'] } },
-            function ( results, status ) {
-                if ( status === google.maps.GeocoderStatus.OK ) {
-                    // success! 
-                    console.log(results);
-                    var address = results[0].address_components;
-                    for ( var p = address.length - 1; p >= 0; p-- ) {
-                        var found = false;
-                        //loop through all indexes of the present field
-                        for ( var x = 0; x < index.length; x++ ) {
-                            if ( address[p].types.indexOf( index[x] ) != -1 ) {
-                                coordinates[map_canvas_id]['coordinates'][coordinate_index][input_id] = address[p]['long_name'];
-                                element.val(address[p]['long_name']);
-                                focusout_input( element );
-                                found = true;
-                                break;
-                            }
-                        }
-                        //if someone found break both for loops
-                        if( found === true ) {
-                            break;
-                        }
-                    }
-                } else {
-                    // failure!
-                }
-            }
-        );
+        mhs_tm_utilities.gmaps.geocode_lat_lng( coordinates[map_canvas_id]['coordinates'][coordinate_index]['latitude'], 
+        coordinates[map_canvas_id]['coordinates'][coordinate_index]['longitude'], input_id, function ( result_geocode ) {
+            coordinates[map_canvas_id]['coordinates'][coordinate_index][input_id] = result_geocode;
+            element.val(result_geocode);
+            focusout_input( element );
+        } );
     } );
     
     function save_route(path) {
@@ -341,7 +291,7 @@ jQuery( function ( $ ) {
         // get the new value of the input and change the Pin again
         if ( input_id == 'starttime' ) {
             coordinates[map_canvas_id]['coordinates'][coordinate_index][input_id] =
-                mhs_tm_utilities.utilities.get_timestamp_plus_timezone_offset( new Date( element.val() ).getTime() );
+                Math.round( mhs_tm_utilities.utilities.get_timestamp_plus_timezone_offset( new Date( element.val() ).getTime() / 1000 ) );
         } else if ( input_id == 'ispartofaroute' ) {
             if ( element.is( ':checked' ) ) {
                 coordinates[map_canvas_id]['coordinates'][coordinate_index][input_id] = 1;
@@ -517,8 +467,12 @@ jQuery( function ( $ ) {
                 marker[map_canvas_id][marker[map_canvas_id].length - 1].infowindow = new google.maps.InfoWindow( {
                     content: ''
                 } );
-                var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1], coordinates[0]['coordinates'] );
-                bind_info_window( marker[map_canvas_id][marker[map_canvas_id].length - 1], marker[map_canvas_id], map[map_canvas_id], contentString );
+                var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( 
+                    coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1], 
+                coordinates[0]['coordinates'] );
+                
+                bind_info_window( marker[map_canvas_id][marker[map_canvas_id].length - 1], 
+                marker[map_canvas_id], map[map_canvas_id], contentString );
 
                 add_dragend_listener( event.overlay );
 
@@ -541,7 +495,7 @@ jQuery( function ( $ ) {
 
         bounds[map_canvas_id] = new google.maps.LatLngBounds();
         var mark_counter = 0;
-
+ 
         if ( coordinates.length > 0 ) {
             for ( var i = 0; i < coordinates.length; ++i ) {
                 for ( var j = 0; j < coordinates[i]['coordinates'].length; ++j ) {
@@ -665,12 +619,14 @@ jQuery( function ( $ ) {
         $( '#longitude_' + coordinate_id ).val( lng );
         coordinates[0]['coordinates'][coordinate_id - 1]['longitude'] = lng;
 
-        $( '.datetimepicker' ).datetimepicker( {
+        $( '.mhs_tm_datetimepicker' ).datetimepicker( {
             step: 10,
             value: new Date()
         } );
-
-        coordinates[0]['coordinates'][coordinate_id - 1]['starttime'] = new Date().getTime();
+        
+        coordinates[0]['coordinates'][coordinate_id - 1]['starttime'] = 
+            Math.round( mhs_tm_utilities.utilities.get_timestamp_plus_timezone_offset(
+                new Date().getTime() / 1000 ) );
     }
 
     function bind_info_window( marker, marker_all, map, contentString ) {

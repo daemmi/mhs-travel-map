@@ -481,19 +481,15 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					break;
 
 				case 'datetimepicker':
-					echo '<input type="text" class="datetimepicker" id="' . esc_attr( $field[ 'id' ] ) . '" >';
-					echo '<script>
-							jQuery(function ($) { 
-								$(document).ready(function() {
-									$( "#' . esc_attr( $field[ 'id' ] ) . '" ).datepicker({
-										showButtonPanel: true,
-										changeMonth: true,
-										changeYear: true,
-										firstDay: 1
-									  });
-								} ); 
-							} );
-						</script>';
+					echo '<input type="text" class="mhs_tm_datetimepicker" id="' . esc_attr( $field[ 'id' ] ) . '" ';
+					if ( !empty( $field[ 'value' ] ) ) {
+						$timezone = date_default_timezone_get();
+						date_default_timezone_set('UTC');
+						echo 'value="' . date( "Y/m/d H:i", esc_attr( $field[ 'value' ] ) ) . '"> ';
+						date_default_timezone_set($timezone);
+					} else {
+						echo '> ';
+					}
 					break;
 
 				case 'color_picker':

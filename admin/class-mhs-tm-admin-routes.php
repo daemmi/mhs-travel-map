@@ -163,6 +163,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				$coordinates[0] = [];
 				$coordinates[0]['coordinates']			= [];
 				$coordinates[0]['options']['name']		= '';
+				$coordinates[0]['options']['path']		= [];
 			} else {
 				$coordinates[0]['coordinates']			= $this->sanitize_coordinates_array( $coordinates[0]['coordinates'] );
 				$coordinates[0]['options']['path']		= $this->sanitize_path_array( $coordinates[0]['options']['path'] );
@@ -191,6 +192,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$custom_buttons = array(
 				'<input type="submit" class="button-secondary margin" value="' . __( 'update map', 'mhs_tm' ) . '" />',
 				'<input type="submit" id="mhs_tm_calc_path" class="button-secondary margin" value="' . __( 'calculate and draw path', 'mhs_tm' ) . '" />',
+				'<input type="submit" id="mhs_tm_geocode_all_coordinates" class="button-secondary margin" value="' . __( 'geocode coordinates', 'mhs_tm' ) . '" />',
 			);
 
 			$args	 = array(
@@ -542,6 +544,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 						),
 						array(
 							'type'	 => 'datetimepicker',
+//							'type'	 => 'datepicker',
 							'label'	 => __( 'Time', 'mhs_tm' ),
 							'id'	 => 'starttime_' . $coordinate_id,
 							'desc'	 => __( 'The start time of the coordinate.', 'mhs_tm' )
@@ -657,6 +660,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 								),
 								array(
 									'type'	 => 'datetimepicker',
+//									'type'	 => 'datepicker',
 									'label'	 => __( 'Time', 'mhs_tm' ),
 									'id'	 => 'starttime_' . $coordinate_id,
 									'desc'	 => __( 'The start time of the coordinate.', 'mhs_tm' )

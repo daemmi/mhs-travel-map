@@ -122,10 +122,10 @@ jQuery( function ( $ ) {
                 } );
 
                 if ( 0 < routes.length ) {
-                    mhs_tm_map.coordinates = [ ];
-                    mhs_tm_map.coordinates[0] = [ ];
-                    mhs_tm_map.coordinates[0][0] = [ ];
-                    mhs_tm_map.coordinates[0][0]['coordinates'] = [ ];
+                    mhs_tm_map.coordinates = [];
+                    mhs_tm_map.coordinates[0] = [];
+                    mhs_tm_map.coordinates[0][0] = [];
+                    mhs_tm_map.coordinates[0][0]['coordinates'] = [];
                     mhs_tm_map.coordinates[0][0]['options'] = [];
                     mhs_tm_map.coordinates[0][0]['coordinates'] = routes[0];
 
@@ -236,8 +236,8 @@ jQuery( function ( $ ) {
         html += mhs_tm_utilities.utilities.get_buttons( id );
 
         html += '<div id="map" class="collapse ">\n\
-                            <div class="mhs_tm-map" id="mhs_tm_map_canvas_' + id + '" style="height: 500px; margin: 0; padding: 0;"></div>\n\
-                            </div>';
+        <div class="mhs_tm-map" id="mhs_tm_map_canvas_' + id + '" style="height: 500px; margin: 0; padding: 0;"></div>\n\
+        </div>';
 
         html += '</div>';
 
@@ -305,7 +305,6 @@ jQuery( function ( $ ) {
         if( typeof mhs_tm_map.coordinates[id_number] !== 'undefined' && mhs_tm_map.coordinates[id_number].length > 0 ) {
             if( typeof mhs_tm_map.coordinates[id_number][0]['options']['path'] !== 'undefined' ) {
                 var path = mhs_tm_map.coordinates[id_number][0]['options']['path'];
-
                 $.post( 
                     ajax_url + '?action=routes_save',
                     {
