@@ -52,7 +52,6 @@ mhs_tm_utilities.gmaps.geocode_lat_lng = function( lat, lng, place, callback ) {
     function gmap_geocode( lat, lng, index, callback ) {
         geocoder.geocode( { 'location': { lat: lat, lng: lng } },
             function( results, status ) {
-                    console.log(status);
                 switch( status ) {
                     case google.maps.GeocoderStatus.OVER_QUERY_LIMIT:
                         setTimeout(function(){

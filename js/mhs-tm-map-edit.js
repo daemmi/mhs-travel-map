@@ -144,8 +144,8 @@ jQuery( function ( $ ) {
             }
             var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[map_canvas_id]['coordinates'][coordinate_index_global], coordinates[map_canvas_id]['coordinates'] );
             marker[map_canvas_id][coordinate_index_global].infowindow.setContent( contentString );
-            bind_info_window( marker[map_canvas_id][coordinate_index_global], marker[map_canvas_id],
-                map[map_canvas_id], contentString );
+//            bind_info_window( marker[map_canvas_id][coordinate_index_global], marker[map_canvas_id],
+//                map[map_canvas_id], contentString );
         },
         open: function ( event, ui ) {
             // set dialog height min to 500px
@@ -218,8 +218,8 @@ jQuery( function ( $ ) {
             for( var x = 0; x < marker[map_canvas_id].length; x++ ) {
                 var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[map_canvas_id]['coordinates'][x], coordinates[map_canvas_id]['coordinates'] );
                 marker[map_canvas_id][x].infowindow.setContent( contentString );
-                bind_info_window( marker[map_canvas_id][x], marker[map_canvas_id],
-                    map[map_canvas_id], contentString );
+//                bind_info_window( marker[map_canvas_id][x], marker[map_canvas_id],
+//                    map[map_canvas_id], contentString );
             }
 
             $( "#mhs_tm_dialog_loading" ).dialog( "close" );
@@ -278,8 +278,8 @@ jQuery( function ( $ ) {
                 for( var x = 0; x < marker[map_canvas_id].length; x++ ) {
                     var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[map_canvas_id]['coordinates'][x], coordinates[map_canvas_id]['coordinates'] );
                     marker[map_canvas_id][x].infowindow.setContent( contentString );
-                    bind_info_window( marker[map_canvas_id][x], marker[map_canvas_id],
-                        map[map_canvas_id], contentString );
+//                    bind_info_window( marker[map_canvas_id][x], marker[map_canvas_id],
+//                        map[map_canvas_id], contentString );
                 }
 
                 $( ".admin_title_mhs_tm h1" ).html( 'Edit "' + $( "#name" ).val() + '"' );
@@ -359,8 +359,8 @@ jQuery( function ( $ ) {
 
             marker[map_canvas_id][x].infowindow.setContent( contentString );
             
-            bind_info_window( marker[map_canvas_id][x], marker[map_canvas_id],
-                map[map_canvas_id], contentString );
+//            bind_info_window( marker[map_canvas_id][x], marker[map_canvas_id],
+//                map[map_canvas_id], contentString );
         }
 
         // set the  gmap marker to the new location
@@ -496,8 +496,11 @@ jQuery( function ( $ ) {
                     coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1], 
                 coordinates[0]['coordinates'] );
                 
+                //bind event handler for info window
                 bind_info_window( marker[map_canvas_id][marker[map_canvas_id].length - 1], 
                 marker[map_canvas_id], map[map_canvas_id], contentString );
+                //set content of info window
+                marker[map_canvas_id][marker[map_canvas_id].length - 1].infowindow.setContent( contentString );
 
                 add_dragend_listener( event.overlay );
                 //create the Pin Icon
@@ -559,9 +562,11 @@ jQuery( function ( $ ) {
 
                     map[map_canvas_id].fitBounds( bounds[map_canvas_id] );
                     map[map_canvas_id].panToBounds( bounds[map_canvas_id] );
-
+                    //bind event handler for info window
                     bind_info_window( marker[map_canvas_id][mark_counter], marker[map_canvas_id], map[map_canvas_id], contentString );
-
+                    //set content of info window
+                    marker[map_canvas_id][mark_counter].infowindow.setContent( contentString );
+                    
                     mark_counter++;
                 }
         
@@ -666,8 +671,7 @@ jQuery( function ( $ ) {
             for ( index = 0; index < marker_all.length; ++index ) {
                 marker_all[index].infowindow.close();
             }
-
-            marker.infowindow.setContent( contentString );
+            
             marker.infowindow.open( map, marker );
         } );
     }
@@ -698,7 +702,6 @@ jQuery( function ( $ ) {
     
     function get_geocoded_coordinate( coordinate_id, last_coordinate_id ) {
         var element_id = coordinate_id + 1;
-        console.log('element_id: ' + element_id);
         //get geocode for all 3 parts of one coordinate
         mhs_tm_utilities.gmaps.geocode_lat_lng(
             coordinates[map_canvas_id]['coordinates'][coordinate_id]['latitude'],
