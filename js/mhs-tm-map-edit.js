@@ -225,6 +225,21 @@ jQuery( function ( $ ) {
             $( "#mhs_tm_dialog_loading" ).dialog( "close" );
         } );
     } );
+
+    $( "#mhs_tm_update_location_name_all" ).on( 'click', $( this ), function () {
+        var coordinate_id      = 0;
+        var last_coordinate_id = $('.coordinate').length - 1;
+        $( "#mhs_tm_dialog_loading" ).dialog( "open" );
+        get_geocoded_coordinate(coordinate_id, last_coordinate_id );
+    } );
+
+    $( ".mhs_tm_update_location_name_coordinate" ).on( 'click', $( this ), function () {
+        var element  = $( this ).parent().parent().find('input');
+        var input_id = element.attr( 'id' ).substr( 0, element.attr( 'id' ).search( '_' ) );
+        var coordinate_index = parseInt( element.attr( 'id' ).replace( input_id + '_', '' ) - 1 );
+        $( "#mhs_tm_dialog_loading" ).dialog( "open" );
+        get_geocoded_coordinate(coordinate_index, coordinate_index );
+    } );
     
     $( ".mhs_tm_update_location_name" ).on( 'click', $( this ), function () { 
         var element  = $( this ).parent().parent().find('input');
@@ -233,9 +248,13 @@ jQuery( function ( $ ) {
         
         mhs_tm_utilities.gmaps.geocode_lat_lng( coordinates[map_canvas_id]['coordinates'][coordinate_index]['latitude'], 
         coordinates[map_canvas_id]['coordinates'][coordinate_index]['longitude'], input_id, function ( result_geocode ) {
-            coordinates[map_canvas_id]['coordinates'][coordinate_index][input_id] = result_geocode;
-            element.val(result_geocode);
-            focusout_input( element );
+            if( result_geocode !== false ) {
+                element.val( result_geocode );
+                focusout_input( element );
+            } else {
+                element.val( '' );
+                focusout_input( element );                                   
+            }
         } );
     } );
     
@@ -448,7 +467,7 @@ jQuery( function ( $ ) {
 
         google.maps.event.addListener( drawingManager, 'overlaycomplete', function ( event ) {
             if ( event.type == 'marker' ) {
-
+                $( "#mhs_tm_dialog_loading" ).dialog( "open" );
 
                 // Add new coordinate in coordinate array
                 if ( coordinates[0]['coordinates'].length > 0 ) {
@@ -469,7 +488,7 @@ jQuery( function ( $ ) {
                     draggable: true
                 } );
 
-                // Set Info Window of ne Marker
+                // Set Info Window of new Marker
                 marker[map_canvas_id][marker[map_canvas_id].length - 1].infowindow = new google.maps.InfoWindow( {
                     content: ''
                 } );
@@ -481,7 +500,6 @@ jQuery( function ( $ ) {
                 marker[map_canvas_id], map[map_canvas_id], contentString );
 
                 add_dragend_listener( event.overlay );
-
                 //create the Pin Icon
                 pin = 'd_map_xpin_letter&chld=pin_star|' + ( coordinates[0]['coordinates'].length ) + '|000000|ffffff|ffffff';
 
@@ -496,6 +514,10 @@ jQuery( function ( $ ) {
 
                 //set the Icon to marker
                 marker[map_canvas_id][marker[map_canvas_id].length - 1].setIcon( pinIcon );
+                
+                //set the geocode of the new coordinate
+                get_geocoded_coordinate( coordinates[0]['coordinates'].length - 1, 
+                coordinates[0]['coordinates'].length - 1 );
             }
         } );
 
@@ -563,12 +585,15 @@ jQuery( function ( $ ) {
 
     function add_dragend_listener( marker ) {
         google.maps.event.addListener( marker, 'dragend', function ( event ) {
-
+            $( "#mhs_tm_dialog_loading" ).dialog( "open" );
             $( '#latitude_' + ( marker.id + 1 ) ).val( marker.getPosition().lat() );
             $( '#longitude_' + ( marker.id + 1 ) ).val( marker.getPosition().lng() );
 
             coordinates[map_canvas_id]['coordinates'][marker.id]['latitude'] = marker.getPosition().lat();
             coordinates[map_canvas_id]['coordinates'][marker.id]['longitude'] = marker.getPosition().lng();
+                
+            //set the geocode of the moved coordinate
+            get_geocoded_coordinate( marker.id, marker.id );
 
         } );
     }
@@ -669,6 +694,58 @@ jQuery( function ( $ ) {
         } );
         // change coordinate header name
         coordinate.find( 'h1 > span.postbox_title' ).text( 'Coordinate ' + new_id );
+    }
+    
+    function get_geocoded_coordinate( coordinate_id, last_coordinate_id ) {
+        var element_id = coordinate_id + 1;
+        console.log('element_id: ' + element_id);
+        //get geocode for all 3 parts of one coordinate
+        mhs_tm_utilities.gmaps.geocode_lat_lng(
+            coordinates[map_canvas_id]['coordinates'][coordinate_id]['latitude'],
+            coordinates[map_canvas_id]['coordinates'][coordinate_id]['longitude'],
+            'country', function ( result_geocode ) {                
+                if ( result_geocode !== false ) {
+                    $( '#country_' + element_id ).val( result_geocode );
+                    focusout_input( $( '#country_' + element_id ) );
+                } else {
+                    $( '#country_' + element_id ).val( '' );
+                    focusout_input( $( '#country_' + element_id ) );                                    
+                }
+                
+                mhs_tm_utilities.gmaps.geocode_lat_lng(
+                    coordinates[map_canvas_id]['coordinates'][coordinate_id]['latitude'],
+                    coordinates[map_canvas_id]['coordinates'][coordinate_id]['longitude'],
+                    'state', function ( result_geocode ) {
+                        if ( result_geocode !== false ) {
+                            $( '#state_' + element_id ).val( result_geocode );
+                            focusout_input( $( '#state_' + element_id ) );
+                        } else {
+                            $( '#state_' + element_id ).val( '' );
+                            focusout_input( $( '#state_' + element_id ) );                                    
+                        }
+                        
+                        mhs_tm_utilities.gmaps.geocode_lat_lng(
+                            coordinates[map_canvas_id]['coordinates'][coordinate_id]['latitude'],
+                            coordinates[map_canvas_id]['coordinates'][coordinate_id]['longitude'],
+                            'city', function ( result_geocode ) {
+                                if ( result_geocode !== false ) {
+                                    $( '#city_' + element_id ).val( result_geocode );
+                                    focusout_input( $( '#city_' + element_id ) );
+                                } else {
+                                    $( '#city_' + element_id ).val( '' );
+                                    focusout_input( $( '#city_' + element_id ) );                                    
+                                }
+                                //if not the last coordinate call function again
+                                if ( coordinate_id !== last_coordinate_id ) {
+                                    coordinate_id++;
+                                    get_geocoded_coordinate( coordinate_id, last_coordinate_id );
+                                } else {
+                                    //if last close loading window
+                                    $( "#mhs_tm_dialog_loading" ).dialog( "close" );
+                                }
+                            } );
+                    } );
+            } );
     }
 
     function get_marker_icon( coordinate, number ) {

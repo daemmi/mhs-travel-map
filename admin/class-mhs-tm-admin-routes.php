@@ -192,7 +192,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$custom_buttons = array(
 				'<input type="submit" class="button-secondary margin" value="' . __( 'update map', 'mhs_tm' ) . '" />',
 				'<input type="submit" id="mhs_tm_calc_path" class="button-secondary margin" value="' . __( 'calculate and draw path', 'mhs_tm' ) . '" />',
-				'<input type="submit" id="mhs_tm_geocode_all_coordinates" class="button-secondary margin" value="' . __( 'geocode coordinates', 'mhs_tm' ) . '" />',
+				'<input type="submit" id="mhs_tm_update_location_name_all" class="button-secondary margin" value="' . __( 'geocode coordinates', 'mhs_tm' ) . '" />',
 			);
 
 			$args	 = array(
@@ -482,19 +482,23 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 							'type'	 => 'text_long',
 							'label'	 => __( 'Country', 'mhs_tm' ),
 							'id'	 => 'country_' . $coordinate_id,
-							'desc'	 => __( 'The country name of the coordinate. <a class="mhs_tm_update_location_name" href="javascript:void(0);">Update</a>', 'mhs_tm' )
+							'desc'	 => __( 'The country name of the coordinate. <a class="mhs_tm_update_location_name" 
+								href="javascript:void(0);">Update</a> | <a class="mhs_tm_update_location_name_coordinate" 
+								href="javascript:void(0);">Update all (Country, State, City)</a>', 'mhs_tm' )
 						),
 						array(
 							'type'	 => 'text_long',
 							'label'	 => __( 'State', 'mhs_tm' ),
 							'id'	 => 'state_' . $coordinate_id,
-							'desc'	 => __( 'The state name of the coordinate. <a class="mhs_tm_update_location_name" href="javascript:void(0);">Update</a>', 'mhs_tm' )
+							'desc'	 => __( 'The state name of the coordinate. <a class="mhs_tm_update_location_name" 
+								href="javascript:void(0);">Update</a>', 'mhs_tm' )
 						),
 						array(
 							'type'	 => 'text_long',
 							'label'	 => __( 'City', 'mhs_tm' ),
 							'id'	 => 'city_' . $coordinate_id,
-							'desc'	 => __( 'The city name of the coordinate. <a class="mhs_tm_update_location_name" href="javascript:void(0);">Update</a>', 'mhs_tm' )
+							'desc'	 => __( 'The city name of the coordinate. <a class="mhs_tm_update_location_name" 
+								href="javascript:void(0);">Update</a>', 'mhs_tm' )
 						),
 						array(
 							'type'	 => 'html_div',
@@ -598,19 +602,25 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 									'type'	 => 'text_long',
 									'label'	 => __( 'Country', 'mhs_tm' ),
 									'id'	 => 'country_' . $coordinate_id,
-									'desc'	 => __( 'The country name of the coordinate. <a class="mhs_tm_update_location_name" href="javascript:void(0);">Update</a>', 'mhs_tm' )
+									'desc'	 => __( 'The country name of the coordinate. <a class="mhs_tm_update_location_name" 
+								href="javascript:void(0);">Update</a> | <a class="mhs_tm_update_location_name_coordinate" 
+								href="javascript:void(0);">Update all (Country, State, City)</a>', 'mhs_tm' )
 								),
 								array(
 									'type'	 => 'text_long',
 									'label'	 => __( 'State', 'mhs_tm' ),
 									'id'	 => 'state_' . $coordinate_id,
-									'desc'	 => __( 'The state name of the coordinate. <a class="mhs_tm_update_location_name" href="javascript:void(0);">Update</a>', 'mhs_tm' )
+									'desc'	 => __( 'The state name of the coordinate. 
+										<a class="mhs_tm_update_location_name" href="javascript:void(0);">Update</a>', 
+									'mhs_tm' )
 								),
 								array(
 									'type'	 => 'text_long',
 									'label'	 => __( 'City', 'mhs_tm' ),
 									'id'	 => 'city_' . $coordinate_id,
-									'desc'	 => __( 'The city name of the coordinate. <a class="mhs_tm_update_location_name" href="javascript:void(0);">Update</a>', 'mhs_tm' )
+									'desc'	 => __( 'The city name of the coordinate. 
+										<a class="mhs_tm_update_location_name" href="javascript:void(0);">Update</a>', 
+									'mhs_tm' )
 								),
 								array(
 									'type'	 => 'html_div',

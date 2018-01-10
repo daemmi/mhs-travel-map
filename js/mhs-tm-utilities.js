@@ -47,28 +47,40 @@ mhs_tm_utilities.gmaps.geocode_lat_lng = function( lat, lng, place, callback ) {
             index[0] = 'country';
             break;
     }
+    gmap_geocode( lat, lng, index, callback );
 
-    geocoder.geocode( { 'location': { lat: lat, lng: lng } },
-        function ( results, status ) {
-            if ( status === google.maps.GeocoderStatus.OK ) {
-                // success! 
-                var address = results[0].address_components;
-                for ( var p = address.length - 1; p >= 0; p-- ) {
-                    //loop through all indexes of the present field
-                    for ( var x = 0; x < index.length; x++ ) {
-                        if ( address[p].types.indexOf( index[x] ) != -1 ) {
-                            callback( address[p]['long_name'] );
-                            return;
-                            break;
+    function gmap_geocode( lat, lng, index, callback ) {
+        geocoder.geocode( { 'location': { lat: lat, lng: lng } },
+            function( results, status ) {
+                    console.log(status);
+                switch( status ) {
+                    case google.maps.GeocoderStatus.OVER_QUERY_LIMIT:
+                        setTimeout(function(){
+                            gmap_geocode( lat, lng, index, callback ); }, 2000); 
+                        break;
+                    case google.maps.GeocoderStatus.OK:
+                        // success! 
+                        var address = results[0].address_components;
+                        for ( var p = address.length - 1; p >= 0; p-- ) {
+                            //loop through all indexes of the present field
+                            for ( var x = 0; x < index.length; x++ ) {                              
+                                if ( address[p].types.indexOf( index[x] ) !== -1 ) {
+                                    callback( address[p]['long_name'] );
+                                    return;
+                                    break;
+                                }
+                            }
                         }
-                    }
+                        callback( false );
+                        break;
+                    default:
+                        callback( false );
+                        return;// failure!
+                        break;
                 }
-            } else {
-                callback( false );
-                return;// failure!
             }
-        }
-    );
+        );
+    };
 };
 
 //use direction service of gmaps to get coordinates of a route between 2 coordinates
