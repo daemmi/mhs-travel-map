@@ -1,15 +1,16 @@
 jQuery( function ( $ ) {
-    var coordinates = mhs_tm_app_vars.coordinates,
-        coord_center_lat = parseFloat( mhs_tm_app_vars.coord_center_lat ),
-        coord_center_lng = parseFloat( mhs_tm_app_vars.coord_center_lng ),
-        auto_load = mhs_tm_app_vars.auto_load,
-        ajax_url = mhs_tm_app_vars.ajax_url,
-        map = [],
-        bounds = [],
-        map_canvas_id = 0,
-        old_order,
+    var coordinates             = mhs_tm_app_vars.coordinates,
+        coord_center_lat        = parseFloat( mhs_tm_app_vars.coord_center_lat ),
+        coord_center_lng        = parseFloat( mhs_tm_app_vars.coord_center_lng ),
+        auto_load               = mhs_tm_app_vars.auto_load,
+        ajax_url                = mhs_tm_app_vars.ajax_url,
+        settings                = mhs_tm_app_vars.settings,
+        map                     = [],
+        bounds                  = [],
+        map_canvas_id           = 0,
+        old_order               = 0,
         coordinate_index_global = 0,
-        marker = [],
+        marker                  = [],
         route_path;
     
     marker[map_canvas_id] = [];
@@ -144,8 +145,6 @@ jQuery( function ( $ ) {
             }
             var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[map_canvas_id]['coordinates'][coordinate_index_global], coordinates[map_canvas_id]['coordinates'] );
             marker[map_canvas_id][coordinate_index_global].infowindow.setContent( contentString );
-//            bind_info_window( marker[map_canvas_id][coordinate_index_global], marker[map_canvas_id],
-//                map[map_canvas_id], contentString );
         },
         open: function ( event, ui ) {
             // set dialog height min to 500px
@@ -218,8 +217,6 @@ jQuery( function ( $ ) {
             for( var x = 0; x < marker[map_canvas_id].length; x++ ) {
                 var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[map_canvas_id]['coordinates'][x], coordinates[map_canvas_id]['coordinates'] );
                 marker[map_canvas_id][x].infowindow.setContent( contentString );
-//                bind_info_window( marker[map_canvas_id][x], marker[map_canvas_id],
-//                    map[map_canvas_id], contentString );
             }
 
             $( "#mhs_tm_dialog_loading" ).dialog( "close" );
@@ -229,16 +226,24 @@ jQuery( function ( $ ) {
     $( "#mhs_tm_update_location_name_all" ).on( 'click', $( this ), function () {
         var coordinate_id      = 0;
         var last_coordinate_id = $('.coordinate').length - 1;
+        
         $( "#mhs_tm_dialog_loading" ).dialog( "open" );
-        get_geocoded_coordinate(coordinate_id, last_coordinate_id );
+        
+        get_geocoded_coordinate(coordinate_id, last_coordinate_id, function () {
+            $( "#mhs_tm_dialog_loading" ).dialog( "close" );            
+        } );
     } );
 
     $( ".mhs_tm_update_location_name_coordinate" ).on( 'click', $( this ), function () {
         var element  = $( this ).parent().parent().find('input');
         var input_id = element.attr( 'id' ).substr( 0, element.attr( 'id' ).search( '_' ) );
         var coordinate_index = parseInt( element.attr( 'id' ).replace( input_id + '_', '' ) - 1 );
+        
         $( "#mhs_tm_dialog_loading" ).dialog( "open" );
-        get_geocoded_coordinate(coordinate_index, coordinate_index );
+        
+        get_geocoded_coordinate(coordinate_index, coordinate_index, function () {
+            $( "#mhs_tm_dialog_loading" ).dialog( "close" );            
+        } );
     } );
     
     $( ".mhs_tm_update_location_name" ).on( 'click', $( this ), function () { 
@@ -247,14 +252,14 @@ jQuery( function ( $ ) {
         var coordinate_index = parseInt( element.attr( 'id' ).replace( input_id + '_', '' ) - 1 );
         
         mhs_tm_utilities.gmaps.geocode_lat_lng( coordinates[map_canvas_id]['coordinates'][coordinate_index]['latitude'], 
-        coordinates[map_canvas_id]['coordinates'][coordinate_index]['longitude'], input_id, function ( result_geocode ) {
-            if( result_geocode !== false ) {
-                element.val( result_geocode );
-                focusout_input( element );
+        coordinates[map_canvas_id]['coordinates'][coordinate_index]['longitude'], settings, function ( result_geocode ) {
+            if( 'error' in result_geocode ) {
+                // do nothing
+                return;
             } else {
-                element.val( '' );
-                focusout_input( element );                                   
-            }
+                element.val( result_geocode[input_id] );
+                focusout_input( element );
+            } 
         } );
     } );
     
@@ -278,8 +283,6 @@ jQuery( function ( $ ) {
                 for( var x = 0; x < marker[map_canvas_id].length; x++ ) {
                     var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[map_canvas_id]['coordinates'][x], coordinates[map_canvas_id]['coordinates'] );
                     marker[map_canvas_id][x].infowindow.setContent( contentString );
-//                    bind_info_window( marker[map_canvas_id][x], marker[map_canvas_id],
-//                        map[map_canvas_id], contentString );
                 }
 
                 $( ".admin_title_mhs_tm h1" ).html( 'Edit "' + $( "#name" ).val() + '"' );
@@ -358,9 +361,6 @@ jQuery( function ( $ ) {
                 coordinates[map_canvas_id]['coordinates'] );
 
             marker[map_canvas_id][x].infowindow.setContent( contentString );
-            
-//            bind_info_window( marker[map_canvas_id][x], marker[map_canvas_id],
-//                map[map_canvas_id], contentString );
         }
 
         // set the  gmap marker to the new location
@@ -503,24 +503,37 @@ jQuery( function ( $ ) {
                 marker[map_canvas_id][marker[map_canvas_id].length - 1].infowindow.setContent( contentString );
 
                 add_dragend_listener( event.overlay );
-                //create the Pin Icon
-                pin = 'd_map_xpin_letter&chld=pin_star|' + ( coordinates[0]['coordinates'].length ) + '|000000|ffffff|ffffff';
-
-                var pinIcon = new google.maps.MarkerImage(
-                    'https://chart.apis.google.com/chart?chst=' + pin,
-                    null, /* size is determined at runtime */
-                    null, /* origin is 0,0 */
-                    null, /* anchor is bottom center of the scaled image */
-                    // new google.maps.Size(30, 30)
-                    null
-                    );
-
-                //set the Icon to marker
+                
+                //set marker icon
+                var pinIcon = get_marker_icon(
+                    coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1],
+                    coordinates[0]['coordinates'].length );
+                    
                 marker[map_canvas_id][marker[map_canvas_id].length - 1].setIcon( pinIcon );
+//                //create the Pin Icon
+//                pin = 'd_map_xpin_letter&chld=pin_star|' + ( coordinates[0]['coordinates'].length ) + '|000000|ffffff|ffffff';
+//
+//                var pinIcon = new google.maps.MarkerImage(
+//                    'https://chart.apis.google.com/chart?chst=' + pin,
+//                    null, /* size is determined at runtime */
+//                    null, /* origin is 0,0 */
+//                    null, /* anchor is bottom center of the scaled image */
+//                    // new google.maps.Size(30, 30)
+//                    null
+//                    );
+//
+//                //set the Icon to marker
+//                marker[map_canvas_id][marker[map_canvas_id].length - 1].setIcon( pinIcon );
                 
                 //set the geocode of the new coordinate
-                get_geocoded_coordinate( coordinates[0]['coordinates'].length - 1, 
-                coordinates[0]['coordinates'].length - 1 );
+                if( settings['new_coordinate_is_geocoded'] ) {
+                    get_geocoded_coordinate( coordinates[0]['coordinates'].length - 1, 
+                    coordinates[0]['coordinates'].length - 1, function () {
+                        $( "#mhs_tm_dialog_loading" ).dialog( "close" );            
+                    } );
+                } else {
+                    $( "#mhs_tm_dialog_loading" ).dialog( "close" );
+                }
             }
         } );
 
@@ -598,7 +611,13 @@ jQuery( function ( $ ) {
             coordinates[map_canvas_id]['coordinates'][marker.id]['longitude'] = marker.getPosition().lng();
                 
             //set the geocode of the moved coordinate
-            get_geocoded_coordinate( marker.id, marker.id );
+            if( settings['moved_coordinate_is_geocoded'] ) {
+                get_geocoded_coordinate( marker.id, marker.id, function () {
+                    $( "#mhs_tm_dialog_loading" ).dialog( "close" );            
+                } );
+            } else {
+                $( "#mhs_tm_dialog_loading" ).dialog( "close" );
+            }
 
         } );
     }
@@ -650,10 +669,23 @@ jQuery( function ( $ ) {
 
         $( '.mhs_tm_normal_sortables' ).accordion( 'refresh' );
 
+        if( settings['new_coordinate_part_of_the_road'] ) {
+            $( '#ispartofaroute_' + coordinate_id ).prop("checked", true);
+            coordinates[map_canvas_id]['coordinates'][coordinate_id - 1]['ispartofaroute'] = 1;
+        }
+
+        if( settings['new_coordinate_is_hitchhiking_spot'] ) {
+            $( '#ishitchhikingspot_' + coordinate_id ).prop("checked", true);
+            coordinates[map_canvas_id]['coordinates'][coordinate_id - 1]['ishitchhikingspot'] = 1;   
+        }
+        
         $( '#latitude_' + coordinate_id ).val( lat );
-        coordinates[0]['coordinates'][coordinate_id - 1]['latitude'] = lat;
+        coordinates[map_canvas_id]['coordinates'][coordinate_id - 1]['latitude'] = lat;
         $( '#longitude_' + coordinate_id ).val( lng );
-        coordinates[0]['coordinates'][coordinate_id - 1]['longitude'] = lng;
+        coordinates[map_canvas_id]['coordinates'][coordinate_id - 1]['longitude'] = lng;
+
+        $( '#waitingtime_' + coordinate_id ).val( '0' );
+        coordinates[map_canvas_id]['coordinates'][coordinate_id - 1]['waitingtime'] = 0;
 
         $( '.mhs_tm_datetimepicker' ).datetimepicker( {
             step: 10,
@@ -700,54 +732,33 @@ jQuery( function ( $ ) {
         coordinate.find( 'h1 > span.postbox_title' ).text( 'Coordinate ' + new_id );
     }
     
-    function get_geocoded_coordinate( coordinate_id, last_coordinate_id ) {
+    function get_geocoded_coordinate( coordinate_id, last_coordinate_id, callback ) {
         var element_id = coordinate_id + 1;
         //get geocode for all 3 parts of one coordinate
         mhs_tm_utilities.gmaps.geocode_lat_lng(
             coordinates[map_canvas_id]['coordinates'][coordinate_id]['latitude'],
             coordinates[map_canvas_id]['coordinates'][coordinate_id]['longitude'],
-            'country', function ( result_geocode ) {                
-                if ( result_geocode !== false ) {
-                    $( '#country_' + element_id ).val( result_geocode );
-                    focusout_input( $( '#country_' + element_id ) );
+            settings, function ( result_geocode ) { 
+                if( 'error' in result_geocode ) {
+                    $( "#mhs_tm_dialog_loading" ).dialog( "close" );
+                    // do nothing
+                    return;
                 } else {
-                    $( '#country_' + element_id ).val( '' );
-                    focusout_input( $( '#country_' + element_id ) );                                    
-                }
-                
-                mhs_tm_utilities.gmaps.geocode_lat_lng(
-                    coordinates[map_canvas_id]['coordinates'][coordinate_id]['latitude'],
-                    coordinates[map_canvas_id]['coordinates'][coordinate_id]['longitude'],
-                    'state', function ( result_geocode ) {
-                        if ( result_geocode !== false ) {
-                            $( '#state_' + element_id ).val( result_geocode );
-                            focusout_input( $( '#state_' + element_id ) );
-                        } else {
-                            $( '#state_' + element_id ).val( '' );
-                            focusout_input( $( '#state_' + element_id ) );                                    
-                        }
-                        
-                        mhs_tm_utilities.gmaps.geocode_lat_lng(
-                            coordinates[map_canvas_id]['coordinates'][coordinate_id]['latitude'],
-                            coordinates[map_canvas_id]['coordinates'][coordinate_id]['longitude'],
-                            'city', function ( result_geocode ) {
-                                if ( result_geocode !== false ) {
-                                    $( '#city_' + element_id ).val( result_geocode );
-                                    focusout_input( $( '#city_' + element_id ) );
-                                } else {
-                                    $( '#city_' + element_id ).val( '' );
-                                    focusout_input( $( '#city_' + element_id ) );                                    
-                                }
-                                //if not the last coordinate call function again
-                                if ( coordinate_id !== last_coordinate_id ) {
-                                    coordinate_id++;
-                                    get_geocoded_coordinate( coordinate_id, last_coordinate_id );
-                                } else {
-                                    //if last close loading window
-                                    $( "#mhs_tm_dialog_loading" ).dialog( "close" );
-                                }
-                            } );
-                    } );
+                    $( '#country_' + element_id ).val( result_geocode['country'] );
+                    focusout_input( $( '#country_' + element_id ) );
+                    $( '#state_' + element_id ).val( result_geocode['state'] );
+                    focusout_input( $( '#state_' + element_id ) );
+                    $( '#city_' + element_id ).val( result_geocode['city'] );
+                    focusout_input( $( '#city_' + element_id ) );
+                    
+                    //check if lastcoordinate
+                    if( coordinate_id !== last_coordinate_id ) {
+                        coordinate_id++;
+                        get_geocoded_coordinate( coordinate_id, last_coordinate_id, callback );
+                    } else {
+                        callback();
+                    }
+                } 
             } );
     }
 

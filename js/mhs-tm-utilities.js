@@ -8,6 +8,11 @@ mhs_tm_utilities.gmaps = {};
 
 //snap path of coordinate array to road
 mhs_tm_utilities.gmaps.route_snap_to_road = function( coordinates, i, route_array, disabled_snap_to_road, callback ) {
+    //set distance of first coordinate to 0, should be done if this coordinate had a distance and 
+    //the coordinate before have been deleted now
+    if( i === 0 ) {
+        coordinates[0].distance = 0;
+    }
     if( i < coordinates.length - 1 ) {
         i++;
         //the gmaps direction service is async so use a callback
@@ -19,67 +24,6 @@ mhs_tm_utilities.gmaps.route_snap_to_road = function( coordinates, i, route_arra
     } else {
           callback(route_array);
     }
-};
-
-//geocode from lat long to places names
-mhs_tm_utilities.gmaps.geocode_lat_lng = function( lat, lng, place, callback ) {
-    var geocoder = new google.maps.Geocoder;
-    var index = [];
-    switch( place ) {
-        //set all posible indexes beginning with most relevant
-        case 'country':
-            index[0] = 'country';
-            break;
-        case 'state':
-            index[0] = 'administrative_area_level_1';
-            index[1] = 'administrative_area_level_2';
-            index[2] = 'administrative_area_level_3';
-            index[3] = 'administrative_area_level_4';
-            index[4] = 'administrative_area_level_5';
-            break;
-        case 'city':
-            index[0] = 'locality';
-            index[1] = 'sublocality';
-            index[2] = 'neighborhood';
-            index[3] = 'postal_town';
-            break;
-        default:
-            index[0] = 'country';
-            break;
-    }
-    gmap_geocode( lat, lng, index, callback );
-
-    function gmap_geocode( lat, lng, index, callback ) {
-        geocoder.geocode( { 'location': { lat: lat, lng: lng } },
-            function( results, status ) {
-                switch( status ) {
-                    case google.maps.GeocoderStatus.OVER_QUERY_LIMIT:
-                        setTimeout(function(){
-                            gmap_geocode( lat, lng, index, callback ); }, 2000); 
-                        break;
-                    case google.maps.GeocoderStatus.OK:
-                        // success! 
-                        var address = results[0].address_components;
-                        for ( var p = address.length - 1; p >= 0; p-- ) {
-                            //loop through all indexes of the present field
-                            for ( var x = 0; x < index.length; x++ ) {                              
-                                if ( address[p].types.indexOf( index[x] ) !== -1 ) {
-                                    callback( address[p]['long_name'] );
-                                    return;
-                                    break;
-                                }
-                            }
-                        }
-                        callback( false );
-                        break;
-                    default:
-                        callback( false );
-                        return;// failure!
-                        break;
-                }
-            }
-        );
-    };
 };
 
 //use direction service of gmaps to get coordinates of a route between 2 coordinates
@@ -152,6 +96,81 @@ mhs_tm_utilities.gmaps.get_route = function(from, to, path, disabled_snap_to_roa
         callback();
     }
 };
+
+//geocode from lat long to places names
+mhs_tm_utilities.gmaps.geocode_lat_lng = function( lat, lng, settings, callback ) {
+    var index = { 'country': [], 'state': [], 'city': [] };
+    index.country[0] = 'country';
+    index.state[0]   = 'administrative_area_level_1';
+    index.state[1]   = 'administrative_area_level_2';
+    index.state[2]   = 'administrative_area_level_3';
+    index.state[3]   = 'administrative_area_level_4';
+    index.state[4]   = 'administrative_area_level_5';
+    index.city[0]    = 'locality';
+    index.city[1]    = 'sublocality';
+    index.city[2]    = 'neighborhood';
+    index.city[3]    = 'postal_town';
+    
+    gmap_geocode( lat, lng, index, settings, callback );
+
+    function gmap_geocode( lat, lng, index, settings, callback ) {
+        $.getJSON('https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat + ',' + lng + 
+            '&language=' + settings['lang_geocoding_gmap'] + '&key=' + settings['api_key_gmap'],//
+            function( data ) {
+                var status = data.status;
+                var results = data.results;
+                if ( data.error_message !== '' && data.error_message !== undefined ) {
+                    mhs_tm_utilities.utilities.show_message( 'error',
+                        'Google maps Geocoder API error! Message: ' + data.error_message );
+                    callback( { 'error': 'Google maps Geocoder API error! Message: ' +
+                            data.error_message } );
+                    return;
+                }
+                switch( status ) {
+                    case google.maps.GeocoderStatus.OVER_QUERY_LIMIT:
+                        setTimeout(function(){
+                            gmap_geocode( lat, lng, index, settings, callback ); }, 2000); 
+                        break;
+                    case google.maps.GeocoderStatus.OK:
+                        // success! 
+                        var return_result = []; 
+                        var address = results[0].address_components;
+                        $.each(index, function( key ) {
+                            return_result[key] = '';
+                            for ( var p = address.length - 1; p >= 0; p-- ) {
+                                //loop through all indexes of the present field
+                                for ( var x = 0; x < index[key].length; x++ ) { 
+                                    if ( address[p].types.indexOf( index[key][x] ) !== -1 ) {
+                                        return_result[key] = address[p]['long_name'];
+                                        break;
+                                    }
+                                }
+                                //check if something founded
+                                if( return_result[key] !== '' ) {
+                                    break;
+                                }
+                            }
+                        } );
+                        callback( return_result );
+                        break;
+                        
+                    case google.maps.GeocoderStatus.ZERO_RESULTS:
+                        return_result            = [];
+                        return_result['country'] = '';
+                        return_result['state']   = '';
+                        return_result['city']    = '';
+                        callback( return_result );
+                        break;
+                        
+                    default:
+                        callback(  { 'error': 'Google maps Geocoder API error! Message: undefinded' }  );
+                        return;// failure!
+                        break;
+                }
+            }
+        );
+    };
+};
  
 /**************************************************************************************************
 *   Utilities for coordinate handling and informations
@@ -206,18 +225,18 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = function(
         contentString += mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview(coordinate, coordinates);
         if( mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview(coordinate, coordinates) ) {
             contentString += ' | ' + mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview(coordinate, coordinates) + 
-            ') </p> <hr>';
+            ') </p>';
         } else {
-            contentString +=  ') </p> <hr>';
+            contentString +=  ') </p>';
         }
     } else if( mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview(coordinate, coordinates) ) {
         contentString += mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview(coordinate, coordinates) + 
-        ') </p> <hr>';
+        ') </p>';
     }
         
 
-    if ( coordinate.note !== null && coordinate.note !== undefined ) {
-        contentString += mhs_tm_utilities.utilities.stripslashes( coordinate.note );
+    if ( coordinate.note !== null && coordinate.note !== undefined && coordinate.note !== '' ) {
+        contentString += '<hr>' + mhs_tm_utilities.utilities.stripslashes( coordinate.note );
     }
     contentString += '</div>';
 
@@ -225,35 +244,47 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = function(
 };
 
 mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview = function( coordinate, coordinates ) {
-    var lifts = 0;
-    var waiting_time_total = 0;
-    var id_last_hitchhikingspot = 0;
-    var id_first_hitchhikingspot = 0;
+    var lifts               = 0;
+    var waiting_time_total  = 0;
+    var id_last_coordinate  = 0;
+    var id_first_coordinate = 0;
+    var is_hitchhiking_spot = false;
+    var string              = '';
     
-    if( !coordinate.ishitchhikingspot || !coordinate.ispartofaroute ) {
+    if( !coordinate.ispartofaroute ) {
         return false;
     }
     
-    //find first hitchhikingspot on the route        
+    //is a hitchhiking spot on the route?      
     for( var x = 0; x < coordinates.length ; x++ ) {
-        if( coordinates[x].ishitchhikingspot && coordinates[x].ispartofaroute ) {
-            id_first_hitchhikingspot = x;
+        if( coordinates[x].ispartofaroute && coordinates[x].ishitchhikingspot ) {
+            is_hitchhiking_spot = true;
             break;
         }
     }
     
-    //find last hitchhikingspot on the route        
-    for( var x = coordinates.length - 1; x >= 0 ; x-- ) {
-        if( coordinates[x].ishitchhikingspot && coordinates[x].ispartofaroute ) {
-            id_last_hitchhikingspot = x;
+    //find first coordinate on the route        
+    for( var x = 0; x < coordinates.length ; x++ ) {
+        if( coordinates[x].ispartofaroute ) {
+            id_first_coordinate = x;
             break;
         }
     }
-    //if coordinate is last hitchhikingspot return lift count etc. 
-    if( mhs_tm_utilities.utilities.is_equivalent(coordinate, coordinates[id_last_hitchhikingspot] ) ) {
+    
+    //find last coordinate on the route        
+    for( var x = coordinates.length - 1; x >= 0 ; x-- ) {
+        if( coordinates[x].ispartofaroute ) {
+            id_last_coordinate = x;
+            break;
+        }
+    }
+    //if coordinate is last coordinate on the route return lift count etc. 
+    if( mhs_tm_utilities.utilities.is_equivalent(coordinate, coordinates[id_last_coordinate] ) ) {
         for( var x = 0; x < coordinates.length; ++x) {
             if( coordinates[x].ishitchhikingspot && coordinates[x].ispartofaroute ) {
-                waiting_time_total += parseInt(coordinates[x].waitingtime);
+                if( coordinates[x].waitingtime !== '' ) {
+                    waiting_time_total += parseInt(coordinates[x].waitingtime);
+                }
                 ++lifts;
             }
         }
@@ -263,30 +294,39 @@ mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview = function(
         waiting_time_total_hours = Math.floor(waiting_time_total_hours);
         var waiting_time_total_minutes = waiting_time_total - waiting_time_total_hours * 60;
         waiting_time_total_minutes = Math.floor(waiting_time_total_minutes);
-        var coordinate_time_total = coordinates[id_last_hitchhikingspot].starttime - 
-            coordinates[id_first_hitchhikingspot].starttime;
+        var coordinate_time_total = coordinates[id_last_coordinate].starttime - 
+            coordinates[id_first_coordinate].starttime;
         var coordinate_time_total_hours = coordinate_time_total / (60 * 60 );
         coordinate_time_total_hours = Math.floor(coordinate_time_total_hours);
         var coordinate_time_total_minutes = ( coordinate_time_total - 
             coordinate_time_total_hours * 60 * 60 ) / ( 60 );
         coordinate_time_total_minutes = Math.floor(coordinate_time_total_minutes);
         
-        var string = 'Total: ' + lifts + ' lifts | ';
+        if( is_hitchhiking_spot ) {
+            string += 'Total: ' + ( lifts - 1 ) + ' lifts | ';
+        }
+        
+        string += 'Journey total: ';
+        
         if( coordinate_time_total_hours !== 0 ) {
             string += coordinate_time_total_hours + 'h ';
         }
         if( coordinate_time_total_minutes !== 0 || coordinate_time_total_hours === 0 ) {
             string += coordinate_time_total_minutes + 'min ';
         }
-        string += '| Waited: ';
-        if( waiting_time_total_hours !== 0 ) {
-            string += waiting_time_total_hours + 'h ';
+        
+        if( is_hitchhiking_spot ) {
+            string += '| Waited total: ';
+            if( waiting_time_total_hours !== 0 ) {
+                string += waiting_time_total_hours + 'h ';
+            }
+            if( waiting_time_total_minutes !== 0 || waiting_time_total_hours === 0 ) {
+                string += waiting_time_total_minutes + 'min ';
+            }
         }
-        if( waiting_time_total_minutes !== 0 || waiting_time_total_hours === 0 ) {
-            string += waiting_time_total_minutes + 'min ';
-        }
+        
         return string; 
-    }else {
+    } else if( coordinate.ishitchhikingspot ) {
         // otherwise just witing time
         // get time in hours and minutes
         var waiting_time_total_hours = coordinate.waitingtime / 60;
@@ -294,7 +334,7 @@ mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview = function(
         var waiting_time_total_minutes = coordinate.waitingtime - waiting_time_total_hours * 60;
         waiting_time_total_minutes = Math.floor(waiting_time_total_minutes);
         
-        var string = 'Waiting time: ';
+        var string = 'Waited: ';
         if( waiting_time_total_hours !== 0 ) {
             string += waiting_time_total_hours + 'h ';
         }
@@ -306,10 +346,20 @@ mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview = function(
 };
 
 mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview = function( coordinate, coordinates ) {
-    var distance_total = 0;
+    var distance_total      = 0;
     var coordinate_on_route = 0;
+    var id_last_coordinate  = 0;
+    
     if( !coordinate.ispartofaroute || typeof coordinate.distance === 'undefined' ) {
         return false;
+    }
+    
+    //find last coordinate on the route        
+    for( var x = coordinates.length - 1; x >= 0 ; x-- ) {
+        if( coordinates[x].ispartofaroute ) {
+            id_last_coordinate = x;
+            break;
+        }
     }
     
     // check if it is first coordinate on the route and calculate total distance
@@ -333,8 +383,13 @@ mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview = function
         }
     }
     
-    return 'Distance: ' + Math.round( coordinate.distance / 1000 ) + 'km | Total distance: ' + 
-        Math.round( distance_total / 1000 ) + 'km';
+    //if coordinate is last coordinate on the route return Total distance. 
+    if( mhs_tm_utilities.utilities.is_equivalent(coordinate, coordinates[id_last_coordinate] ) ) {
+        return 'Distance: ' + Math.round( coordinate.distance / 1000 ) + 'km | Total distance: ' + 
+            Math.round( distance_total / 1000 ) + 'km';
+    } else {
+        return 'Distance: ' + Math.round( coordinate.distance / 1000 ) + 'km';
+    }
 };
  
 /**************************************************************************************************

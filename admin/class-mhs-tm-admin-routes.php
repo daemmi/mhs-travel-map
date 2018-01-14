@@ -233,7 +233,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			
 			$height		 = 500;
 
-			$output = '<div class="mhs_tm_gmap_div" id="mhs_tm_map_canvas_0" style="height: ' . esc_attr( $height ) . 'px; margin: 0; padding: 0;"></div>';
+			$output = '<div class="mhs_tm_gmap_div" id="mhs_tm_map_canvas_0" style="height: ' . esc_attr( $height ) . 
+			'px; margin: 0; padding: 0;"></div>';
 
 			echo $adminpage->top();
 			// Make an div over the whole content when loading the page
@@ -257,7 +258,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			echo '<div style="display: none;" id="wp_editor_dialog_div" title="Route note" >';
 			$content	 = '';
 			$editor_id	 = 'wp_editor_dialog';
-			$settings	 = array(
+			$wp_editor_settings	 = array(
 				'wpautop'		 => true, // use wpautop?
 				'media_buttons'	 => true, // show insert/upload button(s)
 				'textarea_name'	 => $editor_id, // set the textarea name to something different, square brackets [] can be used here
@@ -270,14 +271,17 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				'tinymce'		 => true, // load TinyMCE, can be used to pass settings directly to TinyMCE using an array()
 				'quicktags'		 => true // load Quicktags, can be used to pass settings directly to Quicktags using an array()
 			);
-			wp_editor( $content, $editor_id, $settings );
+			wp_editor( $content, $editor_id, $wp_editor_settings );
 			echo '</div>';
 			echo '</div>';	
 
 			// enqueue, register, localize javascript
-			$key = $MHS_TM_Utilities->get_gmaps_api_key();
 
-			wp_register_script( 'googlemap', 'https://maps.googleapis.com/maps/api/js?key=' . $key . '&libraries=drawing', true );
+			$settings                 = $MHS_TM_Utilities->get_plugin_settings();
+			$settings['api_key_gmap'] = $MHS_TM_Utilities->get_gmaps_api_key();
+
+			wp_register_script( 'googlemap', 'https://maps.googleapis.com/maps/api/js?key=' . $settings['api_key_gmap'] . 
+			'&libraries=drawing', true );
 			wp_enqueue_script( 'googlemap' );
 
 			wp_enqueue_script( 'jquery_ui_touch_punch_min' );
@@ -289,6 +293,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				'coord_center_lng'	 => 9.377068,
 				'auto_load'			 => true,
 				'ajax_url'			 => admin_url( 'admin-ajax.php' ),
+				'settings'			 => $settings,
 			) );
 		}
 
@@ -452,7 +457,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 								'type'	 => 'checkbox',
 								'label'	 => __( 'Disable snap to road?', 'mhs_tm' ),
 								'id'	 => 'dis_route_snap_to_road',
-								'desc'	 => __( 'If checked the whole route path will not snapped to the road.', 'mhs_tm' )
+								'desc'	 => __( 'If checked, the whole route path will not snapped to the road.', 'mhs_tm' )
 							),
 							array(
 								'type'	 => 'hidden',

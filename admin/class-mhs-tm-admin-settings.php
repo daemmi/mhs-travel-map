@@ -49,11 +49,15 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 			global $wpdb;
 			
 			//save Get and Post and sanitize
-			$todo_check	  = isset( $_POST[ 'todo_check' ] ) ? sanitize_text_field( $_POST[ 'todo_check' ] ) : null;
-			$api_key_gmap = isset( $_POST[ 'api_key_gmap' ] ) ? sanitize_text_field( $_POST[ 'api_key_gmap' ] ) : null;
-			$nonce_key	  = isset( $_POST[ 'mhs_tm_settings_save_nonce' ] ) ? esc_attr( $_POST[ 'mhs_tm_settings_save_nonce' ] ) : null;
+			$api_key_gmap                       = isset( $_POST[ 'api_key_gmap' ] ) ? sanitize_text_field( $_POST[ 'api_key_gmap' ] ) : null;
+			$lang_geocoding_gmap                = isset( $_POST[ 'lang_geocoding_gmap' ] ) ? sanitize_text_field( $_POST[ 'lang_geocoding_gmap' ] ) : null;
+			$new_coordinate_part_of_the_road    = isset( $_POST[ 'new_coordinate_part_of_the_road' ] ) && $_POST[ 'new_coordinate_part_of_the_road' ] == true ? 1 : 0;
+			$new_coordinate_is_hitchhiking_spot = isset( $_POST[ 'new_coordinate_is_hitchhiking_spot' ] ) && $_POST[ 'new_coordinate_is_hitchhiking_spot' ] == true ? 1 : 0;
+			$new_coordinate_is_geocoded         = isset( $_POST[ 'new_coordinate_is_geocoded' ] ) && $_POST[ 'new_coordinate_is_geocoded' ] == true ? 1 : 0;
+			$moved_coordinate_is_geocoded       = isset( $_POST[ 'moved_coordinate_is_geocoded' ] ) && $_POST[ 'moved_coordinate_is_geocoded' ] == true ? 1 : 0;
+			$nonce_key	                        = isset( $_POST[ 'mhs_tm_settings_save_nonce' ] ) ? esc_attr( $_POST[ 'mhs_tm_settings_save_nonce' ] ) : null;
 
-			if ( !isset( $todo_check ) && !wp_verify_nonce( $nonce_key, 'mhs_tm_settings_save' ) ) {
+			if ( !wp_verify_nonce( $nonce_key, 'mhs_tm_settings_save' ) ) {
 				$messages[] = array(
 					'type'		 => 'error',
 					'message'	 => __( 'Something went wrong!', 'mhs_tm' )
@@ -62,11 +66,14 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 				return;
 			}
 
-			$options = array( 
-				'api_key_gmap' => $api_key_gmap
-			);
-			
-			$options = json_encode( $options );
+			$options = json_encode( array( 
+				'api_key_gmap'                       => $api_key_gmap,
+				'lang_geocoding_gmap'                => $lang_geocoding_gmap,
+				'new_coordinate_part_of_the_road'    => $new_coordinate_part_of_the_road,
+				'new_coordinate_is_hitchhiking_spot' => $new_coordinate_is_hitchhiking_spot,
+				'new_coordinate_is_geocoded'         => $new_coordinate_is_geocoded,
+				'moved_coordinate_is_geocoded'       => $moved_coordinate_is_geocoded,
+			) );
 			
 			$wpdb->update(
 			$wpdb->prefix . 'mhs_tm_maps', array(
@@ -173,14 +180,8 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 
 			$settings_fields = array(
 				array(
-					'title'	 => __( 'Settings', 'mhs_tm' ),
+					'title'	 => __( 'Google Maps', 'mhs_tm' ),
 					'fields' => array(
-						array(
-							'type'	 => 'hidden',
-							'hidden' => true,
-							'id'	 => 'todo_check',
-							'value'	 => 'check'
-						),
 						array(
 							'type'	 => 'text_long',
 							'label'	 => __( 'API Key for google maps', 'mhs_tm' ),
@@ -188,13 +189,57 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 							'desc'	 => __( 'You could use your own "API Key". 
 								If there is no key entered the plugin will use a public one but it 
 								could be that the contingent runs out from time to time. <br>
-								<b>Please get your own APII key!</b> You could get a API key for free. Just use your own google account 
-								and get your key <a href="https://console.developers.google.com/flows/enableapi?apiid=maps_backend,geocoding_backend,directions_backend,distance_matrix_backend,elevation_backend,places_backend&reusekey=true&pli=1" 
+								<b>Please get your own API key!</b> You could get a API key for free. Just use your own google account 
+								and get your key <a href="https://console.developers.google.com/flows/enableapi?apiid=maps_backend,geocoding_backend,directions_backend&reusekey=true&pli=1" 
 								target="_blank">here</a>. More information you will get <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" 
-								target="_blank">here</a>. For your project you have to activate "Google Maps JavaScript API" and "Google Maps Directions API"!', 'mhs_tm' )
-						)
+								target="_blank">here</a>. For your project you have to activate "Google Maps JavaScript API", "Google Maps Geocoding API" and "Google Maps Directions API"!', 'mhs_tm' )
+						),
+						array(
+							'type'	 => 'text',
+							'label'	 => __( 'Translation language for geocoding function.', 'mhs_tm' ),
+							'id'	 => 'lang_geocoding_gmap',
+							'desc'	 => __( 'Enter here the google language code (<a 
+								href="https://developers.google.com/maps/faq#languagesupport" 
+								target="_blank">Check for more information about the codes</a>). The result of the 
+								google geocode function will be in this language. If you leave it blank, google will 
+								use a language automaticly by your system settings. ', 'mhs_tm' )
+						),
+					)
+				),
+				array(
+					'title'	 => __( 'Route Edit', 'mhs_tm' ),
+					'fields' => array(
+						array(
+							'type'	 => 'checkbox',
+							'label'	 => __( 'New coordinates are part of the roads?', 'mhs_tm' ),
+							'id'	 => 'new_coordinate_part_of_the_road',
+							'desc'	 => __( 'If checked, added coordinates in the route edit menu will automatically	
+								set to be part of the route.', 'mhs_tm' )
+						),
+						array(
+							'type'	 => 'checkbox',
+							'label'	 => __( 'New coordinates are hitchhiking spots?', 'mhs_tm' ),
+							'id'	 => 'new_coordinate_is_hitchhiking_spot',
+							'desc'	 => __( 'If checked, added coordinates in the route edit menu will automatically	
+								set to be a hitchhiking spot.', 'mhs_tm' )
+						),
+						array(
+							'type'	 => 'checkbox',
+							'label'	 => __( 'New coordinates are geocoded?', 'mhs_tm' ),
+							'id'	 => 'new_coordinate_is_geocoded',
+							'desc'	 => __( 'If checked, added coordinates in the route edit menu will automatically	
+								get geocoded location (Country-, State- and City Name).', 'mhs_tm' )
+						),
+						array(
+							'type'	 => 'checkbox',
+							'label'	 => __( 'Moved coordinates are geocoded?', 'mhs_tm' ),
+							'id'	 => 'moved_coordinate_is_geocoded',
+							'desc'	 => __( 'If checked, moved coordinates in the route edit menu will automatically	
+								get geocoded location (Country-, State- and City Name).', 'mhs_tm' )
+						),
 					)
 				)
+							
 			);
 
 			$json_array = $MHS_TM_Utilities->get_plugin_settings();
