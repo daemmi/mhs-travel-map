@@ -132,15 +132,18 @@ jQuery( function ( $ ) {
                     //calculate path of coordinate
                     var coordinates_on_route = mhs_tm_utilities.coordinate_handling.get_only_on_route_coordinates( routes[0] );
                     var path = [];
-                    mhs_tm_utilities.gmaps.route_snap_to_road(coordinates_on_route, 0, path, $( "#mhs_tm_dis_route_snap_to_road" ).is(':checked'), function(path) {
-                        //if calculation finish pass over the path coordinate in gloabl variable
-                        //and load map
-                        mhs_tm_map.coordinates[0][0]['options']['path'] = path;
+                    mhs_tm_utilities.gmaps.route_snap_to_road(coordinates_on_route, 0, path, 
+                    $( "#mhs_tm_dis_route_snap_to_road" ).is(':checked'), function(path) {
+                        if( path !== false ) {
+                            //if calculation finish pass over the path coordinate in gloabl variable
+                            //and load map
+                            mhs_tm_map.coordinates[0][0]['options']['path'] = path;
 
-                        mhs_tm_map.coord_center_lat[0] = parseFloat( window["mhs_tm_app_vars_0"].coord_center_lat );
-                        mhs_tm_map.coord_center_lng[0] = parseFloat( window["mhs_tm_app_vars_0"].coord_center_lng );
+                            mhs_tm_map.coord_center_lat[0] = parseFloat( window["mhs_tm_app_vars_0"].coord_center_lat );
+                            mhs_tm_map.coord_center_lng[0] = parseFloat( window["mhs_tm_app_vars_0"].coord_center_lng );
 
-                        mhs_tm_map.gmap_initialize( 0 );
+                            mhs_tm_map.gmap_initialize( 0 );
+                        }
                     } );
 
                     $( "#mhs_tm_save_all" ).css( 'display', "initial" );

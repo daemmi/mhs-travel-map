@@ -18,8 +18,14 @@ mhs_tm_utilities.gmaps.route_snap_to_road = function( coordinates, i, route_arra
         //the gmaps direction service is async so use a callback
         //call the same function again if the callback from gmaps occured
         //if you went through the whole coordinations array, call callback and pass over the result
-        mhs_tm_utilities.gmaps.get_route(coordinates[i - 1], coordinates[i], route_array, disabled_snap_to_road, function() {
-            mhs_tm_utilities.gmaps.route_snap_to_road(coordinates, i, route_array, disabled_snap_to_road, callback);
+        mhs_tm_utilities.gmaps.get_route(coordinates[i - 1], coordinates[i], route_array, 
+        disabled_snap_to_road, function( result ) {
+            if( result === true ) {
+                mhs_tm_utilities.gmaps.route_snap_to_road(coordinates, i, route_array, 
+                disabled_snap_to_road, callback);
+            } else {
+                callback( false );
+            }
         } );
     } else {
           callback(route_array);
@@ -38,43 +44,63 @@ mhs_tm_utilities.gmaps.get_route = function(from, to, path, disabled_snap_to_roa
             destination: new google.maps.LatLng(to.latitude, to.longitude),
             travelMode: google.maps.DirectionsTravelMode.DRIVING
         }, function(result, status) {
+            console.log(result);
+            console.log(status);
+            //if a error occurs 
+            if ( result.error_message !== '' && result.error_message !== undefined ) {
+                mhs_tm_utilities.utilities.show_message( 'error',
+                    'Google maps Directions API error! Message: ' + result.error_message );
+                callback( { 'error': 'Google maps Geocoder API error! Message: ' +
+                        result.error_message } );
+                return;
+            }
             //if gmaps could calculate a direction get thearray with all coordinates and push it to the array
-            if (status == google.maps.DirectionsStatus.OK) {
-                //get dstance of path
-                to.distance = result.routes[0].legs[0].distance.value;
-                
-                for (var i = 0, len = result.routes[0].overview_path.length; i < len; i++) {
-                path.push( { 
-                    lat: result.routes[0].overview_path[i].lat(),
-                    lng: result.routes[0].overview_path[i].lng(),
-                  } );
-                }
+            switch( status ) {
+                case google.maps.DirectionsStatus.OK:
+                    //get dstance of path
+                    to.distance = result.routes[0].legs[0].distance.value;
 
-                callback(); 
-            } else if (status == google.maps.DirectionsStatus.OVER_QUERY_LIMIT) {
-                //wait 2s if there is a OVER_QUERY_LIMIT error
-                //and call function again
-                setTimeout(function(){
-                    mhs_tm_utilities.gmaps.get_route(from, to, path, disabled_snap_to_road, callback); 
-                }, 2000); 
-            } else {
-                //if gmaps couldn't finde a direction put coordinates from origin and destination to the array
-                // get distance
-                to.distance = Math.round( google.maps.geometry.spherical.computeDistanceBetween(
-                    new google.maps.LatLng( from.latitude, from.longitude ), 
-                    new google.maps.LatLng( to.latitude, to.longitude ) ) );
-                    
-                path.push( { 
-                    lat: from.latitude,
-                    lng: from.longitude,
-                } );
+                    for ( var i = 0, len = result.routes[0].overview_path.length; i < len; i++ ) {
+                        path.push( {
+                            lat: result.routes[0].overview_path[i].lat(),
+                            lng: result.routes[0].overview_path[i].lng(),
+                        } );
+                    }
 
-                path.push( { 
-                    lat: to.latitude,
-                    lng: to.longitude,
-                } );
+                    callback( true ); 
+                    break;
+                case google.maps.DirectionsStatus.OVER_QUERY_LIMIT:
+                    //wait 2s if there is a OVER_QUERY_LIMIT error
+                    //and call function again
+                    setTimeout( function () {
+                        mhs_tm_utilities.gmaps.get_route( from, to, path, disabled_snap_to_road, callback );
+                    }, 2000 ); 
+                    break;
+                case google.maps.DirectionsStatus.ZERO_RESULTS:
+                    //if gmaps couldn't finde a direction put coordinates from origin and destination to the array
+                    // get distance
+                    to.distance = Math.round( google.maps.geometry.spherical.computeDistanceBetween(
+                        new google.maps.LatLng( from.latitude, from.longitude ),
+                        new google.maps.LatLng( to.latitude, to.longitude ) ) );
 
-                callback();
+                    path.push( {
+                        lat: from.latitude,
+                        lng: from.longitude,
+                    } );
+
+                    path.push( {
+                        lat: to.latitude,
+                        lng: to.longitude,
+                    } );
+
+                    callback( true );
+                    break;                    
+                default:
+                    mhs_tm_utilities.utilities.show_message( 'error',
+                        'Google maps Directions API error! Message: ' + result.error_message );
+                    callback( { 'error': 'Google maps Geocoder API error! Message: ' +
+                            result.error_message } );
+                    break;
             }
         } );
     } else {
@@ -93,7 +119,7 @@ mhs_tm_utilities.gmaps.get_route = function(from, to, path, disabled_snap_to_roa
             lng: to.longitude,
         } );
 
-        callback();
+        callback( true );
     }
 };
 
@@ -192,8 +218,11 @@ mhs_tm_utilities.coordinate_handling.get_only_on_route_coordinates = function( c
 
 mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = function( coordinate, coordinates ) {
     
-    var contentString = '<div class="mhs-tm-map-message">' +
-        '<p class="map-message-title"><b style="font-size: 120%;">';
+    var contentString = '<div class="mhs-tm-map-message"> <p class="map-message-title">';
+    
+    if( coordinate.country || coordinate.state || coordinate.city) {
+        contentString += '<b style="font-size: 120%;">';
+    }
     if ( coordinate.country )
     {
         contentString += coordinate.country;
@@ -210,12 +239,15 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = function(
     } else {
         contentString += coordinate.city;
     }
+    
+    if( coordinate.country || coordinate.state || coordinate.city) {
+        contentString += '</b> </br>';
+    }
     var coordinate_date = new Date( mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset( parseInt( coordinate.starttime ) ) * 1000 )
         .toLocaleString();
+    // cut the last 3 chars because it's the seconds we won't display
+    contentString +=coordinate_date.slice(0, coordinate_date.length - 3) + '</br>';
     
-    contentString += '</b> </br>' +
-        // cut the last 3 chars because it's the seconds we won't display
-        coordinate_date.slice(0, coordinate_date.length - 3) + '</br>';
     if( mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview(coordinate, coordinates) || 
         mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview(coordinate, coordinates) ) {
         contentString += '(';
@@ -443,14 +475,15 @@ mhs_tm_utilities.utilities.stripslashes = function( str ) {
         
 mhs_tm_utilities.utilities.show_message = function( message_class, message ) {
     jQuery( function ( $ ) {
-        $( "#dialog_message>p" ).text( message );
-        $( "#dialog_message" )
+        var dialog_width = $( "#mhs-tm-dialog-message" ).width();
+        $( "#mhs-tm-dialog-message>p" ).text( message );
+        $( "#mhs-tm-dialog-message" )
             .removeClass()
             .addClass( message_class )
-            .slideDown();
+            .fadeIn();
         setTimeout(  function() {
-            $( "#dialog_message" ).slideUp();
-        }, 3000);
+            $( "#mhs-tm-dialog-message" ).fadeOut();
+        }, 1500);
     } );
 };
 

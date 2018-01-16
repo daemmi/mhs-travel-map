@@ -208,15 +208,18 @@ jQuery( function ( $ ) {
         
         $( "#mhs_tm_dialog_loading" ).dialog( "open" );
         // snap the route to the roads via gmaps directions
-        mhs_tm_utilities.gmaps.route_snap_to_road(coordinates_on_route, 0, path, $( "#dis_route_snap_to_road" ).is(':checked'), function(path) {
-            //update route path
-            route_path.setPath(path); 
-            route_path.setOptions( { strokeColor: $( "#route_color" ).val() } );
-            
-            // make the content string for the gmap info window
-            for( var x = 0; x < marker[map_canvas_id].length; x++ ) {
-                var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[map_canvas_id]['coordinates'][x], coordinates[map_canvas_id]['coordinates'] );
-                marker[map_canvas_id][x].infowindow.setContent( contentString );
+        mhs_tm_utilities.gmaps.route_snap_to_road(coordinates_on_route, 0, path, 
+        $( "#dis_route_snap_to_road" ).is(':checked'), function(path) {
+            if( path !== false ) {
+                //update route path
+                route_path.setPath(path); 
+                route_path.setOptions( { strokeColor: $( "#route_color" ).val() } );
+
+                // make the content string for the gmap info window
+                for( var x = 0; x < marker[map_canvas_id].length; x++ ) {
+                    var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[map_canvas_id]['coordinates'][x], coordinates[map_canvas_id]['coordinates'] );
+                    marker[map_canvas_id][x].infowindow.setContent( contentString );
+                }
             }
 
             $( "#mhs_tm_dialog_loading" ).dialog( "close" );
@@ -424,8 +427,10 @@ jQuery( function ( $ ) {
             $( '#mhs_tm_loading' ).slideUp( 1500 );
             //show the form with the coordinates
             $( '#mhs_tm-form ' ).show();
+            //show the gmap search box
+            $( '#mhs-tm-gmap-search-input' ).show();
             //enable sortable, otherwise touch punch doesnt work with sortable
-            $('.mhs_tm_normal_sortables').sortable('enable');
+            $('.mhs_tm_normal_sortables').sortable('enable'); 
         } );
         
         // Event listener fires after a resize of the window
@@ -434,6 +439,32 @@ jQuery( function ( $ ) {
             map[map_canvas_id].panToBounds( bounds[map_canvas_id] );
         });
 
+        //set a search box to the map
+        var search_input = document.getElementById('mhs-tm-gmap-search-input');
+        console.log(search_input);
+        map[map_canvas_id].controls[google.maps.ControlPosition.TOP_LEFT].push( search_input );
+
+        var autocomplete = new google.maps.places.Autocomplete( search_input );
+        autocomplete.bindTo( 'bounds', map[map_canvas_id] );
+
+        autocomplete.addListener( 'place_changed', function () {
+            var place = autocomplete.getPlace();
+            if ( !place.geometry ) {
+                // User entered the name of a Place that was not suggested and
+                // pressed the Enter key, or the Place Details request failed.
+                window.alert( "No details available for input: '" + place.name + "'" );
+                return;
+            }
+
+            // If the place has a geometry, then present it on a map.
+            if ( place.geometry.viewport ) {
+                map[map_canvas_id].fitBounds( place.geometry.viewport );
+            } else {
+                map[map_canvas_id].setCenter( place.geometry.location );
+                map[map_canvas_id].setZoom( 17 ); // Why 17? Because it looks good.
+            }
+        } );
+  
         // If new Route, coordinates are NULL and first Pin is 1);
         if ( coordinates[0]['coordinates'] > 0 ) {
             var pin_drawing = 'd_map_xpin_letter&chld=pin_star|' + ( coordinates[0]['coordinates'].length + 1 ) + '|000000|ffffff|ffffff';
@@ -510,20 +541,6 @@ jQuery( function ( $ ) {
                     coordinates[0]['coordinates'].length );
                     
                 marker[map_canvas_id][marker[map_canvas_id].length - 1].setIcon( pinIcon );
-//                //create the Pin Icon
-//                pin = 'd_map_xpin_letter&chld=pin_star|' + ( coordinates[0]['coordinates'].length ) + '|000000|ffffff|ffffff';
-//
-//                var pinIcon = new google.maps.MarkerImage(
-//                    'https://chart.apis.google.com/chart?chst=' + pin,
-//                    null, /* size is determined at runtime */
-//                    null, /* origin is 0,0 */
-//                    null, /* anchor is bottom center of the scaled image */
-//                    // new google.maps.Size(30, 30)
-//                    null
-//                    );
-//
-//                //set the Icon to marker
-//                marker[map_canvas_id][marker[map_canvas_id].length - 1].setIcon( pinIcon );
                 
                 //set the geocode of the new coordinate
                 if( settings['new_coordinate_is_geocoded'] ) {

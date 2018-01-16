@@ -1,5 +1,5 @@
 #mhs_tm_loading {
-    z-index: 999;
+    z-index: 99999;
     position: absolute;
     background-color: rgba(200, 200, 200, 0.0);
     width: 100%;
@@ -154,6 +154,7 @@
 
 /* Styles for jQuery dialog mhs_tm_dialog_loading class*/
 .ui-dialog.mhs_tm_dialog_loading {
+    position: fixed;
     background-color: transparent;
 }
 

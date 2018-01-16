@@ -149,6 +149,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 		 */
 		private function routes_edit( $id = NULL ) {
 			global $wpdb, $MHS_TM_Maps, $MHS_TM_Admin, $MHS_TM_Admin_Settings, $MHS_TM_Utilities;
+			$output = '';
 			$table_name = $wpdb->prefix . 'mhs_tm_routes';
 
 			$url		 = 'admin.php?page=MHS_TM-routes';
@@ -232,9 +233,12 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$form_coordinates	 = new MHS_TM_Admin_Form( $args );
 			
 			$height		 = 500;
-
-			$output = '<div class="mhs_tm_gmap_div" id="mhs_tm_map_canvas_0" style="height: ' . esc_attr( $height ) . 
+					
+			
+			$output .= '<div class="mhs_tm_gmap_div" id="mhs_tm_map_canvas_0" style="height: ' . esc_attr( $height ) . 
 			'px; margin: 0; padding: 0;"></div>';
+			$output .= '<input id="mhs-tm-gmap-search-input" class="mhs-tm-gmap-controls" style="display: none;" 
+				type="text" placeholder="Enter a location">';
 
 			echo $adminpage->top();
 			// Make an div over the whole content when loading the page
@@ -253,7 +257,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			. '</div>';
 			
 			// Error or Update Message to set by jquery
-			echo '<div id="dialog_message" class="updated" style="display: none;"><p>TEXT</p></div>';
+			echo '<div id="mhs-tm-dialog-message" class="updated" style="display: none;"><p>TEXT</p></div>';
 			
 			echo '<div style="display: none;" id="wp_editor_dialog_div" title="Route note" >';
 			$content	 = '';
@@ -281,7 +285,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$settings['api_key_gmap'] = $MHS_TM_Utilities->get_gmaps_api_key();
 
 			wp_register_script( 'googlemap', 'https://maps.googleapis.com/maps/api/js?key=' . $settings['api_key_gmap'] . 
-			'&libraries=drawing', true );
+			'&libraries=drawing,places', true );
 			wp_enqueue_script( 'googlemap' );
 
 			wp_enqueue_script( 'jquery_ui_touch_punch_min' );
@@ -350,7 +354,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			echo $adminpage->bottom();
 			
 			// Error or Update Message to set by jquery
-			echo '<div id="dialog_message" class="updated" style="display: none;"><p>TEXT</p></div>';
+			echo '<div id="mhs-tm-dialog-message" class="updated" style="display: none;"><p>TEXT</p></div>';
 			
 			//dummy map to localize variables
 			echo '<div class="mhs_tm-map" id="mhs_tm_map_canvas_0" style="height: 0px; margin: 0; padding: 0;"></div>';
