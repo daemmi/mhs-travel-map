@@ -114,6 +114,9 @@ jQuery( function ( $ ) {
             
             // snap the route to the roads via gmaps directions
             mhs_tm_utilities.gmaps.route_snap_to_road(coordinates_on_route, 0, path, $( "#dis_route_snap_to_road" ).is(':checked'), function(path) {
+                if ( path === false ) {
+                    path = [];
+                }
                 save_route( path );
             } );
         } else {
@@ -143,8 +146,16 @@ jQuery( function ( $ ) {
                 coordinates[map_canvas_id]['coordinates'][coordinate_index_global]['note'] = $('#wp_editor_dialog').val();
                 $( "#note_" + ( coordinate_index_global + 1 ) ).html( $('#wp_editor_dialog').val() );
             }
-            var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[map_canvas_id]['coordinates'][coordinate_index_global], coordinates[map_canvas_id]['coordinates'] );
-            marker[map_canvas_id][coordinate_index_global].infowindow.setContent( contentString );
+            marker[map_canvas_id][coordinate_index_global].contentString =
+                mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
+                    coordinates[map_canvas_id]['coordinates'][coordinate_index_global],
+                    coordinates[map_canvas_id]['coordinates'] );
+
+            marker[map_canvas_id][coordinate_index_global].setTitle(
+                mhs_tm_utilities.coordinate_handling.get_title(
+                    coordinates[map_canvas_id]['coordinates'][coordinate_index_global],
+                    coordinates[map_canvas_id]['coordinates'] )
+                );
         },
         open: function ( event, ui ) {
             // set dialog height min to 500px
@@ -216,9 +227,18 @@ jQuery( function ( $ ) {
                 route_path.setOptions( { strokeColor: $( "#route_color" ).val() } );
 
                 // make the content string for the gmap info window
-                for( var x = 0; x < marker[map_canvas_id].length; x++ ) {
-                    var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[map_canvas_id]['coordinates'][x], coordinates[map_canvas_id]['coordinates'] );
-                    marker[map_canvas_id][x].infowindow.setContent( contentString );
+                for ( var x = 0; x < marker[map_canvas_id].length; x++ ) {
+                    marker[map_canvas_id][x].contentString =
+                        mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
+                            coordinates[map_canvas_id]['coordinates'][x],
+                            coordinates[map_canvas_id]['coordinates']
+                            );
+
+                    marker[map_canvas_id][x].setTitle(
+                        mhs_tm_utilities.coordinate_handling.get_title(
+                            coordinates[map_canvas_id]['coordinates'][x],
+                            coordinates[map_canvas_id]['coordinates'] )
+                        );
                 }
             }
 
@@ -283,9 +303,23 @@ jQuery( function ( $ ) {
                 route_path.setOptions( { strokeColor: $( "#route_color" ).val() } );
             
                 // make the content string for the gmap info window
-                for( var x = 0; x < marker[map_canvas_id].length; x++ ) {
-                    var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[map_canvas_id]['coordinates'][x], coordinates[map_canvas_id]['coordinates'] );
-                    marker[map_canvas_id][x].infowindow.setContent( contentString );
+                for ( var x = 0; x < marker[map_canvas_id].length; x++ ) {
+                    marker[map_canvas_id][x].contentString =
+                        mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
+                            coordinates[map_canvas_id]['coordinates'][x],
+                            coordinates[map_canvas_id]['coordinates'] );
+
+                    marker[map_canvas_id][x].setTitle(
+                        mhs_tm_utilities.coordinate_handling.get_title(
+                            coordinates[map_canvas_id]['coordinates'][x],
+                            coordinates[map_canvas_id]['coordinates'] )
+                        );
+                }
+                
+                //if no id in url ne saved map has now a id so change url
+                if( getUrlParameter( 'id' ) === undefined ) {
+                    console.log(window.location.href.replace( '&todo=new', '&todo=edit&id=' + response.route_id ) );
+                    window.location.replace(window.location.href.replace( '&todo=new', '&todo=edit&id=' + response.route_id ));                    
                 }
 
                 $( ".admin_title_mhs_tm h1" ).html( 'Edit "' + $( "#name" ).val() + '"' );
@@ -359,14 +393,19 @@ jQuery( function ( $ ) {
 
         // make the content string for all gmap info window
         for( var x = 0; x < coordinates[map_canvas_id]['coordinates'].length; x++ ) {
-            var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
-                coordinates[map_canvas_id]['coordinates'][x],
-                coordinates[map_canvas_id]['coordinates'] );
+            marker[map_canvas_id][x].contentString =
+                mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
+                    coordinates[map_canvas_id]['coordinates'][x],
+                    coordinates[map_canvas_id]['coordinates'] );
 
-            marker[map_canvas_id][x].infowindow.setContent( contentString );
+            marker[map_canvas_id][x].setTitle(
+                mhs_tm_utilities.coordinate_handling.get_title(
+                    coordinates[map_canvas_id]['coordinates'][x],
+                    coordinates[map_canvas_id]['coordinates'] )
+                );
         }
 
-        // set the  gmap marker to the new location
+        // set the gmap marker to the new location
         if ( input_id == 'latitude' || input_id == 'longitude' ) {
             marker[map_canvas_id][coordinate_index].setPosition( {
                 lat: parseFloat( coordinates[map_canvas_id]['coordinates'][coordinate_index]['latitude'] ),
@@ -417,31 +456,46 @@ jQuery( function ( $ ) {
         var mapOptions = {
             center: { lat: coord_center_lat, lng: coord_center_lng },
             zoom: 5,
-            fullscreenControl: true
+            fullscreenControl: true,
+            mapTypeControlOptions: {
+                style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+                position: google.maps.ControlPosition.LEFT_TOP
+            },
         };
         map[map_canvas_id] = new google.maps.Map( document.getElementById( 'mhs_tm_map_canvas_' + map_canvas_id ), mapOptions );
 
         // Event listener fires if map is loaded and hide the loaing overlay
         google.maps.event.addListenerOnce( map[map_canvas_id], 'idle', function () {
             // do something only the first time the map is loaded
-            $( '#mhs_tm_loading' ).slideUp( 1500 );
             //show the form with the coordinates
             $( '#mhs_tm-form ' ).show();
             //show the gmap search box
             $( '#mhs-tm-gmap-search-input' ).show();
             //enable sortable, otherwise touch punch doesnt work with sortable
-            $('.mhs_tm_normal_sortables').sortable('enable'); 
+            $( '.mhs_tm_normal_sortables' ).sortable('enable'); 
+            $( '#mhs_tm_loading' ).slideUp( 1500 );
         } );
         
         // Event listener fires after a resize of the window
         google.maps.event.addDomListener(window, 'resize', function() {
-            map[map_canvas_id].fitBounds( bounds[map_canvas_id] );
-            map[map_canvas_id].panToBounds( bounds[map_canvas_id] );
-        });
+            //set a time out otherwise the function calls come to early after closing the full screen
+            setTimeout( function () {
+                map[map_canvas_id].fitBounds( bounds[map_canvas_id] );
+                map[map_canvas_id].panToBounds( bounds[map_canvas_id] );
+            }, 20 );
+        });   
+        
+        //Make ne popup window for the map
+        map[map_canvas_id].popup_window = new mhs_tm_utilities.gmaps.popup_window(
+            map[map_canvas_id], 
+            document.getElementById( 'mhs_tm_map_canvas_0' ),
+            document.getElementById( 'mhs-tm-gmap-popup-window-0' ),
+            document.getElementById( '' )
+        );
 
         //set a search box to the map
         var search_input = document.getElementById('mhs-tm-gmap-search-input');
-        console.log(search_input);
+        
         map[map_canvas_id].controls[google.maps.ControlPosition.TOP_LEFT].push( search_input );
 
         var autocomplete = new google.maps.places.Autocomplete( search_input );
@@ -485,7 +539,7 @@ jQuery( function ( $ ) {
             drawingMode: null,
             drawingControl: true,
             drawingControlOptions: {
-                position: google.maps.ControlPosition.TOP_CENTER,
+                position: google.maps.ControlPosition.LEFT_BOTTOM,
                 drawingModes: [ 'marker' ]
             },
             markerOptions: {
@@ -519,21 +573,9 @@ jQuery( function ( $ ) {
                     draggable: true
                 } );
 
-                // Set Info Window of new Marker
-                marker[map_canvas_id][marker[map_canvas_id].length - 1].infowindow = new google.maps.InfoWindow( {
-                    content: ''
-                } );
-                var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( 
-                    coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1], 
-                coordinates[0]['coordinates'] );
-                
-                //bind event handler for info window
-                bind_info_window( marker[map_canvas_id][marker[map_canvas_id].length - 1], 
-                marker[map_canvas_id], map[map_canvas_id], contentString );
-                //set content of info window
-                marker[map_canvas_id][marker[map_canvas_id].length - 1].infowindow.setContent( contentString );
-
                 add_dragend_listener( event.overlay );
+                bind_marker_click_event( marker[map_canvas_id][marker[map_canvas_id].length - 1],
+                    map[map_canvas_id] );
                 
                 //set marker icon
                 var pinIcon = get_marker_icon(
@@ -546,9 +588,27 @@ jQuery( function ( $ ) {
                 if( settings['new_coordinate_is_geocoded'] ) {
                     get_geocoded_coordinate( coordinates[0]['coordinates'].length - 1, 
                     coordinates[0]['coordinates'].length - 1, function () {
+                        marker[map_canvas_id][marker[map_canvas_id].length - 1].setTitle(
+                            mhs_tm_utilities.coordinate_handling.get_title(
+                                coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1],
+                                coordinates[0]['coordinates'] )
+                            );
+                        marker[map_canvas_id][marker[map_canvas_id].length - 1].contentString =
+                            mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
+                                coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1],
+                                coordinates[0]['coordinates'] );
                         $( "#mhs_tm_dialog_loading" ).dialog( "close" );            
                     } );
                 } else {
+                    marker[map_canvas_id][marker[map_canvas_id].length - 1].setTitle(
+                        mhs_tm_utilities.coordinate_handling.get_title(
+                            coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1],
+                            coordinates[0]['coordinates'] )
+                        );
+                    marker[map_canvas_id][marker[map_canvas_id].length - 1].contentString =
+                        mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
+                            coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1],
+                            coordinates[0]['coordinates'] );
                     $( "#mhs_tm_dialog_loading" ).dialog( "close" );
                 }
             }
@@ -572,30 +632,31 @@ jQuery( function ( $ ) {
 
                     var pinIcon = get_marker_icon( coordinates[i]['coordinates'][j], ( j + 1 ) );
 
-                    var contentString = mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( coordinates[i]['coordinates'][j], coordinates[i]['coordinates'] );
-
                     marker[map_canvas_id][mark_counter] = new google.maps.Marker( {
                         position: myLatlng,
                         map: map[map_canvas_id],
-                        title: coordinates[i]['coordinates'][0].name,
+                        title: mhs_tm_utilities.coordinate_handling.get_title(
+                            coordinates[i]['coordinates'][j], coordinates[i]['coordinates'] ),
                         id: mark_counter,
                         icon: pinIcon,
                         draggable: true
                     } );
 
-                    add_dragend_listener( marker[map_canvas_id][mark_counter] );
+                    marker[map_canvas_id][mark_counter].contentString = 
+                        mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( 
+                        coordinates[i]['coordinates'][j], coordinates[i]['coordinates'] );
+                    
+                    marker[map_canvas_id][mark_counter].setTitle(
+                        mhs_tm_utilities.coordinate_handling.get_title(
+                            coordinates[i]['coordinates'][j], coordinates[i]['coordinates'] )
+                        );
 
-                    marker[map_canvas_id][mark_counter].infowindow = new google.maps.InfoWindow( {
-                        // content: contentString
-                        content: ''
-                    } );
+                    add_dragend_listener( marker[map_canvas_id][mark_counter] );
+                    bind_marker_click_event( marker[map_canvas_id][mark_counter],
+                        map[map_canvas_id] );
 
                     map[map_canvas_id].fitBounds( bounds[map_canvas_id] );
-                    map[map_canvas_id].panToBounds( bounds[map_canvas_id] );
-                    //bind event handler for info window
-                    bind_info_window( marker[map_canvas_id][mark_counter], marker[map_canvas_id], map[map_canvas_id], contentString );
-                    //set content of info window
-                    marker[map_canvas_id][mark_counter].infowindow.setContent( contentString );
+                    map[map_canvas_id].panToBounds( bounds[map_canvas_id] ); 
                     
                     mark_counter++;
                 }
@@ -714,14 +775,10 @@ jQuery( function ( $ ) {
                 new Date().getTime() / 1000 ) );
     }
 
-    function bind_info_window( marker, marker_all, map, contentString ) {
+    function bind_marker_click_event( marker, map ) {
         google.maps.event.addListener( marker, 'click', function () {
-
-            for ( index = 0; index < marker_all.length; ++index ) {
-                marker_all[index].infowindow.close();
-            }
-            
-            marker.infowindow.open( map, marker );
+                map.setCenter( this.getPosition() );    
+                map.popup_window.show( this.contentString );            
         } );
     }
 

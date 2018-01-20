@@ -10,6 +10,13 @@ mhs_tm_utilities.gmaps = {};
 mhs_tm_utilities.gmaps.route_snap_to_road = function( coordinates, i, route_array, disabled_snap_to_road, callback ) {
     //set distance of first coordinate to 0, should be done if this coordinate had a distance and 
     //the coordinate before have been deleted now
+    
+    //a route could only calculated between two coordinates
+    if( coordinates.length < 2 ) {
+        callback( false );
+        return;
+    }
+    
     if( i === 0 ) {
         coordinates[0].distance = 0;
     }
@@ -44,8 +51,6 @@ mhs_tm_utilities.gmaps.get_route = function(from, to, path, disabled_snap_to_roa
             destination: new google.maps.LatLng(to.latitude, to.longitude),
             travelMode: google.maps.DirectionsTravelMode.DRIVING
         }, function(result, status) {
-            console.log(result);
-            console.log(status);
             //if a error occurs 
             if ( result.error_message !== '' && result.error_message !== undefined ) {
                 mhs_tm_utilities.utilities.show_message( 'error',
@@ -197,6 +202,105 @@ mhs_tm_utilities.gmaps.geocode_lat_lng = function( lat, lng, settings, callback 
         );
     };
 };
+
+//Class popup window
+jQuery( function ( $ ) {
+    mhs_tm_utilities.gmaps.popup_window = function ( gmap, gmap_div, popup_div, control_button ) {
+        this.gmap = gmap;
+        this.gmap_div = gmap_div;
+        this.popup_div = popup_div;
+        this.control_button = control_button;
+
+        //add aditonal div to the popup div
+        $( this.popup_div ).html( '<div class="mhs-tm-gmap-popup-window-inner">\n\
+        <a class="mhs-tm-gmap-popup-window-close" href="javascript:void(0)"> \n\
+        <span class="ui-icon ui-icon-white ui-icon-closethick"></span> </a> </div> \n\
+        <div class="mhs-tm-gmap-popup-window-content"> </div>' );
+
+        this.popup_div_close = $( this.popup_div ).find( '.mhs-tm-gmap-popup-window-close' );
+        this.popup_div_inner = $( this.popup_div ).find( '.mhs-tm-gmap-popup-window-inner' );
+        this.popup_div_content = $( this.popup_div ).find( '.mhs-tm-gmap-popup-window-content' );
+        this.content_control = '';
+
+        this.show_control_button = function () {
+            $( this.control_button ).fadeIn();
+            $( this.gmap_div ).find( '.gm-style' ).css( {
+                'color': '',
+                'font-family': '',
+                'font-size': '',
+                'line-height': '',
+                'font': 'inherit',
+            } );
+        };
+        this.content_control = '';
+
+        this.change_gm_style = function () {
+            $( this.control_button ).fadeIn();
+            $( this.gmap_div ).find( '.gm-style' ).css( {
+                'color': '',
+                'font-family': '',
+                'font-size': '',
+                'line-height': '',
+                'font': 'inherit',
+            } );
+        };
+
+        this.show = function ( content ) {
+            $( this.popup_div ).outerHeight( $( this.gmap_div ).find( '.gm-style' ).height() );
+            $( this.popup_div ).outerWidth( $( this.gmap_div ).find( '.gm-style' ).width() );
+            $( this.popup_div ).css( {
+                'left': 0,
+                'z-index': 1000000000000
+            } );
+            $( this.popup_div_content ).html( content );
+            $( this.popup_div ).fadeIn();
+
+            $( this.popup_div_inner ).css( {
+                'margin-top': ( $( this.popup_div ).height() -
+                    $( this.popup_div_content ).outerHeight() ) / 2
+            } );
+            $( this.popup_div_content ).css( {
+                'margin-top': ( $( this.popup_div ).height() -
+                    $( this.popup_div_content ).outerHeight() ) / 2
+            } );
+        };
+
+        this.show_control = function () {
+            this.show( this.content_control );
+        };
+
+        this.hide = function () {
+            $( this.popup_div ).fadeOut();
+        };
+
+        this.set_size = function () {
+            $( this.popup_div ).outerHeight( $( this.gmap_div ).find( '.gm-style' ).height() );
+            $( this.popup_div ).outerWidth( $( this.gmap_div ).find( '.gm-style' ).width() );
+
+            $( this.popup_div_inner ).css( {
+                'margin-top': ( $( this.popup_div ).height() - $( this.popup_div_content ).outerHeight() ) / 2
+            } );
+            $( this.popup_div_content ).css( {
+                'margin-top': ( $( this.popup_div ).height() - $( this.popup_div_content ).outerHeight() ) / 2
+            } );
+        };
+
+        //place it in the map
+        this.gmap.controls[google.maps.ControlPosition.LEFT_TOP].push( this.control_button );
+        this.gmap.controls[google.maps.ControlPosition.BOTTOM_CENTER].push( this.popup_div );
+        //make the control button visible
+        google.maps.event.addListenerOnce( this.gmap, 'idle', this.show_control_button.bind( this ) );
+        google.maps.event.addListenerOnce( this.gmap, 'idle', this.change_gm_style.bind( this ) );
+
+        this.gmap.addListener( 'bounds_changed', this.set_size.bind( this ) );
+
+        //event if close is pressed
+        $( this.popup_div_close ).click( this.hide.bind( this ) );
+
+        $( this.control_button ).click( this.show_control.bind( this ) );
+    };
+
+} );
  
 /**************************************************************************************************
 *   Utilities for coordinate handling and informations
@@ -214,6 +318,54 @@ mhs_tm_utilities.coordinate_handling.get_only_on_route_coordinates = function( c
     } );
     
     return coordinates_on_route;
+};
+
+mhs_tm_utilities.coordinate_handling.get_title = function( coordinate, coordinates ) {
+    var contentString = '';
+    if ( coordinate.country )
+    {
+        contentString += coordinate.country;
+    }
+    if ( coordinate.state && coordinate.country )
+    {
+        contentString += ' - ' + coordinate.state;
+    } else {
+        contentString += coordinate.state;
+    }
+    if ( coordinate.city && coordinate.country || coordinate.city && coordinate.state )
+    {
+        contentString += ' - ' + coordinate.city;
+    } else {
+        contentString += coordinate.city;
+    }
+    
+    if( coordinate.country || coordinate.state || coordinate.city) {
+        contentString += ' ';
+    }
+    var coordinate_date = new Date( mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset( parseInt( coordinate.starttime ) ) * 1000 )
+        .toLocaleString();
+    // cut the last 3 chars because it's the seconds we won't display
+    contentString +=coordinate_date.slice(0, coordinate_date.length - 3) + ' ';
+    
+    if( mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview(coordinate, coordinates) || 
+        mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview(coordinate, coordinates) ) {
+        contentString += '(';
+    }
+    
+    if( mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview(coordinate, coordinates) ) {
+        contentString += mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview(coordinate, coordinates);
+        if( mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview(coordinate, coordinates) ) {
+            contentString += ' | ' + mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview(coordinate, coordinates) + 
+            ')';
+        } else {
+            contentString +=  ')';
+        }
+    } else if( mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview(coordinate, coordinates) ) {
+        contentString += mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview(coordinate, coordinates) + 
+        ')';
+    }
+
+    return contentString;
 };
 
 mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = function( coordinate, coordinates ) {

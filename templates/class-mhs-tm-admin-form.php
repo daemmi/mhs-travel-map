@@ -295,14 +295,14 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 						'quicktags'		 => true // load Quicktags, can be used to pass settings directly to Quicktags using an array()
 					);
 					//filter to increase the allowed tags from wp_kses_post
-					$class = new MHS_TM_Admin_Utilities();
+					$class = new MHS_TM_Utilities();
 					add_filter( 'wp_kses_allowed_html', array( $class, 'add_wpkses_tags' ), 10, 2 );
 					wp_editor( wp_kses_post( $content ), $editor_id, $settings );
 					break;
 
 				case 'html_div':
 					//filter to increase the allowed tags from wp_kses_post
-					$class = new MHS_TM_Admin_Utilities();
+					$class = new MHS_TM_Utilities();
 					add_filter( 'wp_kses_allowed_html', array( $class, 'add_wpkses_tags' ), 10, 2 );
 					echo '<div  class="html_div" name="' . esc_attr( $field[ 'name' ] ) .
 					'" id="' . esc_attr( $field[ 'id' ] );

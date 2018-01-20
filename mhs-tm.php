@@ -58,12 +58,14 @@ function MHS_TM_enqueue() {
 	    
 	/* register styles */
     wp_register_style( 'mhs_tm_map_style', MHS_TM_RELPATH . 'css/mhs-tm-map.css', false, '1.0.1' );
+    wp_register_style( 'mhs_tm_jquery_style', MHS_TM_RELPATH . 'css/jquery-ui/jquery-ui.css', false, '1.12.1' );
 	
 	/* enqueue scripts */
 	wp_enqueue_script( 'google_jsapi' );
 	wp_enqueue_script( 'mhs_tm_utilities' );
     
 	/* enqueue stylesheets */
+	wp_enqueue_style( 'mhs_tm_jquery_style' ); 
 	wp_enqueue_style( 'mhs_tm_map_style' );
     
 }

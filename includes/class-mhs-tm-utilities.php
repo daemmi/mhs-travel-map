@@ -100,6 +100,44 @@ class MHS_TM_Utilities {
 		return $key;
 	}
 
+    /**
+     * Funktion to sanitize a checkbox
+     *
+     * @since 1.0
+     * @access public
+     */
+    public function sanitize_checkbox( $value ) {
+		// Initialize the new array that will hold the sanitize values
+		$new_value = array();
+
+		if( (int)$value == 1 || (int)$value == 0 ) {
+			$new_value = (int)$value;
+		} else {
+			$new_value = 0;
+		}
+		return $new_value;
+	}
+			
+	/**
+	 * Funktion to add tags in wp_kses_post
+	 *
+	 * @since 1.0
+	 * @access public
+	 */
+	function add_wpkses_tags( $tags, $context ) {
+		if ( 'post' === $context ) {
+			$tags['iframe'] = array(
+				'src'             => true,
+				'height'          => true,
+				'width'           => true,
+				'frameborder'     => true,
+				'scrolling'       => true,
+				'allowfullscreen' => true,
+			);
+		}
+		return $tags;
+	}
+
 } // class
 
 endif; // class exists

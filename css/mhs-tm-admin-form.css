@@ -21,11 +21,11 @@
 }
 
 .mhs_tm_normal_sortables .ui-icon { 
-    background-image: url(jquery-ui/images/ui-icons_ffffff_256x240.png); 
+    background-image: url("jquery-ui/images/ui-icons_ffffff_256x240.png"); 
 }
 
 .mhs_tm_normal_sortables .ui-state-hover .ui-icon { 
-    background-image: url(jquery-ui/images/ui-icons_777777_256x240.png); 
+    background-image: url("jquery-ui/images/ui-icons_777777_256x240.png"); 
 }
 
 .mhs_tm_normal_sortables .ui-accordion-header-active {

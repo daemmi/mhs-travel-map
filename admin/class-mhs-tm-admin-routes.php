@@ -155,31 +155,22 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$url		 = 'admin.php?page=MHS_TM-routes';
 			$form_action = 'javascript:void(0);';
 
-			$coordinates = array();
-			$coordinates = $MHS_TM_Maps->get_coordinates( $id, 'route' );
-			
-			// if coordinates array is empty create a dumy for js functions
-			if( empty($coordinates) ) {
+			if ( !is_numeric( $id ) ) {
+				$title	 = sprintf( __( 'Add New Route', 'mhs_tm' ) );
+				$fields_the_route	 = $this->routes_fields(NULL, 'The Route' );
+				$fields_coordinates	 = $this->routes_fields(NULL, NULL );
+				$nonce	 = 'mhs_tm_route_save';
+				
+				//if no id create a dumy for js functions
 				$coordinates = [];
 				$coordinates[0] = [];
 				$coordinates[0]['coordinates']			= [];
 				$coordinates[0]['options']['name']		= '';
 				$coordinates[0]['options']['path']		= [];
 			} else {
-				$coordinates[0]['coordinates']			= $this->sanitize_coordinates_array( $coordinates[0]['coordinates'] );
-				$coordinates[0]['options']['path']		= $this->sanitize_path_array( $coordinates[0]['options']['path'] );
-				$coordinates[0]['options']['name']		= sanitize_text_field( $coordinates[0]['options']['name'] );
-			}
-			
-			$name = $coordinates[0]['options']['name'];
-
-			if ( !is_numeric( $id ) ) {
-				$title	 = sprintf( __( 'Add New Route', 'mhs_tm' ) );
-				$fields_the_route	 = $this->routes_fields(NULL, 'The Route' );
-				$fields_coordinates	 = $this->routes_fields(NULL, NULL );
-				$nonce	 = 'mhs_tm_route_save';
-			} else {
-				$title	 = sprintf( __( 'Edit &quot;%s&quot;', 'mhs_tm' ), $name );
+				$coordinates = $MHS_TM_Maps->get_coordinates($id, 'route');
+				
+				$title	 = sprintf( __( 'Edit &quot;%s&quot;', 'mhs_tm' ), $coordinates[0]['options']['name'] );
 				$fields_the_route	 = $this->routes_fields($id, 'The Route' );
 				$fields_coordinates	 = $this->routes_fields($id, NULL );
 				$nonce	 = 'mhs_tm_route_save_' . $id;
@@ -239,6 +230,12 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			'px; margin: 0; padding: 0;"></div>';
 			$output .= '<input id="mhs-tm-gmap-search-input" class="mhs-tm-gmap-controls" style="display: none;" 
 				type="text" placeholder="Enter a location">';
+			//control button for gmaps popup window
+			$output .= '<div id="mhs-tm-gmap-show-info-0" 
+				class="mhs-tm-gmap-controls mhs-tm-gmap-controls-button">Statistics</div>';
+			//div for gmaps popup window
+			$output .= '<div id="mhs-tm-gmap-popup-window-0" class="mhs-tm-gmap-popup-window"></div>';
+
 
 			echo $adminpage->top();
 			// Make an div over the whole content when loading the page
@@ -432,7 +429,9 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 		 * @access private
 		 */
 		private function routes_fields( $id = NULL, $part = '' ) {
-			global $wpdb;
+			global $wpdb, $MHS_TM_Maps;
+			/* @var $wpdb wpdb */
+			/* @var $MHS_TM_Maps MHS_TM_Maps */
 			
 			$table_name = $wpdb->prefix . 'mhs_tm_routes ';
 			
@@ -463,12 +462,6 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 								'id'	 => 'dis_route_snap_to_road',
 								'desc'	 => __( 'If checked, the whole route path will not snapped to the road.', 'mhs_tm' )
 							),
-							array(
-								'type'	 => 'hidden',
-								'hidden' => true,
-								'id'	 => 'todo_check',
-								'value'	 => 'check'
-							)
 						)
 					)
 				);
@@ -533,14 +526,6 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 							'id'	 => 'waitingtime_' . $coordinate_id,
 							'desc'	 => __( 'The waiting time at the spot for the next ride (If it is a hitchhikig spot).', 'mhs_tm' )
 						),
-	//					array(
-	//						'type'	 => 'text_long',
-	//						'label'	 => __( 'Country code', 'mhs_tm' ),
-	//						'id'	 => 'countrycode_' . $coordinate_id,
-	//						'desc'	 => __( '(Not necessary yet, won\'t be used) The country code from the country where the  coordinate is located. <br>
-	//										The two letters of the ISO code. <a href="https://www.countrycode.org/"> 
-	//										Click for mir information. </a>', 'mhs_tm' )
-	//					),
 						array(
 							'type'	 => 'checkbox',
 							'label'	 => __( 'Hitchhiking spot?', 'mhs_tm' ),
@@ -557,7 +542,6 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 						),
 						array(
 							'type'	 => 'datetimepicker',
-//							'type'	 => 'datepicker',
 							'label'	 => __( 'Time', 'mhs_tm' ),
 							'id'	 => 'starttime_' . $coordinate_id,
 							'desc'	 => __( 'The start time of the coordinate.', 'mhs_tm' )
@@ -568,30 +552,13 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 
 			// no new route there are data and maybe coordinates
 			if ( is_numeric( $id ) ) {
-
-				$data	 = $wpdb->get_results( $wpdb->prepare( 
-				'SELECT * FROM ' . $table_name . ' WHERE id = %d LIMIT 1', $id ), ARRAY_A
-				);
-				$data	 = $data[ 0 ];
-
-				// Load Option JSON data
-				$json_array = json_decode( $data['options'], true );
-				if ( !empty( $json_array ) ) {
-					$json_array_keys = array_keys( $json_array );
-					$json_id		 = 0;
-					foreach ( $json_array as $json ) {
-						$data[ $json_array_keys[ $json_id ] ]	 = $json;
-						$json_id								 = $json_id + 1;
-					}
-				}
-
-				// Load Coordinates JSON data
-				$json_array_coordinates = json_decode( $data['coordinates'], true );
-
+				$data = $MHS_TM_Maps->get_coordinates($id, 'route');
+				$data = $data[0];
+				
 				// display coordinates only if there are one and we will not get the "The Route" fields
 				$coordinate_id = 0;
-				if ( is_array( $json_array_coordinates ) && count( $json_array_coordinates ) > 0 && $part != 'The Route' ) {
-					foreach ( $json_array_coordinates as $json_array_coordinate ) {
+				if ( is_array( $data['coordinates'] ) && count( $data['coordinates'] ) > 0 && $part != 'The Route' ) {
+					foreach ( $data['coordinates'] as $json_array_coordinate ) {
 						$json_array_keys = array_keys( $json_array_coordinate );
 
 						$json_id		 = 0;
@@ -655,14 +622,6 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 									'id'	 => 'waitingtime_' . $coordinate_id,
 									'desc'	 => __( 'The waiting time at the spot for the next ride (If it is a hitchhikig spot).', 'mhs_tm' )
 								),
-//								array(
-//									'type'	 => 'text_long',
-//									'label'	 => __( 'Country code', 'mhs_tm' ),
-//									'id'	 => 'countrycode_' . $coordinate_id,
-//									'desc'	 => __( 'The country code from the country where the  coordinate is located. <br>
-//													The two letters of the ISO code. <a href="https://www.countrycode.org/"> 
-//													Click for more information. </a>', 'mhs_tm' )
-//								),
 								array(
 									'type'	 => 'checkbox',
 									'label'	 => __( 'Hitchhiking spot?', 'mhs_tm' ),
@@ -679,7 +638,6 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 								),
 								array(
 									'type'	 => 'datetimepicker',
-//									'type'	 => 'datepicker',
 									'label'	 => __( 'Time', 'mhs_tm' ),
 									'id'	 => 'starttime_' . $coordinate_id,
 									'desc'	 => __( 'The start time of the coordinate.', 'mhs_tm' )
@@ -694,15 +652,29 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 							$json_id			 = $json_id + 1;
 						}
 					}
-				}
 
-				$mcount = count( $routes_fields );
-				for ( $i = 0; $i < $mcount; $i++ ) {
-					if( isset( $routes_fields[ $i ]['fields'] ) ) {
-						$fcount = count( $routes_fields[ $i ]['fields'] );
-						for ( $j = 0; $j < $fcount; $j++ ) {
-							if( isset( $data[ $routes_fields[ $i ]['fields'][ $j ]['id'] ] ) ) {
-								$routes_fields[ $i ]['fields'][ $j ]['value'] = stripslashes( $data[ $routes_fields[ $i ]['fields'][ $j ]['id'] ] );
+					$mcount = count( $routes_fields );
+					for ( $i = 0; $i < $mcount; $i++ ) {
+						if( isset( $routes_fields[ $i ]['fields'] ) ) {
+							$fcount = count( $routes_fields[ $i ]['fields'] );
+							for ( $j = 0; $j < $fcount; $j++ ) {
+								if( isset( $data[ $routes_fields[ $i ]['fields'][ $j ]['id'] ] ) ) {
+									$routes_fields[ $i ]['fields'][ $j ]['value'] = stripslashes( $data[ $routes_fields[ $i ]['fields'][ $j ]['id'] ] );
+								}
+							}
+						}
+					}
+				} else {
+					//fill the route fields with values
+					//all the route fields are saved in options array of coordinate
+					$mcount = count( $routes_fields );
+					for ( $i = 0; $i < $mcount; $i++ ) {
+						if( isset( $routes_fields[ $i ]['fields'] ) ) {
+							$fcount = count( $routes_fields[ $i ]['fields'] );
+							for ( $j = 0; $j < $fcount; $j++ ) {
+								if( isset( $data['options'][ $routes_fields[ $i ]['fields'][ $j ]['id'] ] ) ) {
+									$routes_fields[ $i ]['fields'][ $j ]['value'] = stripslashes( $data['options'][ $routes_fields[ $i ]['fields'][ $j ]['id'] ] );
+								}
 							}
 						}
 					}
@@ -719,17 +691,16 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 		 * @access private
 		 */
 		public function routes_save() {
-			global $wpdb, $MHS_TM_Admin_Maps, $MHS_TM_Maps, $MHS_TM_Admin_Routes;
+			global $wpdb, $MHS_TM_Admin_Maps, $MHS_TM_Maps;
 			
 			// save variables and sanitize 
-			$coordinates        = isset( $_POST['route'] ) ? $MHS_TM_Admin_Routes->sanitize_coordinates_array( json_decode( stripslashes( $_POST['route'] ) ) ) : [];
-			$path		        = isset( $_POST['path'] ) ? $MHS_TM_Admin_Routes->sanitize_path_array( json_decode( stripslashes( $_POST['path'] )  ) ) : [];
-			$route              = isset( $_POST['route'] ) ? json_decode( stripslashes( $_POST['route'] ) ) : [];
-			$name		        = isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : null;
-			$route_color        = isset( $_POST['route_color'] ) ? sanitize_text_field( $_POST['route_color'] ) : '#fff';
+			$coordinates            = isset( $_POST['route'] ) ? $MHS_TM_Maps->sanitize_coordinates_array( json_decode( stripslashes( $_POST['route'] ) ) ) : [];
+			$path		            = isset( $_POST['path'] ) ? $MHS_TM_Maps->sanitize_path_array( json_decode( stripslashes( $_POST['path'] )  ) ) : [];
+			$name		            = isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : null;
+			$route_color            = isset( $_POST['route_color'] ) ? sanitize_text_field( $_POST['route_color'] ) : '#000';
 			$dis_route_snap_to_road = $_POST['dis_route_snap_to_road'] == 1 ? 1 : 0;
-			$nonce_key	        = isset( $_POST['mhs_tm_route_save_nonce'] ) ? esc_attr( $_POST['mhs_tm_route_save_nonce'] ) : null;
-			$id			        = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
+			$nonce_key	            = isset( $_POST['mhs_tm_route_save_nonce'] ) ? esc_attr( $_POST['mhs_tm_route_save_nonce'] ) : null;
+			$id			            = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
 			
 			if ( NULL != $id ) {
 				$nonce = 'mhs_tm_route_save_' . $id;
@@ -811,108 +782,12 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				$messages = array(
 					'type'		 => 'updated',
 					'message'	 => __( 'Route successfully added!', 'mhs_tm' ),
-					'coordinate_json' => $route,
-					'coordinate' => $coordinates
+					'route_id' => $last_route_id,
 				);
 			}
 			
 			echo json_encode( $messages );
 			wp_die(); 
-		}
-
-		/**
-		 * Funktion to sanitize an path array
-		 *
-		 * @since 1.0
-		 * @access public
-		 */
-		public function sanitize_path_array( $array ) {
-			// Initialize the new array that will hold the sanitize values
-			$new_input = array();
-
-			if( is_array( $array ) ) {
-				// Loop through the input and sanitize each of the values
-				foreach ( $array as $key => $val ) {
-					if( isset( $array[ $key ] ) ) {
-						if( is_object( $array[ $key ] ) ) {
-							$new_input[ $key ] = (object) array( 
-								'lat' => (float)$val->lat, 
-								'lng' => (float)$val->lng 
-							);
-						} elseif ( is_array( $array[ $key ] ) ) {
-							$new_input[ $key ] = (object) array( 
-								'lat' => (float)$val['lat'], 
-								'lng' => (float)$val['lng'] 
-							);							
-						}
-					}
-				}
-			} else {
-				$new_input[0] = (int)sanitize_text_field( $array );
-			}
-			return $new_input;
-		}
-
-		/**
-		 * Funktion to sanitize an coordinates array
-		 *
-		 * @since 1.0
-		 * @access public
-		 */
-		public function sanitize_coordinates_array( $array ) {
-			global $MHS_TM_Admin_Utilities;
-			/* @var $MHS_TM_Admin_Utilities MHS_TM_Admin_Utilities */
-			
-			// Initialize the new array that will hold the sanitize values
-			$new_input = array();
-			
-			//filter to increase the allowed tags from wp_kses_post
-			$class = new MHS_TM_Admin_Utilities();
-			add_filter( 'wp_kses_allowed_html', array( $class, 'add_wpkses_tags' ), 10, 2 );
-
-			if( is_array( $array ) ) {
-				// Loop through the input and sanitize each of the values
-				foreach ( $array as $key => $val ) {
-					if( isset( $array[ $key ] ) ) {
-						if( is_object( $array[ $key ] ) ) {
-							$new_input[ $key ] = (object) array( 
-								'city'				=> sanitize_text_field( $val->city ), 
-								'country'			=> sanitize_text_field( $val->country ), 
-								'ishitchhikingspot' => $MHS_TM_Admin_Utilities->sanitize_checkbox( $val->ishitchhikingspot ), 
-								'ispartofaroute'	=> $MHS_TM_Admin_Utilities->sanitize_checkbox( $val->ispartofaroute ), 
-								'latitude'			=> floatval( $val->latitude ), 
-								'longitude'			=> floatval( $val->longitude ), 
-								'note'				=> balanceTags( wp_kses_post( $val->note ), true), 
-								'starttime'			=> substr( sanitize_text_field( $val->starttime ), 0, 10), 
-								'state'				=> sanitize_text_field( $val->state ), 
-								'street'			=> sanitize_text_field( $val->street ), 
-								'waitingtime'		=> intval( $val->waitingtime ), 
-								'dissnaptoroad'     => property_exists( $val, 'dissnaptoroad' ) && $val->dissnaptoroad == 1 ? 1 : 0,
-								'distance'		    => property_exists( $val, 'distance' ) ? intval( $val->distance ) : false, 
-							);
-						} elseif( is_array( $array[ $key ] ) ) {
-							$new_input[ $key ] = array( 
-								'city'				=> sanitize_text_field( $val['city'] ), 
-								'country'			=> sanitize_text_field( $val['country'] ), 
-								'ishitchhikingspot' => $MHS_TM_Admin_Utilities->sanitize_checkbox( $val['ishitchhikingspot'] ), 
-								'ispartofaroute'	=> $MHS_TM_Admin_Utilities->sanitize_checkbox( $val['ispartofaroute'] ), 
-								'latitude'			=> floatval( $val['latitude'] ), 
-								'longitude'			=> floatval( $val['longitude'] ), 
-								'note'				=> balanceTags( wp_kses_post( $val['note'] ), true), 
-								'starttime'			=> substr( sanitize_text_field( $val['starttime'] ), 0, 10), 
-								'state'				=> sanitize_text_field( $val['state'] ), 
-								'street'			=> sanitize_text_field( $val['street'] ), 
-								'waitingtime'		=> intval( $val['waitingtime'] ), 
-								'dissnaptoroad'     => array_key_exists( 'dissnaptoroad', $val ) && $val['dissnaptoroad'] == 1 ? 1 : 0, 
-								'distance'		    => array_key_exists( 'distance', $val ) ? intval( $val['distance'] ) : false,   
-							);							
-						}
-					}
-				}
-			} else {
-				$new_input[0] = (int)sanitize_text_field( $array );
-			}
-			return $new_input;
 		}
 	} // class
 

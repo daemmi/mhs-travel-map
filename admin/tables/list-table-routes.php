@@ -311,10 +311,7 @@ class List_Table_Routes extends WP_List_Table_My {
 			if ( is_numeric( $id ) && wp_verify_nonce( $nonce, 'mhs_tm_duplicate_route_' . $id ) ) {
 				$coordinates = array();
 				$coordinates = $MHS_TM_Maps->get_coordinates( $id, 'route' );
-
-				$coordinates[0]['coordinates']			= $MHS_TM_Admin_Routes->sanitize_coordinates_array( $coordinates[0]['coordinates'] );
-				$coordinates[0]['options']['path']		= $MHS_TM_Admin_Routes->sanitize_path_array( $coordinates[0]['options']['path'] );
-				$coordinates[0]['options']['name']		= sanitize_text_field( $coordinates[0]['options']['name'] );
+				
 				$coordinates[0]['options']['name']		= $coordinates[0]['options']['name'] . ' (Copy)';
 
 				$options = wp_json_encode( $coordinates[0]['options'] );
@@ -357,9 +354,6 @@ class List_Table_Routes extends WP_List_Table_My {
 						$coordinates = array();
 						$coordinates = $MHS_TM_Maps->get_coordinates( $route_id, 'route' );
 
-						$coordinates[0]['coordinates']			= $MHS_TM_Admin_Routes->sanitize_coordinates_array( $coordinates[0]['coordinates'] );
-						$coordinates[0]['options']['path']		= $MHS_TM_Admin_Routes->sanitize_path_array( $coordinates[0]['options']['path'] );
-						$coordinates[0]['options']['name']		= sanitize_text_field( $coordinates[0]['options']['name'] );
 						$coordinates[0]['options']['name']		= $coordinates[0]['options']['name'] . ' (Copy)';
 
 						$options = wp_json_encode( $coordinates[0]['options'] );
