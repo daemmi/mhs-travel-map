@@ -146,7 +146,7 @@ jQuery( function ( $ ) {
                 coordinates[map_canvas_id]['coordinates'][coordinate_index_global]['note'] = $('#wp_editor_dialog').val();
                 $( "#note_" + ( coordinate_index_global + 1 ) ).html( $('#wp_editor_dialog').val() );
             }
-            marker[map_canvas_id][coordinate_index_global].contentString =
+            marker[map_canvas_id][coordinate_index_global].content_string =
                 mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                     coordinates[map_canvas_id]['coordinates'][coordinate_index_global],
                     coordinates[map_canvas_id]['coordinates'] );
@@ -228,7 +228,7 @@ jQuery( function ( $ ) {
 
                 // make the content string for the gmap info window
                 for ( var x = 0; x < marker[map_canvas_id].length; x++ ) {
-                    marker[map_canvas_id][x].contentString =
+                    marker[map_canvas_id][x].content_string =
                         mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                             coordinates[map_canvas_id]['coordinates'][x],
                             coordinates[map_canvas_id]['coordinates']
@@ -304,7 +304,7 @@ jQuery( function ( $ ) {
             
                 // make the content string for the gmap info window
                 for ( var x = 0; x < marker[map_canvas_id].length; x++ ) {
-                    marker[map_canvas_id][x].contentString =
+                    marker[map_canvas_id][x].content_string =
                         mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                             coordinates[map_canvas_id]['coordinates'][x],
                             coordinates[map_canvas_id]['coordinates'] );
@@ -393,7 +393,7 @@ jQuery( function ( $ ) {
 
         // make the content string for all gmap info window
         for( var x = 0; x < coordinates[map_canvas_id]['coordinates'].length; x++ ) {
-            marker[map_canvas_id][x].contentString =
+            marker[map_canvas_id][x].content_string =
                 mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                     coordinates[map_canvas_id]['coordinates'][x],
                     coordinates[map_canvas_id]['coordinates'] );
@@ -593,7 +593,7 @@ jQuery( function ( $ ) {
                                 coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1],
                                 coordinates[0]['coordinates'] )
                             );
-                        marker[map_canvas_id][marker[map_canvas_id].length - 1].contentString =
+                        marker[map_canvas_id][marker[map_canvas_id].length - 1].content_string =
                             mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                                 coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1],
                                 coordinates[0]['coordinates'] );
@@ -605,7 +605,7 @@ jQuery( function ( $ ) {
                             coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1],
                             coordinates[0]['coordinates'] )
                         );
-                    marker[map_canvas_id][marker[map_canvas_id].length - 1].contentString =
+                    marker[map_canvas_id][marker[map_canvas_id].length - 1].content_string =
                         mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                             coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1],
                             coordinates[0]['coordinates'] );
@@ -642,7 +642,7 @@ jQuery( function ( $ ) {
                         draggable: true
                     } );
 
-                    marker[map_canvas_id][mark_counter].contentString = 
+                    marker[map_canvas_id][mark_counter].content_string = 
                         mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( 
                         coordinates[i]['coordinates'][j], coordinates[i]['coordinates'] );
                     
@@ -778,7 +778,7 @@ jQuery( function ( $ ) {
     function bind_marker_click_event( marker, map ) {
         google.maps.event.addListener( marker, 'click', function () {
                 map.setCenter( this.getPosition() );    
-                map.popup_window.show( this.contentString );            
+                map.popup_window.show( this.content_string );            
         } );
     }
 
@@ -808,12 +808,19 @@ jQuery( function ( $ ) {
     
     function get_geocoded_coordinate( coordinate_id, last_coordinate_id, callback ) {
         var element_id = coordinate_id + 1;
+        
+        if( typeof coordinates[map_canvas_id]['coordinates'][coordinate_id] === "undefined" ) {
+            $( "#mhs_tm_dialog_loading" ).dialog( "close" );
+            // do nothing
+            return;
+        }
+        
         //get geocode for all 3 parts of one coordinate
         mhs_tm_utilities.gmaps.geocode_lat_lng(
             coordinates[map_canvas_id]['coordinates'][coordinate_id]['latitude'],
             coordinates[map_canvas_id]['coordinates'][coordinate_id]['longitude'],
-            settings, function ( result_geocode ) { 
-                if( 'error' in result_geocode ) {
+            settings, function ( result_geocode ) {
+                if ( 'error' in result_geocode ) {
                     $( "#mhs_tm_dialog_loading" ).dialog( "close" );
                     // do nothing
                     return;
@@ -824,15 +831,15 @@ jQuery( function ( $ ) {
                     focusout_input( $( '#state_' + element_id ) );
                     $( '#city_' + element_id ).val( result_geocode['city'] );
                     focusout_input( $( '#city_' + element_id ) );
-                    
+
                     //check if lastcoordinate
-                    if( coordinate_id !== last_coordinate_id ) {
+                    if ( coordinate_id !== last_coordinate_id ) {
                         coordinate_id++;
                         get_geocoded_coordinate( coordinate_id, last_coordinate_id, callback );
                     } else {
                         callback();
                     }
-                } 
+                }
             } );
     }
 

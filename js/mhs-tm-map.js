@@ -7,6 +7,7 @@ mhs_tm_map = {
     marker: [],
     bounds: {},
     coordinates: {},
+    map_options: {},
     coord_center_lat: {},
     coord_center_lng: {},
     auto_load: {},
@@ -23,6 +24,7 @@ jQuery( function ( $ ) {
     $( '.mhs_tm-map' ).each( function ( index ) {
         var map_canvas_id = parseInt( $( this ).attr( 'id' ).replace( 'mhs_tm_map_canvas_', '' ) );
         mhs_tm_map.coordinates[map_canvas_id] = window["mhs_tm_app_vars_" + map_canvas_id].coordinates;
+        mhs_tm_map.map_options[map_canvas_id] = window["mhs_tm_app_vars_" + map_canvas_id].map_options;
         mhs_tm_map.coord_center_lat[map_canvas_id] = parseFloat( window["mhs_tm_app_vars_" + map_canvas_id].coord_center_lat );
         mhs_tm_map.coord_center_lng[map_canvas_id] = parseFloat( window["mhs_tm_app_vars_" + map_canvas_id].coord_center_lng );
         mhs_tm_map.auto_load[map_canvas_id] = window["mhs_tm_app_vars_" + map_canvas_id].auto_load;
@@ -57,6 +59,11 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
         document.getElementById( 'mhs-tm-gmap-popup-window-' + map_canvas_id ),
         document.getElementById( 'mhs-tm-gmap-show-info-' + map_canvas_id )
     );
+    //set content for statistics button
+    mhs_tm_map.map[map_canvas_id].popup_window.content_control =
+        mhs_tm_utilities.coordinate_handling.
+        get_contentstring_of_map( mhs_tm_map.coordinates[map_canvas_id],
+            mhs_tm_map.map_options[map_canvas_id].name );
         
     mhs_tm_map.bounds[map_canvas_id] = new google.maps.LatLngBounds();
     var mark_counter = 0;
@@ -145,7 +152,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
                 icon: pinIcon
             } );
             
-            mhs_tm_map.marker[map_canvas_id][i][mark_counter].contentString = 
+            mhs_tm_map.marker[map_canvas_id][i][mark_counter].content_string = 
                 mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( 
                 mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j], 
                 mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'] );
@@ -157,7 +164,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
                     'single_marker', this );
                 mhs_tm_map.map[map_canvas_id].setCenter( this.getPosition() ); 
                 setTimeout( function () {
-                    mhs_tm_map.map[map_canvas_id].popup_window.show( marker.contentString );
+                    mhs_tm_map.map[map_canvas_id].popup_window.show( marker.content_string );
                 }, 700 );
             } );
             

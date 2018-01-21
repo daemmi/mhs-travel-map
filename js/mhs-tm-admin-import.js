@@ -65,7 +65,7 @@ jQuery( function ( $ ) {
                 // remove last entry in results because its always empty
                 results['data'].splice(results['data'].length - 1, 1);
                 // sort results DESC through START_DATE_TIME column 
-                data = mhs_tm_utilities.utilities.sortResults(results['data'], 'START_DATE_TIME', 1);
+                data = mhs_tm_utilities.utilities.sort_results(results['data'], 'START_DATE_TIME', 1);
 
                 var start_date = $( "#mhs_tm_start_date" ).datepicker( "getDate" );
                 if ( !start_date ) {

@@ -7,6 +7,10 @@
     height: auto !important;    
 }
 
+.mhs-tm-map-message-title {
+    margin-bottom: 0px;
+}
+
 /*search box in gmap edit*/
 .mhs-tm-gmap-controls {
     margin: 10px;

@@ -36,7 +36,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 
 			$coordinates = array();
 			$coordinates = $this->get_coordinates( $map_id, 'map' );
-
+			$map_options = $this->get_map_options( $map_id );
 			
 			$output = '<div class="mhs_tm-map" id="mhs_tm_map_canvas_' . esc_attr( $map_id ) . '" style="height: ' .
 			esc_attr( $height ) . 'px; margin: 0; padding: 0;"></div>';
@@ -58,6 +58,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 				'coord_center_lng'	 => $coord_center_lng,
 				'auto_load'			 => true,
 				'map_id'			 => $map_id,
+				'map_options'		 => $map_options,
 				'plugin_dir'		 => MHS_TM_RELPATH
 			)
 			);
@@ -115,6 +116,27 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			}
 
 			return $coordinates;
+		}
+
+		/**
+		 * Funktion to get options of a map by id
+		 *
+		 * @since 1.0.6
+		 * @access public
+		 */
+		public function get_map_options( $id = NULL ) {
+			global $wpdb;
+			$table_name = $wpdb->prefix . 'mhs_tm_maps';
+
+			$maps = $wpdb->get_results( $wpdb->prepare(
+			'SELECT * FROM ' . $table_name . ' WHERE id = %d order by create_date DESC', $id ), ARRAY_A
+			);
+
+			$map_option_string	 = $maps[0]['options'];
+			$map_options		 = array();
+			$map_options		 = json_decode( $map_option_string, true );
+
+			return $map_options;
 		}
 
 		/**

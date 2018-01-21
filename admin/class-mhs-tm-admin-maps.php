@@ -183,27 +183,18 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 		 * @access private
 		 */
 		private function maps_edit( $id = NULL ) {
-			global $wpdb, $MHS_TM_Maps;
-			$table_name = $wpdb->prefix . 'mhs_tm_maps';
+			global $MHS_TM_Maps;
 
 			$url		 = 'admin.php?page=MHS_TM-maps';
 			$form_action = $url . '&amp;todo=save&amp;id=' . $id;
-
-			$maps = $wpdb->get_results( $wpdb->prepare(
-			'SELECT * FROM ' . $table_name . ' WHERE id = %d order by create_date DESC', $id ), ARRAY_A
-			);
-
-			$map_option_string	 = $maps[0]['options'];
-			$map_options		 = array();
-			$map_options		 = json_decode( $map_option_string, true );
-			$name				 = $map_options['name'];
 
 			if ( !is_numeric( $id ) ) {
 				$title	 = sprintf( __( 'Add New Map', 'mhs_tm' ) );
 				$fields	 = $this->maps_fields();
 				$nonce	 = 'mhs_tm_maps_save';
 			} else {
-				$title	 = sprintf( __( 'Edit &quot;%s&quot;', 'mhs_tm' ), $name );
+				$map_options		 = $MHS_TM_Maps->get_map_options( $id );
+				$title	 = sprintf( __( 'Edit &quot;%s&quot;', 'mhs_tm' ), $map_options['name'] );
 				$fields	 = $this->maps_fields( $id );
 				$nonce	 = 'mhs_tm_maps_save_' . $id;
 			}
