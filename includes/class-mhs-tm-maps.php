@@ -149,11 +149,14 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			'SELECT * FROM ' . $table_name . ' WHERE id = %d order by create_date DESC', $id ), ARRAY_A
 			);
 
-			$map_option_string	 = $maps[0]['options'];
-			$map_options		 = array();
-			$map_options		 = json_decode( $map_option_string, true );
+			if( sizeof( $maps ) >= 1 && array_key_exists ( 'options' , $maps[0] ) ) {
+				$map_option_string	 = $maps[0]['options'];
+				$map_options		 = array();
+				$map_options		 = json_decode( $map_option_string, true );
 
-			return $map_options;
+				return $map_options;
+			}
+			return false;
 		}
 
 		/**

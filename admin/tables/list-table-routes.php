@@ -93,6 +93,7 @@ class List_Table_Routes extends WP_List_Table_My {
 			case 'date':
 			case 'name':
 			case 'update':
+			case 'route_start_date':
 				return $item[ $column_name ];
 			default:
 				return print_r( $item, true ); //Show the whole array for troubleshooting purposes
@@ -173,11 +174,12 @@ class List_Table_Routes extends WP_List_Table_My {
 	function get_columns() {
 
 		$columns = array(
-			'cb'	 => '<input type="checkbox" />', //Render a checkbox instead of text
-			'name'	 => 'Name',
-			'update' => 'Last updated',
-			'date'	 => 'Create date',
-			'id'	 => 'ID'
+			'cb'	           => '<input type="checkbox" />', //Render a checkbox instead of text
+			'name'	           => 'Name',
+			'route_start_date' => 'Start date',
+			'update'           => 'Last updated',
+			'date'	           => 'Create date',
+			'id'	           => 'ID'
 		);
 		return $columns;
 	}
@@ -199,10 +201,11 @@ class List_Table_Routes extends WP_List_Table_My {
 	function get_sortable_columns() {
 
 		$sortable_columns = array(
-			'id'	 => array( 'id', false ),
-			'date'	 => array( 'date', false ), //true means it's already sorted
-			'update' => array( 'update', false ),
-			'name'	 => array( 'name', false )
+			'id'	           => array( 'id', false ),
+			'date'	           => array( 'date', false ), //true means it's already sorted 
+			'update'           => array( 'update', false ),
+			'route_start_date' => array( 'route_start_date', false ),
+			'name'	           => array( 'name', false )
 		);
 		return $sortable_columns;
 	}
@@ -415,7 +418,7 @@ class List_Table_Routes extends WP_List_Table_My {
 	 * @uses $this->set_pagination_args()
 	 * ************************************************************************ */
 	function prepare_items() {
-		global $wpdb; //This is used only if making any database queries
+		global $wpdb, $MHS_TM_Maps; //This is used only if making any database queries
 		$table_name = $wpdb->prefix . 'mhs_tm_routes';
 
 		/**
@@ -467,20 +470,23 @@ class List_Table_Routes extends WP_List_Table_My {
 		);
 
 		$id = 0;
+		$data = [];
 		foreach ( $routes as $route ) {
 
 			$date				 = $route['create_date'];
 			$update				 = $route['updated'];
-			$route_option_string = $route['options'];
 			$route_options		 = array();
-			$route_options		 = json_decode( $route_option_string, true );
-
-			date_default_timezone_set( 'Europe/Berlin' );
-			$data[ $id ]['date']	 = $date;
-			$data[ $id ]['update'] = $update;
-			$data[ $id ]['name']	 = $route_options['name'];
-			$data[ $id ]['id']	 = $route['id'];
-			$id						 = $id + 1;
+			$route_options		 = $MHS_TM_Maps->sanitize_coordinate_option_array( json_decode( $route['options'], true ) );
+			$route_coordinates	 = array();
+			$route_coordinates	 = $MHS_TM_Maps->sanitize_coordinates_array( json_decode( $route['coordinates'], true ) );
+			
+			date_default_timezone_set( 'Europe/London' );
+			$data[ $id ]['date']	         = $date;
+			$data[ $id ]['update']           = $update;
+			$data[ $id ]['name']	         = $route_options['name'];
+			$data[ $id ]['route_start_date'] = date( 'Y-m-d', $route_coordinates[0]['starttime'] );
+			$data[ $id ]['id']	             = $route['id'];
+			$id						         = $id + 1;
 		}
 
 		/**
@@ -492,7 +498,7 @@ class List_Table_Routes extends WP_List_Table_My {
 		 * sorting technique would be unnecessary.
 		 */
 		function usort_reorder( $a, $b ) {
-			$orderby_options = ['update', 'date', 'name', 'id'];
+			$orderby_options = ['update', 'date', 'name', 'id', 'route_start_date'];
 			$order_options   = ['DESC', 'ASC', 'desc', 'asc'];
 			
 			if ( isset( $_GET['orderby'], $_GET['order'] ) && in_array( $_GET['orderby'], $orderby_options ) && in_array( $_GET['order'], $order_options ) ) {
@@ -507,7 +513,7 @@ class List_Table_Routes extends WP_List_Table_My {
 			return ( $order === 'asc' ) ? $result : -$result; //Send final sort direction to usort
 		}
 
-		if ( NULL != $data ) {
+		if ( isset( $data ) && NULL != $data ) {
 			usort( $data, 'usort_reorder' );
 		}
 

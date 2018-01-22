@@ -381,6 +381,7 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( coord
     var content_string = '';
     var start_date = 999999999999999;
     var end_date = 0;
+    var lift_string = '';
     
     for ( var x = 0; x < coordinates.length; x++ ) {
         //check if route has coordinates
@@ -394,7 +395,11 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( coord
                 end_date = coordinates[x].coordinates[coordinates[x].coordinates.length - 1].starttime;
             } 
             
-            content_string += coordinates[x].options.name + '<br>';
+            content_string += coordinates[x].options.name + ' - ';
+            var coordinate_date = new Date( mhs_tm_utilities.utilities
+                .get_timestamp_minus_timezone_offset( parseInt( coordinates[x].coordinates[0].starttime ) ) * 1000 )
+                .toLocaleString( [ ], { year: 'numeric', month: 'numeric', day: 'numeric' } );
+            content_string += coordinate_date + '</br>';
 
             if ( mhs_tm_utilities.coordinate_handling.
                 get_coordinate_waiting_overview( coordinates[x].coordinates[coordinates[x].coordinates.length - 1],
@@ -417,18 +422,27 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( coord
                 if ( overview.journey_time_h > 0 ) {
                     journey_string += overview.journey_time_h + 'h ';
                 }
-                if ( overview.journey_time_min > 0 ) {
+                if ( overview.journey_time_h > 0 && overview.journey_time_min > 0 || 
+                    overview.journey_time_h === 0 ) {
                     journey_string += overview.journey_time_min + 'min';
                 }
 
-                waited_string = 'Waited: ';
-                if ( overview.waiting_time_h > 0 ) {
-                    waited_string += overview.waiting_time_h + 'h ';
+                waited_string = '';
+                if( overview.waiting_time_h > 0 || overview.waiting_time_min > 0 ) {
+                    waited_string += ' | Waited: ';
+                    if ( overview.waiting_time_h > 0 ) {
+                        waited_string += overview.waiting_time_h + 'h ';
+                    }
+                    if ( overview.waiting_time_h > 0 && overview.waiting_time_min > 0 || 
+                        overview.waiting_time_h === 0 ) {
+                        waited_string += overview.waiting_time_min + 'min';
+                    }
                 }
-                if ( overview.waiting_time_min > 0 ) {
-                    waited_string += overview.waiting_time_min + 'min';
+                
+                if( overview.lifts > 0 ) {
+                    content_string += overview.lifts + ' lifts | ';
                 }
-                content_string += overview.lifts + ' lifts | ' + journey_string + ' | ' + waited_string;
+                content_string += journey_string + waited_string;
                 lifts_total += overview.lifts;
                 journey_total_h += overview.journey_time_h;
                 journey_total_min += overview.journey_time_min;
@@ -441,7 +455,7 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( coord
                     var distance = mhs_tm_utilities.coordinate_handling.
                         get_coordinate_distance_overview( coordinates[x].coordinates[coordinates[x].coordinates.length - 1],
                             coordinates[x].coordinates );
-                    content_string += ' | Total distance: ' + distance.total_distance + ') <br> <br>  ';
+                    content_string += ' | Total distance: ' + distance.total_distance + 'km) <br> <br>  ';
 
                     total_distance += distance.total_distance;
                 } else {
@@ -453,11 +467,15 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( coord
                 distance = mhs_tm_utilities.coordinate_handling.
                     get_coordinate_distance_overview( coordinates[x].coordinates[coordinates[x].coordinates.length - 1],
                         coordinates[x].coordinates );
-                content_string += ' | Total distance: ' + distance.total_distance + ') <br> <br>  ';
+                content_string += ' | Total distance: ' + distance.total_distance + 'km) <br> <br>  ';
 
                 total_distance += distance.total_distance;
             }    
         }
+    }
+    
+    if( lifts_total > 0 ) {
+        lift_string = lifts_total + ' lifts | ';
     }
     
     journey_string = 'Journey: ';
@@ -468,20 +486,22 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( coord
         journey_string += (  mhs_tm_utilities.utilities.get_days_from_hours( journey_total_h ).hours + 
             mhs_tm_utilities.utilities.get_hours_from_minutes( journey_total_min ).hours ) + 'h ';
     }
-    if( journey_total_min > 0) {
+    if( journey_total_h > 0 && journey_total_min > 0 || journey_total_h === 0 ) {
         journey_string += mhs_tm_utilities.utilities.get_hours_from_minutes( journey_total_min ).minutes + 'min';
     }
 
-    waited_string = 'Waited: ';
-    if( waited_total_h > 24) {
-        waited_string += ( mhs_tm_utilities.utilities.get_days_from_hours( waited_total_h ).days ) + 'd ';
-    }
-    if( waited_total_h > 0) {
-        waited_string += (  mhs_tm_utilities.utilities.get_days_from_hours( waited_total_h ).hours + 
-            mhs_tm_utilities.utilities.get_hours_from_minutes( waited_total_min ).hours ) + 'h ';
-    }   
-    if( waited_total_min > 0) {
-        waited_string += mhs_tm_utilities.utilities.get_hours_from_minutes( waited_total_min ).minutes + 'min';
+    if( waited_total_h > 0 || waited_total_min > 0 ) {
+        waited_string = ' | Waited: ';
+        if( waited_total_h > 24 ) {
+            waited_string += ( mhs_tm_utilities.utilities.get_days_from_hours( waited_total_h ).days ) + 'd ';
+        }
+        if( waited_total_h > 0 ) {
+            waited_string += (  mhs_tm_utilities.utilities.get_days_from_hours( waited_total_h ).hours + 
+                mhs_tm_utilities.utilities.get_hours_from_minutes( waited_total_min ).hours ) + 'h ';
+        }   
+        if( waited_total_h > 0 && waited_total_min > 0 || waited_total_h === 0 ) {
+            waited_string += mhs_tm_utilities.utilities.get_hours_from_minutes( waited_total_min ).minutes + 'min';
+        }
     }
 
     start_date = new Date( mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset( parseInt( start_date ) ) * 1000 )
@@ -493,7 +513,7 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( coord
     var header_string = '<div class="mhs-tm-map-message"> <p class="mhs-tm-map-message-title"> \n\
                         <b style="font-size: 150%;">' + map_name + '</b> <br>' + 
                         start_date + ' to ' + end_date + '<br>' +
-                        journey_string + ' | ' + waited_string + ' | ' +
+                        lift_string + journey_string + waited_string + ' | ' +
                         'Distance: ' + total_distance + 'km </p> <hr> \n\
                         <p class="mhs-tm-map-message-content">';
 

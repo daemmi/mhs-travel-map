@@ -384,6 +384,7 @@ class List_Table_Maps extends WP_List_Table_My {
 		);
 
 		$id = 0;
+		$data = [];
 		foreach ( $maps as $map ) {
 
 			$date				 = $map['create_date'];
