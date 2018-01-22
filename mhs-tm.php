@@ -57,8 +57,8 @@ function MHS_TM_enqueue() {
 	wp_register_script( 'mhs_tm_utilities', MHS_TM_RELPATH . 'js/mhs-tm-utilities.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.1' );
 	    
 	/* register styles */
-    wp_register_style( 'mhs_tm_map_style', MHS_TM_RELPATH . 'css/mhs-tm-map.css', false, '1.0.1' );
     wp_register_style( 'mhs_tm_jquery_style', MHS_TM_RELPATH . 'css/jquery-ui/jquery-ui.css', false, '1.12.1' );
+    wp_register_style( 'mhs_tm_map_style', MHS_TM_RELPATH . 'css/mhs-tm-map.css', false, '1.0.1' );
 	
 	/* enqueue scripts */
 	wp_enqueue_script( 'google_jsapi' );
@@ -116,14 +116,14 @@ function MHS_TM_admin_enqueue() {
 	wp_register_script( 'mhs_tm_map', MHS_TM_RELPATH . 'js/mhs-tm-map.js', array(), '1.0.1' );
 	wp_register_script( 'mhs_tm_map_edit', MHS_TM_RELPATH . 'js/mhs-tm-map-edit.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery-ui-datepicker' ), '1.0.1' );
 	wp_register_script( 'spectrum', MHS_TM_RELPATH . 'js/spectrum.js', array(), '1.0.0' );
-        
-        /* register styles */
+
+	/* register styles */
+    wp_register_style( 'mhs_tm_admin_jquery_style', MHS_TM_RELPATH . 'css/jquery-ui/jquery-ui.css', false, '1.12.1' );
 	wp_register_style( 'jquery_datetimepicker_style', MHS_TM_RELPATH . 'css/jquery.datetimepicker.min.css', false, '1.0.0'  );
 	wp_register_style( 'mhs_tm_admin_style', MHS_TM_RELPATH . 'css/mhs-tm-admin.css', false, '1.0.1' );
 	wp_register_style( 'mhs_tm_admin_page_style', MHS_TM_RELPATH . 'css/mhs-tm-admin-page.css', false, '1.0.1' );
 	wp_register_style( 'mhs_tm_admin_form_style', MHS_TM_RELPATH . 'css/mhs-tm-admin-form.css', false, '1.0.1' );
 	wp_register_style( 'mhs_tm_loading_overlay_style', MHS_TM_RELPATH . 'css/mhs-tm-loading-overlay.css', false, '1.0.1' );
-    wp_register_style( 'mhs_tm_admin_jquery_style', MHS_TM_RELPATH . 'css/jquery-ui/jquery-ui.css', false, '1.12.1' );
     wp_register_style( 'mhs_tm_map_style', MHS_TM_RELPATH . 'css/mhs-tm-map.css', false, '1.0.1' );
 	wp_register_style( 'spectrum', MHS_TM_RELPATH . 'css/spectrum.css', false, '1.0.0' );
         
@@ -134,15 +134,15 @@ function MHS_TM_admin_enqueue() {
     wp_enqueue_script( 'google_jsapi' );
     wp_enqueue_script( 'spectrum' );
         
-	/* enqueue stylesheets */
+	/* enqueue stylesheets */   
+	wp_enqueue_style( 'mhs_tm_map_style' );
+	wp_enqueue_style( 'spectrum' );   
 	wp_enqueue_style( 'mhs_tm_admin_style' );
 	wp_enqueue_style( 'mhs_tm_admin_page_style' );
 	wp_enqueue_style( 'mhs_tm_admin_form_style' );
 	wp_enqueue_style( 'mhs_tm_loading_overlay_style' );
-	wp_enqueue_style( 'mhs_tm_admin_jquery_style' ); 
 	wp_enqueue_style( 'jquery_datetimepicker_style' ); 
-	wp_enqueue_style( 'mhs_tm_map_style' );    
-	wp_enqueue_style( 'spectrum' );       
+	wp_enqueue_style( 'mhs_tm_admin_jquery_style' );      
 
 	/* localize */
         
@@ -168,7 +168,6 @@ require_once ( MHS_TM_ABSPATH . '/includes/class-mhs-tm-utilities.php' );
  */
 $GLOBALS['MHS_TM_Maps'] = new MHS_TM_Maps();
 $GLOBALS['MHS_TM_Utilities'] = new MHS_TM_Utilities();
-
 
 /**
  * Admin UI
@@ -202,9 +201,6 @@ if ( is_admin() ) {
 	$GLOBALS['MHS_TM_Admin_Settings'] = new MHS_TM_Admin_Settings();
 	$GLOBALS['MHS_TM_Admin_Utilities'] = new MHS_TM_Admin_Utilities();
 
-	
-	
-            
 	/**
 	 * MHS_TM_Admin ajax
 	 *

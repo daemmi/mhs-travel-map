@@ -218,7 +218,7 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			$form	 = new MHS_TM_Admin_Form( $args );
 
 			echo $adminpage->top();
-			echo do_shortcode( '[mhs-travel-map map_id=' . $id . '] </br>' );
+			echo do_shortcode( '[mhs-travel-map map_id=' . $id . ' run_shortcodes=0] </br>' );
 			echo $form->output();
 			echo $adminpage->bottom();
 

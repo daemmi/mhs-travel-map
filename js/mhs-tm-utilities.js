@@ -212,16 +212,21 @@ jQuery( function ( $ ) {
         this.gmap_div = gmap_div;
         this.popup_div = popup_div;
         this.control_button = control_button;
-
+        this.popup_div_content_before = $( this.popup_div ).html();
+        
         //add aditonal div to the popup div
         $( this.popup_div ).html( '<div class="mhs-tm-gmap-popup-window-inner">\n\
         <a class="mhs-tm-gmap-popup-window-close" href="javascript:void(0)"> \n\
         <span class="ui-icon ui-icon-white ui-icon-closethick"></span> </a> </div> \n\
-        <div class="mhs-tm-gmap-popup-window-content"> </div>' );
+        <div class="mhs-tm-gmap-popup-window-content">\n\
+        <div class="mhs-tm-gmap-popup-window-new"></div> \n\
+        <div class="mhs-tm-gmap-popup-window-content-before">' + this.popup_div_content_before + '</div> </div> ');
 
         this.popup_div_close = $( this.popup_div ).find( '.mhs-tm-gmap-popup-window-close' );
         this.popup_div_inner = $( this.popup_div ).find( '.mhs-tm-gmap-popup-window-inner' );
         this.popup_div_content = $( this.popup_div ).find( '.mhs-tm-gmap-popup-window-content' );
+        this.popup_div_content_new = $( this.popup_div ).find( '.mhs-tm-gmap-popup-window-new' );
+        this.popup_div_content_before = $( this.popup_div ).find( '.mhs-tm-gmap-popup-window-content-before' );
         this.content_control = '';
 
         this.show_control_button = function () {
@@ -246,7 +251,7 @@ jQuery( function ( $ ) {
                 'left': 0,
                 'z-index': 1000000000000
             } );
-            $( this.popup_div_content ).html( content );
+            $( this.popup_div_content_new ).html( content );
             $( this.popup_div ).fadeIn();
 
             $( this.popup_div_inner ).css( {
@@ -265,6 +270,9 @@ jQuery( function ( $ ) {
 
         this.hide = function () {
             $( this.popup_div ).fadeOut();
+            $( this.popup_div_content_before ).children('div').each(function () {
+                $( this ).fadeOut();
+            });
         };
 
         this.set_size = function () {
@@ -338,7 +346,7 @@ mhs_tm_utilities.coordinate_handling.get_title = function ( coordinate, coordina
     }
     var coordinate_date = new Date( mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset( parseInt( coordinate.starttime ) ) * 1000 )
         .toLocaleString( [], { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' } );
-    content_string += coordinate_date + '</br>';
+    content_string += coordinate_date + ' - ';
 
     if ( mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview( coordinate, coordinates ) ||
         mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ) ) {
@@ -545,8 +553,7 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = function 
 
 
     if ( coordinate.note !== null && coordinate.note !== undefined && coordinate.note !== '' ) {
-        content_string += '<hr> <p class="mhs-tm-map-message-content">' +
-            mhs_tm_utilities.utilities.stripslashes( coordinate.note ) + '</p>';
+        content_string += '<hr>';
     }
     content_string += '</div>';
 

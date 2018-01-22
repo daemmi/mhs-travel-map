@@ -109,10 +109,6 @@ from .gm-style class*/
     width: 100% !important;
 }
 
-.ui-icon-white {
-  background-image: url("jquery-ui/images/ui-icons_ffffff_256x240.png");
-}
-
 .mhs-tm-gmap-popup-window-close {
     z-index: 1;
     position: absolute;
@@ -146,4 +142,8 @@ from .gm-style class*/
     background-image: -o-linear-gradient(top, #9e9e9e, #4f4f4f);
     background-image: linear-gradient(to bottom, #9e9e9e, #4f4f4f);
     text-decoration: none;
+}
+
+.mhs-tm-gmap-popup-window-close .ui-icon-white {
+  background-image: url("jquery-ui/images/ui-icons_ffffff_256x240.png") !important;
 }

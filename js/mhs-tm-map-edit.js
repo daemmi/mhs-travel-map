@@ -316,9 +316,8 @@ jQuery( function ( $ ) {
                         );
                 }
                 
-                //if no id in url ne saved map has now a id so change url
+                //if no id in url new saved map has now a id so change url
                 if( getUrlParameter( 'id' ) === undefined ) {
-                    console.log(window.location.href.replace( '&todo=new', '&todo=edit&id=' + response.route_id ) );
                     window.location.replace(window.location.href.replace( '&todo=new', '&todo=edit&id=' + response.route_id ));                    
                 }
 

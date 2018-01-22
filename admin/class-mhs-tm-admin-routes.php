@@ -118,6 +118,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			. '<div class="mhs_tm-map" id="mhs_tm_map_canvas_0" style="height: ' . esc_attr( $height ) . 'px; margin-right: auto ; margin-left: auto ; padding: 0;"></div>'
 			. '</div>';
 
+
 			$key = $MHS_TM_Utilities->get_gmaps_api_key();
 			
 			wp_register_script( 'googlemap', 'https://maps.googleapis.com/maps/api/js?key=' . $key, true );
@@ -305,15 +306,18 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 		 * @access private
 		 */
 		private function routes_import( $id = NULL ) {
-			global $wpdb, $MHS_TM_Admin_Settings, $MHS_TM_Utilities;
+			global $MHS_TM_Utilities;
 
 			$url		 = 'admin.php?page=MHS_TM-routes';
 			$form_action = '';
 			$title		 = sprintf( __( 'Import new Route(s)', 'mhs_tm' ) );
 
+			//dummy options array
+			$map_options = [];
+			
 			$button			 = '<input id="mhs_tm_start_import" type="submit" disabled="disabled" class="mhs_tm_prim_button button" value="+ ' . __( 'Start import', 'mhs_tm' ) . '" />';
 			$button_save_all = '<input id="mhs_tm_save_all" type="submit" class="mhs_tm_prim_button button" value="+ ' . __( 'Save all listed routes', 'mhs_tm' ) . '" />';
-
+						
 			$adminpage = new MHS_TM_Admin_Page( array(
 				'title'	 => $title,
 				'url'	 => $url
@@ -373,6 +377,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				'coord_center_lat'	 => 46.3682855,
 				'coord_center_lng'	 => 14.4170272,
 				'auto_load'			 => false,
+				'map_options'		 => $map_options,
                 'plugin_dir'	     => MHS_TM_RELPATH
 			)
 			);
@@ -685,7 +690,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 		}
 
 		/**
-		 * Routes save function
+		 * Routes save function (ajax)
 		 *
 		 * @since 1.0
 		 * @access private

@@ -33,7 +33,7 @@ jQuery( function ( $ ) {
         {
             //set gmap window size
             mhs_tm_utilities.utilities.set_div_16_9( '#mhs_tm_map_canvas_' + map_canvas_id );
-            google.maps.event.addDomListener( window, 'load', mhs_tm_map.gmap_initialize( map_canvas_id ) );
+            google.maps.event.addDomListener( window, 'load', mhs_tm_map.gmap_initialize( map_canvas_id, 'map' ) );
         }
         
         $( window ).resize( function () {
@@ -43,7 +43,7 @@ jQuery( function ( $ ) {
     } );
 } );
 
-mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
+mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
     var mapOptions = {
         center: { lat: mhs_tm_map.coord_center_lat[map_canvas_id], lng: mhs_tm_map.coord_center_lng[map_canvas_id] },
         zoom: 5,
@@ -51,19 +51,31 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
     };
     mhs_tm_map.route_path[map_canvas_id] = [];
     mhs_tm_map.map[map_canvas_id] = new google.maps.Map( document.getElementById( 'mhs_tm_map_canvas_' + map_canvas_id ),
-        mapOptions );    
-    //Make ne popup window for the map
-    mhs_tm_map.map[map_canvas_id].popup_window = new mhs_tm_utilities.gmaps.popup_window(
-        mhs_tm_map.map[map_canvas_id], 
-        document.getElementById( 'mhs_tm_map_canvas_' + map_canvas_id ),
-        document.getElementById( 'mhs-tm-gmap-popup-window-' + map_canvas_id ),
-        document.getElementById( 'mhs-tm-gmap-show-info-' + map_canvas_id )
-    );
-    //set content for statistics button
-    mhs_tm_map.map[map_canvas_id].popup_window.content_control =
-        mhs_tm_utilities.coordinate_handling.
-        get_contentstring_of_map( mhs_tm_map.coordinates[map_canvas_id],
-            mhs_tm_map.map_options[map_canvas_id].name );
+        mapOptions );   
+        
+    //if type route no content for statistics and no button
+    if ( type === 'route' ) { 
+        //Make new popup window for the map
+        mhs_tm_map.map[map_canvas_id].popup_window = new mhs_tm_utilities.gmaps.popup_window(
+            mhs_tm_map.map[map_canvas_id], 
+            document.getElementById( 'mhs_tm_map_canvas_' + map_canvas_id ),
+            document.getElementById( 'mhs-tm-gmap-popup-window-' + map_canvas_id ),
+            document.getElementById( '' )
+        );
+    } else {
+        //Make new popup window for the map
+        mhs_tm_map.map[map_canvas_id].popup_window = new mhs_tm_utilities.gmaps.popup_window(
+            mhs_tm_map.map[map_canvas_id], 
+            document.getElementById( 'mhs_tm_map_canvas_' + map_canvas_id ),
+            document.getElementById( 'mhs-tm-gmap-popup-window-' + map_canvas_id ),
+            document.getElementById( 'mhs-tm-gmap-show-info-' + map_canvas_id )
+        );
+        //set content for statistics button
+        mhs_tm_map.map[map_canvas_id].popup_window.content_control =
+            mhs_tm_utilities.coordinate_handling.
+            get_contentstring_of_map( mhs_tm_map.coordinates[map_canvas_id],
+                mhs_tm_map.map_options[map_canvas_id].name );        
+    }
         
     mhs_tm_map.bounds[map_canvas_id] = new google.maps.LatLngBounds();
     var mark_counter = 0;
@@ -152,10 +164,13 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
                 icon: pinIcon
             } );
             
-            mhs_tm_map.marker[map_canvas_id][i][mark_counter].content_string = 
-                mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( 
-                mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j], 
-                mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'] );
+            mhs_tm_map.marker[map_canvas_id][i][mark_counter].content_string =
+                mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
+                    mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j],
+                    mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'] );
+                
+            mhs_tm_map.marker[map_canvas_id][i][mark_counter].note_div_id =
+                'note_output_' + map_canvas_id + '-' + i + '-' + mark_counter;
             
             mhs_tm_map.marker[map_canvas_id][i][mark_counter].addListener('click', function() {
                 var marker = this;
@@ -164,6 +179,8 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id ) {
                     'single_marker', this );
                 mhs_tm_map.map[map_canvas_id].setCenter( this.getPosition() ); 
                 setTimeout( function () {
+                    document.getElementById( marker.note_div_id )
+                    .style.display = '';
                     mhs_tm_map.map[map_canvas_id].popup_window.show( marker.content_string );
                 }, 700 );
             } );

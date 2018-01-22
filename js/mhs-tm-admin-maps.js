@@ -14,6 +14,6 @@ jQuery( function ( $ ) {
             mhs_tm_map.coordinates[map_canvas_id].push( coordinates_all[$( this ).val()][0] );
         } );
 
-        google.maps.event.addDomListener( window, 'load', mhs_tm_map.gmap_initialize( map_canvas_id ) );
+        google.maps.event.addDomListener( window, 'load', mhs_tm_map.gmap_initialize( map_canvas_id, 'map' ) );
     } );
 } );

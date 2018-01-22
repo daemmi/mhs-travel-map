@@ -25,7 +25,8 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 				'map_id'			 => 0,
 				'coord_center_lat'	 => 54.0237934,
 				'coord_center_lng'	 => 9.3754401,
-				'height'			 => 500
+				'height'			 => 500,
+				'run_shortcodes'	 => 1
 			), $atts ) );
 
 			//validate shortcode_atts
@@ -33,10 +34,25 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			$height				 = (int) $height;
 			$coord_center_lng	 = (float) $coord_center_lng;
 			$coord_center_lat	 = (float) $coord_center_lat;
-
+			$run_shortcodes		 = $run_shortcodes == 1 ? 1 : 0;
+			
 			$coordinates = array();
 			$coordinates = $this->get_coordinates( $map_id, 'map' );
 			$map_options = $this->get_map_options( $map_id );
+			
+			//display all note and do shortcodes
+			$note_output = '';
+			foreach ( $coordinates as $key => $coordinate ) {
+				foreach ( $coordinate['coordinates'] as $key2 => $coordinate_coordinate ) {
+					if( $run_shortcodes ) {
+						$coordinates[$key]['coordinates'][$key2]['note'] = do_shortcode( balanceTags( wp_kses_post( $coordinate_coordinate['note'] ), true ) );
+					} else {
+						$coordinates[$key]['coordinates'][$key2]['note'] = balanceTags( wp_kses_post( $coordinate_coordinate['note'] ), true );
+					}
+					$note_output .= '<div  style="display: none;" id="note_output_' . $map_id . '-' . $key . '-' . $key2 . '">' . 
+					$coordinates[$key]['coordinates'][$key2]['note'] . '</div>';
+				}
+			}
 			
 			$output = '<div class="mhs_tm-map" id="mhs_tm_map_canvas_' . esc_attr( $map_id ) . '" style="height: ' .
 			esc_attr( $height ) . 'px; margin: 0; padding: 0;"></div>';
@@ -44,7 +60,8 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			$output .= '<div id="mhs-tm-gmap-show-info-' . esc_attr( $map_id ) . '" 
 				class="mhs-tm-gmap-controls mhs-tm-gmap-controls-button">Statistics</div>';
 			//div for gmaps popup window
-			$output .= '<div id="mhs-tm-gmap-popup-window-' . esc_attr( $map_id ) . '" class="mhs-tm-gmap-popup-window"></div>';
+			$output .= '<div id="mhs-tm-gmap-popup-window-' . esc_attr( $map_id ) . '" class="mhs-tm-gmap-popup-window">' . 
+			$note_output . '</div>';
 
 			$key = $MHS_TM_Utilities->get_gmaps_api_key();
 
@@ -66,7 +83,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			return $output;
 		}
 
-		/*		 * ****************************************************************************
+		/* *****************************************************************************
 		 * Utilities
 		 * **************************************************************************** */
 

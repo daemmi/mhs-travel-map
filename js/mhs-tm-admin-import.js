@@ -142,7 +142,7 @@ jQuery( function ( $ ) {
                             mhs_tm_map.coord_center_lat[0] = parseFloat( window["mhs_tm_app_vars_0"].coord_center_lat );
                             mhs_tm_map.coord_center_lng[0] = parseFloat( window["mhs_tm_app_vars_0"].coord_center_lng );
 
-                            mhs_tm_map.gmap_initialize( 0 );
+                            mhs_tm_map.gmap_initialize( 0, 'route' );
                         }
                     } );
 
@@ -173,6 +173,7 @@ jQuery( function ( $ ) {
                     mhs_tm_map.coordinates[map_canvas_id][0] = [ ];
                     mhs_tm_map.coordinates[map_canvas_id][0]['coordinates'] = [ ];
                     mhs_tm_map.coordinates[map_canvas_id][0]['options'] = [];
+                    mhs_tm_map.coordinates[map_canvas_id][0]['options'].name = 'Route';
                     mhs_tm_map.coordinates[map_canvas_id][0]['coordinates'] = routes[id_number];
 
                     //calculate path of coordinate
@@ -185,7 +186,7 @@ jQuery( function ( $ ) {
 
                         mhs_tm_map.coord_center_lat[map_canvas_id] = parseFloat( window["mhs_tm_app_vars_0"].coord_center_lat );
                         mhs_tm_map.coord_center_lng[map_canvas_id] = parseFloat( window["mhs_tm_app_vars_0"].coord_center_lng );
-                        mhs_tm_map.gmap_initialize( map_canvas_id );
+                        mhs_tm_map.gmap_initialize( map_canvas_id, 'route' );
 
                         $( "#mhs_tm_dialog_loading" ).dialog( "close" );
                     } );
@@ -205,29 +206,36 @@ jQuery( function ( $ ) {
 
         var html = ' <div class="mhs_tm_box_item"" id="mhs_tm_list_item_new_' + id + '"> \n\
                     <h3 class="no-hover" style="overflow: auto;">';
-
+        var name = '';
         if ( route[0]['city'] )
         {
             html += route[0]['city'];
+            name += route[0]['city'];
         } else if ( route[0]['state'] )
         {
             html += route[0]['state'];
+            name += route[0]['state'];
         } else if ( route[0]['country'] )
         {
             html += route[0]['country'];
+            name += route[0]['country'];
         }
 
         html += ' to ';
+        name += ' to ';
 
         if ( route[route.length - 1]['city'] )
         {
             html += route[route.length - 1]['city'];
+            name += route[route.length - 1]['city'];
         } else if ( route[route.length - 1]['state'] )
         {
             html += route[route.length - 1]['state'];
+            name += route[route.length - 1]['state'];
         } else if ( route[route.length - 1]['country'] )
         {
             html += route[route.length - 1]['country'];
+            name += route[route.length - 1]['country'];
         }
         // time * 1000 because time is in seconds and Date() calculates in milliseconds
         html += ' (' +
@@ -235,12 +243,25 @@ jQuery( function ( $ ) {
             toLocaleString( [ ], { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' } ) +
             ' / ' + new Date( parseInt( route[route.length - 1]['starttime'] * 1000 ) ).
             toLocaleString( [ ], { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' } ) + ')';
-
+        name += ' (' +
+            new Date( parseInt( route[0]['starttime'] * 1000 ) ).
+            toLocaleString( [ ], { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' } ) +
+            ' / ' + new Date( parseInt( route[route.length - 1]['starttime'] * 1000 ) ).
+            toLocaleString( [ ], { year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' } ) + ')';
+        
+        //set map name
+        mhs_tm_map.map_options[id] = { 'name': name };
+        
         html += mhs_tm_utilities.utilities.get_buttons( id );
 
         html += '<div id="map" class="collapse ">\n\
-        <div class="mhs_tm-map" id="mhs_tm_map_canvas_' + id + '" style="height: 500px; margin: 0; padding: 0;"></div>\n\
+        <div class="mhs_tm-map" id="mhs_tm_map_canvas_' + id + 
+            '" style="height: 500px; margin: 0; padding: 0;"></div>\n\
         </div>';
+        //div for gmaps popup window
+        html += '<div id="mhs-tm-gmap-popup-window-' + id + 
+            '" class="mhs-tm-gmap-popup-window"></div>';
+
 
         html += '</div>';
 
@@ -249,7 +270,7 @@ jQuery( function ( $ ) {
         $( '#mhs_tm_list' ).accordion( "refresh" );
 
 
-    }
+    };
 
     //save sequentiel all listed routes
     save_all = function() {
@@ -270,7 +291,7 @@ jQuery( function ( $ ) {
                 }, 500);                       
             } );
         }
-    }
+    };
 
     save_route = function( id_number, id ) {
         var name = '';
@@ -345,5 +366,5 @@ jQuery( function ( $ ) {
                 );
             } );
         }
-    }
+    };
 } );

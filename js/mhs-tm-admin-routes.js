@@ -43,7 +43,23 @@ jQuery( function ( $ ) {
 
         $( "#mhs_tm_dialog_info" ).dialog( "option", "width", window_width + ( window_width * 0.05 ) );
         $( "#mhs_tm_dialog_info" ).dialog( "open" );
+        
+        //div for gmaps popup window
+         $( "#mhs_tm_dialog_info" ).append( '<div id="mhs-tm-gmap-popup-window-0" class="mhs-tm-gmap-popup-window"></div>' );
 
-        mhs_tm_map.gmap_initialize( 0 );
+        mhs_tm_map.gmap_initialize( 0, 'route' );
+        
+        //get note content div
+        //delte old content
+        var popup_window_before = $( '#mhs-tm-gmap-popup-window-0' ).find( '.mhs-tm-gmap-popup-window-content-before' );
+        $( popup_window_before ).html('');
+        //fill with content again
+        var html = '';
+        for ( var i = 0; i < mhs_tm_map.coordinates[0][0]['coordinates'].length; ++i ) {
+            html = '<div  style="display: none;" id="note_output_0-0-' + i + '">' + 
+                mhs_tm_map.coordinates[0][0]['coordinates'][i].note + '</div>';
+            
+            $( popup_window_before ).append( html );
+        }
     } );
 } );
