@@ -138,7 +138,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 		/**
 		 * Funktion to get options of a map by id
 		 *
-		 * @since 1.0.6
+		 * @since 1.1.0
 		 * @access public
 		 */
 		public function get_map_options( $id = NULL ) {

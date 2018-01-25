@@ -17,7 +17,7 @@ Android app `My Hitchhiking Spots`
 Create your travel map with use of [google maps api](https://developers.google.com/maps/terms) 
 by adding coordinates to a map, make your route public, write a story for each 
 coordinate and import backup files from the Android app 
-[My Hitchhiking Spots](https://play.google.com/store/apps/details?id=com.myhitchhikingspots)
+[My Hitchhiking Spots](https://play.google.com/store/apps/details?id=com.myhitchhikingspots).
 
 = Features =
 
@@ -26,8 +26,12 @@ coordinate and import backup files from the Android app
 * add coordinates to the route
 * add coordinates which are not on the route
 * write to each coordinate a story by using the wordpress text editor
+* it will work with shortcodes
 * add to each coordinate start time and waiting time
-* for each route the total waiting time and the number of lifts will be calculated
+* for each route the total waiting time, the number of lifts, journey time and distance will be calculated
+* geocode your coordinate automatically
+* set the colour of each route
+* get a whole statistic about all route in one map
 
 == Installation ==
 
@@ -46,17 +50,37 @@ This section describes how to install and use the plugin.
 
 == Changelog ==
 
+= 1.1.0 (2018-01-XX) =
+- added, colour for route path
+- added, import settings
+- added, snap to rod settings in editor
+- added, more interaction in front end map
+- added, calculation of distance 
+- added, geocoding for coordinates
+- added, front end map will set size automatically to 16:9
+- added, general settings for editor
+- added, searchbox in editor
+- added, popup window for map will open if marker is pressed
+- added, statistics about distance, waiting tie, journey time and lifts for all
+  route in a map
+- changed, loading spinner and update message are sticked to window  
+- changed, shortcodes can be used in coordinate note 
+- changed, import routine standard saving name
+- changed, route table will show time of first coordinate
+- fixed, bug in time calculation of coordinates
+- fixed, bug in waiting tie calculation
+
 = 1.0.5 (2017-12-16) =
-- changed loading spinner
-- fixed displaying content in edit routes 
+- changed, loading spinner
+- fixed, displaying content in edit routes 
 
 = 1.0.4 (2017-12-04) =
-- fixed warnings which are shown in the WP debug probe
-- add better support in jquery sortable accordion for mobile handling
-- fixed format of gmap info window content
-- fixed problem with deleting coordinates in a route
-- fixed problems with tinyMCE editor
-- changed admin-form; there have been too man default tags in a switch statement
+- added, better support in jquery sortable accordion for mobile handling
+- changed, admin-form; there have been too man default tags in a switch statement
+- fixed, warnings which are shown in the WP debug probe
+- fixed, format of gmap info window content
+- fixed, problem with deleting coordinates in a route
+- fixed, problems with tinyMCE editor
 
 = 1.0.3 (2017-11-20) =
 *first release
