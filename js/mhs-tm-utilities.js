@@ -216,8 +216,7 @@ jQuery( function ( $ ) {
         
         //add aditonal div to the popup div
         $( this.popup_div ).html( '<div class="mhs-tm-gmap-popup-window-inner">\n\
-        <a class="mhs-tm-gmap-popup-window-close" href="javascript:void(0)"> \n\
-        <span class="ui-icon ui-icon-white ui-icon-closethick"></span> </a> </div> \n\
+        <div class="mhs-tm-gmap-popup-window-close" href="javascript:void(0)" title="close"></div> </div> \n\
         <div class="mhs-tm-gmap-popup-window-content">\n\
         <div class="mhs-tm-gmap-popup-window-new"></div> \n\
         <div class="mhs-tm-gmap-popup-window-content-before">' + this.popup_div_content_before + '</div> </div> ');

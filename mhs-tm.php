@@ -4,7 +4,7 @@
 Plugin Name: My Hitchhiking Spot Travel Map (MHS Travel Map)
 Plugin URI: 
 Description: Create your travel map with use of google maps by adding coordinates to a map, make your route public, write a story for each coordinate and import backup files from the Android app "<a title="My Hitchhiking Spots" href="https://play.google.com/store/apps/details?id=com.myhitchhikingspots" target="_blank" rel="noopener">My Hitchhiking Spots</a>"
-Version: 1.1.0
+Version: 1.1.1
 Author: Jonas Damhuis
 Author URI: 
 License: GPL3
@@ -54,11 +54,11 @@ function MHS_TM_enqueue() {
 	/* register scripts */ 
 	wp_register_script( 'google_jsapi','https://www.google.com/jsapi', true ); 
 	wp_register_script( 'mhs_tm_map', MHS_TM_RELPATH . 'js/mhs-tm-map.js', array(), '1.0.2' ); 
-	wp_register_script( 'mhs_tm_utilities', MHS_TM_RELPATH . 'js/mhs-tm-utilities.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.2' );
+	wp_register_script( 'mhs_tm_utilities', MHS_TM_RELPATH . 'js/mhs-tm-utilities.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.3' );
 	    
 	/* register styles */
     wp_register_style( 'mhs_tm_jquery_style', MHS_TM_RELPATH . 'css/jquery-ui/jquery-ui.css', false, '1.12.1' );
-    wp_register_style( 'mhs_tm_map_style', MHS_TM_RELPATH . 'css/mhs-tm-map.css', false, '1.0.2' );
+    wp_register_style( 'mhs_tm_map_style', MHS_TM_RELPATH . 'css/mhs-tm-map.css', false, '1.0.3' );
 	
 	/* enqueue scripts */
 	wp_enqueue_script( 'google_jsapi' );
@@ -108,13 +108,13 @@ function MHS_TM_admin_enqueue() {
 	wp_register_script( 'jquery_datetimepicker', MHS_TM_RELPATH . 'js/jquery.datetimepicker.full.min.js', array( 'jquery' ), '1.0.1' );
 	wp_register_script( 'papaparse', MHS_TM_RELPATH . 'js/papaparse-4.1.2.js', array( 'jquery' ), '4.1.2' );
 	wp_register_script( 'mhs_tm_admin_import', MHS_TM_RELPATH . 'js/mhs-tm-admin-import.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery-ui-datepicker' ), '1.0.2' );
-	wp_register_script( 'mhs_tm_utilities', MHS_TM_RELPATH . 'js/mhs-tm-utilities.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.2' );
-	wp_register_script( 'mhs_tm_admin_maps', MHS_TM_RELPATH . 'js/mhs-tm-admin-maps.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable' ), '1.0.2' );
+	wp_register_script( 'mhs_tm_utilities', MHS_TM_RELPATH . 'js/mhs-tm-utilities.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.3' );
+	wp_register_script( 'mhs_tm_admin_maps', MHS_TM_RELPATH . 'js/mhs-tm-admin-maps.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable' ), '1.0.3' );
 	wp_register_script( 'mhs_tm_admin_routes', MHS_TM_RELPATH . 'js/mhs-tm-admin-routes.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.1' );
 	wp_register_script( 'google_jsapi','https://www.google.com/jsapi', true ); 
 	wp_register_script( 'jquery_ui_touch_punch_min', MHS_TM_RELPATH . 'js/jquery.ui.touch-punch.min.js', array(), '1.0.1' );
 	wp_register_script( 'mhs_tm_map', MHS_TM_RELPATH . 'js/mhs-tm-map.js', array(), '1.0.2' );
-	wp_register_script( 'mhs_tm_map_edit', MHS_TM_RELPATH . 'js/mhs-tm-map-edit.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery-ui-datepicker' ), '1.0.2' );
+	wp_register_script( 'mhs_tm_map_edit', MHS_TM_RELPATH . 'js/mhs-tm-map-edit.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery-ui-datepicker' ), '1.0.3' );
 	wp_register_script( 'spectrum', MHS_TM_RELPATH . 'js/spectrum.js', array(), '1.0.0' );
 
 	/* register styles */
@@ -124,7 +124,7 @@ function MHS_TM_admin_enqueue() {
 	wp_register_style( 'mhs_tm_admin_page_style', MHS_TM_RELPATH . 'css/mhs-tm-admin-page.css', false, '1.0.1' );
 	wp_register_style( 'mhs_tm_admin_form_style', MHS_TM_RELPATH . 'css/mhs-tm-admin-form.css', false, '1.0.2' );
 	wp_register_style( 'mhs_tm_loading_overlay_style', MHS_TM_RELPATH . 'css/mhs-tm-loading-overlay.css', false, '1.0.2' );
-    wp_register_style( 'mhs_tm_map_style', MHS_TM_RELPATH . 'css/mhs-tm-map.css', false, '1.0.2' );
+    wp_register_style( 'mhs_tm_map_style', MHS_TM_RELPATH . 'css/mhs-tm-map.css', false, '1.0.3' );
 	wp_register_style( 'spectrum', MHS_TM_RELPATH . 'css/spectrum.css', false, '1.0.0' );
         
 	/* enqueue scripts */

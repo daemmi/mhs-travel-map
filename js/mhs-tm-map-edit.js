@@ -149,7 +149,8 @@ jQuery( function ( $ ) {
             marker[map_canvas_id][coordinate_index_global].content_string =
                 mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                     coordinates[map_canvas_id]['coordinates'][coordinate_index_global],
-                    coordinates[map_canvas_id]['coordinates'] );
+                    coordinates[map_canvas_id]['coordinates'] ) + 
+                        coordinates[map_canvas_id]['coordinates'][coordinate_index_global].note;
 
             marker[map_canvas_id][coordinate_index_global].setTitle(
                 mhs_tm_utilities.coordinate_handling.get_title(
@@ -232,7 +233,7 @@ jQuery( function ( $ ) {
                         mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                             coordinates[map_canvas_id]['coordinates'][x],
                             coordinates[map_canvas_id]['coordinates']
-                            );
+                            ) + coordinates[map_canvas_id]['coordinates'][x].note;
 
                     marker[map_canvas_id][x].setTitle(
                         mhs_tm_utilities.coordinate_handling.get_title(
@@ -307,7 +308,8 @@ jQuery( function ( $ ) {
                     marker[map_canvas_id][x].content_string =
                         mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                             coordinates[map_canvas_id]['coordinates'][x],
-                            coordinates[map_canvas_id]['coordinates'] );
+                            coordinates[map_canvas_id]['coordinates'] ) + 
+                                coordinates[map_canvas_id]['coordinates'][x].note;
 
                     marker[map_canvas_id][x].setTitle(
                         mhs_tm_utilities.coordinate_handling.get_title(
@@ -395,7 +397,8 @@ jQuery( function ( $ ) {
             marker[map_canvas_id][x].content_string =
                 mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                     coordinates[map_canvas_id]['coordinates'][x],
-                    coordinates[map_canvas_id]['coordinates'] );
+                    coordinates[map_canvas_id]['coordinates'] ) + 
+                        coordinates[map_canvas_id]['coordinates'][x].note;
 
             marker[map_canvas_id][x].setTitle(
                 mhs_tm_utilities.coordinate_handling.get_title(
@@ -595,7 +598,8 @@ jQuery( function ( $ ) {
                         marker[map_canvas_id][marker[map_canvas_id].length - 1].content_string =
                             mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                                 coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1],
-                                coordinates[0]['coordinates'] );
+                                coordinates[0]['coordinates'] ) + 
+                                    coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1].note;
                         $( "#mhs_tm_dialog_loading" ).dialog( "close" );            
                     } );
                 } else {
@@ -607,7 +611,8 @@ jQuery( function ( $ ) {
                     marker[map_canvas_id][marker[map_canvas_id].length - 1].content_string =
                         mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                             coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1],
-                            coordinates[0]['coordinates'] );
+                            coordinates[0]['coordinates'] ) + 
+                                coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1].note;
                     $( "#mhs_tm_dialog_loading" ).dialog( "close" );
                 }
             }
@@ -643,7 +648,8 @@ jQuery( function ( $ ) {
 
                     marker[map_canvas_id][mark_counter].content_string = 
                         mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate( 
-                        coordinates[i]['coordinates'][j], coordinates[i]['coordinates'] );
+                        coordinates[i]['coordinates'][j], coordinates[i]['coordinates'] ) + 
+                        coordinates[i]['coordinates'][j].note;
                     
                     marker[map_canvas_id][mark_counter].setTitle(
                         mhs_tm_utilities.coordinate_handling.get_title(
