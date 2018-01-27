@@ -17,7 +17,7 @@ mhs_tm_map = {
         new google.maps.LatLng( 0, 0 )
     ],
     route_path: [],
-    no_mousover_out: false,
+    no_mousover_out: {},
 };
 
 jQuery( function ( $ ) {
@@ -28,6 +28,7 @@ jQuery( function ( $ ) {
         mhs_tm_map.coord_center_lat[map_canvas_id] = parseFloat( window["mhs_tm_app_vars_" + map_canvas_id].coord_center_lat );
         mhs_tm_map.coord_center_lng[map_canvas_id] = parseFloat( window["mhs_tm_app_vars_" + map_canvas_id].coord_center_lng );
         mhs_tm_map.auto_load[map_canvas_id] = window["mhs_tm_app_vars_" + map_canvas_id].auto_load;
+        mhs_tm_map.no_mousover_out[map_canvas_id] = false;
         mhs_tm_map.plugin_dir = window["mhs_tm_app_vars_" + map_canvas_id].plugin_dir;
         if ( mhs_tm_map.auto_load[map_canvas_id] )
         {
@@ -88,7 +89,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
     // click on the map sets the opacity of the paths and markers back to 1 and closes the 
     // info window
     google.maps.event.addListener(mhs_tm_map.map[map_canvas_id], "click", function() {
-        mhs_tm_map.no_mousover_out = false;
+        mhs_tm_map.no_mousover_out[map_canvas_id] = false;
         mhs_tm_map.set_full_opacity( mhs_tm_map.marker[map_canvas_id], 
             mhs_tm_map.route_path[map_canvas_id] ); 
     } );
@@ -174,7 +175,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
             
             mhs_tm_map.marker[map_canvas_id][i][mark_counter].addListener('click', function() {
                 var marker = this;
-                mhs_tm_map.no_mousover_out = true;
+                mhs_tm_map.no_mousover_out[map_canvas_id] = true;
                 mhs_tm_map.set_opacity( mhs_tm_map.marker, mhs_tm_map.route_path, map_canvas_id, 
                     'single_marker', this );
                 mhs_tm_map.map[map_canvas_id].setCenter( this.getPosition() ); 
@@ -186,14 +187,14 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
             } );
             
             mhs_tm_map.marker[map_canvas_id][i][mark_counter].addListener('mouseover', function() {
-                if ( !mhs_tm_map.no_mousover_out ) {
+                if ( !mhs_tm_map.no_mousover_out[map_canvas_id] ) {
                     mhs_tm_map.set_opacity( mhs_tm_map.marker, mhs_tm_map.route_path, map_canvas_id, 
                         'marker', this );
                 }
             } );
             
             mhs_tm_map.marker[map_canvas_id][i][mark_counter].addListener( 'mouseout', function () {
-                if ( !mhs_tm_map.no_mousover_out ) {
+                if ( !mhs_tm_map.no_mousover_out[map_canvas_id] ) {
                     mhs_tm_map.set_full_opacity( mhs_tm_map.marker[map_canvas_id],
                         mhs_tm_map.route_path[map_canvas_id] );
                 }
@@ -219,20 +220,20 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
         } );
         
         mhs_tm_map.route_path[map_canvas_id][i].addListener( 'click', function () {
-            mhs_tm_map.no_mousover_out = true;
+            mhs_tm_map.no_mousover_out[map_canvas_id] = true;
             mhs_tm_map.set_opacity( mhs_tm_map.marker, mhs_tm_map.route_path, map_canvas_id, 
                 'route_path',this );
         } );
             
         mhs_tm_map.route_path[map_canvas_id][i].addListener('mouseover', function() {
-            if ( !mhs_tm_map.no_mousover_out ) {
+            if ( !mhs_tm_map.no_mousover_out[map_canvas_id] ) {
                 mhs_tm_map.set_opacity( mhs_tm_map.marker, mhs_tm_map.route_path, map_canvas_id, 
                     'route_path',this );
             }
         } );
 
         mhs_tm_map.route_path[map_canvas_id][i].addListener( 'mouseout', function () {
-            if ( !mhs_tm_map.no_mousover_out ) {
+            if ( !mhs_tm_map.no_mousover_out[map_canvas_id] ) {
                 mhs_tm_map.set_full_opacity( mhs_tm_map.marker[map_canvas_id],
                     mhs_tm_map.route_path[map_canvas_id] );
             }

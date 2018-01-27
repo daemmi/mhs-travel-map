@@ -106,26 +106,29 @@ from .gm-style class*/
 
 .mhs-tm-gmap-popup-window-content img {
     height: auto !important;
-    width: 100% !important;
+    max-width: 100% !important;
 }
 
 .mhs-tm-gmap-popup-window-close {
     z-index: 1;
     position: absolute;
-    top: -10px;
-    right: -10px;
-    background: #e0e0e0;
-    background-image: url("images/mhs-tm-close-button.png");
-    height: 20px;
-    width: 20px;
+    top: -14px;
+    right: -14px;
+    background-image: url("images/mhs-tm-close-button-white.png");
+    height: 23px;
+    width: 23px;
     -webkit-border-radius: 20px;
     -moz-border-radius: 20px;
     border-radius: 20px;
+    background-size: contain;
 }
 
 .mhs-tm-gmap-popup-window-close:hover {
-    background: #ffffff;
-    background-image: url(images/mhs-tm-close-button.png);
+    background-image: url(images/mhs-tm-close-button-white.png);
+    background-size: contain;
+    -webkit-box-shadow: 0px 0px 15px 2px rgb(0, 0, 0);
+    -moz-box-shadow: 0px 0px 15px 2px rgb(0, 0, 0);
+    box-shadow: 0px 0px 15px 2px rgb(0, 0, 0);
 }
 
 /*.mhs-tm-gmap-popup-window-close .ui-icon-white {

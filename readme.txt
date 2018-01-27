@@ -5,7 +5,7 @@ Tags: map, google maps, hitchhike, hitchhiking, travel, backpacking, traveling
 Tested up to: 4.9.1
 Requires at least: 3.8.0
 Requires PHP: 5.2.0
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPL3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -49,6 +49,11 @@ This section describes how to install and use the plugin.
 == Frequently Asked Questions ==
 
 == Changelog ==
+
+= 1.1.2 (2018-01-27) =
+- changed, close button in popup window
+- fixed, coordinate note content style
+- fixed, hover effect in two maps in front end
 
 = 1.1.1 (2018-01-26) =
 - changed, close button in popup window
