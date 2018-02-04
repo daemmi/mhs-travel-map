@@ -162,6 +162,25 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 						<h1>My Hitchhiking Spot Travel Map </h1>
 						<p>My Hitchhiking Spot Travel Map (MHS Travel Map) is for travelers who loves to log there route. It\'s designed mainly for hitchhikers but could also good be used by backpackers, hikers, cyclist, overland travelers with car or motorbike or traveler with any other kind of transportation. Create a Map, add coordinates where you have been, draw your travel route, write a story for each coordinate. You will use the wordpress text editor to write the stories, so you could add images and videos to it.</p>
 						<p>For logging of&nbsp; the route you could use the Android app "<a title="My Hitchhiking Spots" href="https://play.google.com/store/apps/details?id=com.myhitchhikingspots" target="_blank">My Hitchhiking Spots</a>" The app runs without mobile internet. You could save a backup and then import the file in the MHS Travel Map plugin. After the import save the routes you would like and change each route individual..</p>	
+						<h1>Settings and Functions </h1>
+						<h2>Shortcodes</h2>
+						<p>There are additional option you could add to the shortcode to show a map. Just add it like 
+						following and the end of the short code: <strong>[mhs-travel-map map_id=12 auto_window_size=0]</strong></p>
+						<h3>Shortcode options</h3>
+						<span style="font-size: 12pt;"><strong>auto_window_ratio</strong></span> <br> 
+						<span style="font-size: 10pt;">values: 1/0; default = 1 </span> <br>
+						<p>Disable the automatic sizing of the map window. If enabled (default) the map window will automatically set to a 16:9 ratio calculated from the screen size</p>
+						<br>
+
+						<span style="font-size: 12pt;"><strong>height</strong></span><br>
+						<span style="font-size: 10pt;">values: numeric; default = 500 </span> <br>
+						<p>If&nbsp;auto_window_ratio is disabled, the map window height in pixel can set here.</p>
+						<br>
+
+						<span style="font-size: 12pt;"><strong>run_shortcodes</strong></span> <br>
+						<span style="font-size: 10pt;">values: 1/0; default = 1 </span> <br>
+						<p>If 1, shortcodes on the coordinate notes will converted.&nbsp;</p>
+						<br>
 						';
 					
 					break;
@@ -190,9 +209,9 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 								If there is no key entered the plugin will use a public one but it 
 								could be that the contingent runs out from time to time. <br>
 								<b>Please get your own API key!</b> You could get a API key for free. Just use your own google account 
-								and get your key <a href="https://console.developers.google.com/flows/enableapi?apiid=maps_backend,geocoding_backend,directions_backend&reusekey=true&pli=1" 
+								and get your key <a href="https://console.developers.google.com/flows/enableapi?apiid=maps_backend&reusekey=true&pli=1" 
 								target="_blank">here</a>. More information you will get <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" 
-								target="_blank">here</a>. For your project you have to activate "Google Maps JavaScript API", "Google Maps Geocoding API" and "Google Maps Directions API"!', 'mhs_tm' )
+								target="_blank">here</a>. For your project you have to activate "Google Maps JavaScript API"!', 'mhs_tm' )
 						),
 						array(
 							'type'	 => 'text',
@@ -200,8 +219,9 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 							'id'	 => 'lang_geocoding_gmap',
 							'desc'	 => __( 'Enter here the google language code (<a 
 								href="https://developers.google.com/maps/faq#languagesupport" 
-								target="_blank">Check for more information about the codes</a>). The result of the 
-								google geocode function will be in this language. If you leave it blank, google will 
+								target="_blank">Check for more information about the codes</a>). The language of the map 
+								in the route edit menu will be in this language. Also the results of the geocoding will be 
+								in this language. If you leave it blank, google will 
 								use a language automaticly by your system settings. ', 'mhs_tm' )
 						),
 					)

@@ -51,14 +51,6 @@ mhs_tm_utilities.gmaps.get_route = function ( from, to, path, disabled_snap_to_r
             destination: new google.maps.LatLng( to.latitude, to.longitude ),
             travelMode: google.maps.DirectionsTravelMode.DRIVING
         }, function ( result, status ) {
-            //if a error occurs 
-            if ( result.error_message !== '' && result.error_message !== undefined ) {
-                mhs_tm_utilities.utilities.show_message( 'error',
-                    'Google maps Directions API error! Message: ' + result.error_message );
-                callback( { 'error': 'Google maps Geocoder API error! Message: ' +
-                        result.error_message } );
-                return;
-            }
             //if gmaps could calculate a direction get thearray with all coordinates and push it to the array
             switch ( status ) {
                 case google.maps.DirectionsStatus.OK:
@@ -101,10 +93,17 @@ mhs_tm_utilities.gmaps.get_route = function ( from, to, path, disabled_snap_to_r
                     callback( true );
                     break;
                 default:
-                    mhs_tm_utilities.utilities.show_message( 'error',
-                        'Google maps Directions API error! Message: ' + result.error_message );
-                    callback( { 'error': 'Google maps Geocoder API error! Message: ' +
-                            result.error_message } );
+                    if ( result !== null && result.error_message !== '' && 
+                        result.error_message !== undefined ) {
+                        mhs_tm_utilities.utilities.show_message( 'error',
+                            'Google maps Directions API error! Message: ' + result.error_message );
+                        callback( { 'error': 'Google maps Geocoder API error! Message: ' +
+                                result.error_message } );
+                    } else {
+                        mhs_tm_utilities.utilities.show_message( 'error',
+                            'Google maps Directions API error!' );
+                        callback( { 'error': 'Google maps Geocoder API error!' } );
+                    }
                     break;
             }
         } );
@@ -145,64 +144,65 @@ mhs_tm_utilities.gmaps.geocode_lat_lng = function ( lat, lng, settings, callback
     gmap_geocode( lat, lng, index, settings, callback );
 
     function gmap_geocode( lat, lng, index, settings, callback ) {
-        $.getJSON( 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat + ',' + lng +
-            '&language=' + settings['lang_geocoding_gmap'] + '&key=' + settings['api_key_gmap'], //
-            function ( data ) {
-                var status = data.status;
-                var results = data.results;
-                if ( data.error_message !== '' && data.error_message !== undefined ) {
-                    mhs_tm_utilities.utilities.show_message( 'error',
-                        'Google maps Geocoder API error! Message: ' + data.error_message );
-                    callback( { 'error': 'Google maps Geocoder API error! Message: ' +
-                            data.error_message } );
-                    return;
-                }
-                switch ( status ) {
-                    case google.maps.GeocoderStatus.OVER_QUERY_LIMIT:
-                        setTimeout( function () {
-                            gmap_geocode( lat, lng, index, settings, callback );
-                        }, 2000 );
-                        break;
-                    case google.maps.GeocoderStatus.OK:
-                        // success! 
-                        var return_result = [ ];
-                        var address = results[0].address_components;
-                        $.each( index, function ( key ) {
-                            return_result[key] = '';
-                            for ( var p = address.length - 1; p >= 0; p-- ) {
-                                //loop through all indexes of the present field
-                                for ( var x = 0; x < index[key].length; x++ ) {
-                                    if ( address[p].types.indexOf( index[key][x] ) !== -1 ) {
-                                        return_result[key] = address[p]['long_name'];
-                                        break;
-                                    }
-                                }
-                                //check if something founded
-                                if ( return_result[key] !== '' ) {
+        var geocoder = new google.maps.Geocoder;
+//        $.getJSON( 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + lat + ',' + lng +
+//            '&language=' + settings['lang_geocoding_gmap'] + '&key=' + settings['api_key_gmap'],
+//            function ( data ) {
+        geocoder.geocode( { 'location': { lat: lat, lng: lng } }, function( results, status ) {
+            switch ( status ) {
+                case google.maps.GeocoderStatus.OVER_QUERY_LIMIT:
+                    setTimeout( function () {
+                        gmap_geocode( lat, lng, index, settings, callback );
+                    }, 2000 );
+                    break;
+                case google.maps.GeocoderStatus.OK:
+                    // success! 
+                    var return_result = [ ];
+                    var address = results[0].address_components;
+                    $.each( index, function ( key ) {
+                        return_result[key] = '';
+                        for ( var p = address.length - 1; p >= 0; p-- ) {
+                            //loop through all indexes of the present field
+                            for ( var x = 0; x < index[key].length; x++ ) {
+                                if ( address[p].types.indexOf( index[key][x] ) !== -1 ) {
+                                    return_result[key] = address[p]['long_name'];
                                     break;
                                 }
                             }
-                        } );
-                        callback( return_result );
-                        break;
+                            //check if something founded
+                            if ( return_result[key] !== '' ) {
+                                break;
+                            }
+                        }
+                    } );
+                    callback( return_result );
+                    break;
 
-                    case google.maps.GeocoderStatus.ZERO_RESULTS:
-                        return_result = [ ];
-                        return_result['country'] = '';
-                        return_result['state'] = '';
-                        return_result['city'] = '';
-                        callback( return_result );
-                        break;
+                case google.maps.GeocoderStatus.ZERO_RESULTS:
+                    return_result = [ ];
+                    return_result['country'] = '';
+                    return_result['state'] = '';
+                    return_result['city'] = '';
+                    callback( return_result );
+                    break;
 
-                    default:
-                        callback( { 'error': 'Google maps Geocoder API error! Message: undefinded' } );
-                        return;// failure!
-                        break;
-                }
+                default:
+                    if ( results !== null && results.error_message !== '' && 
+                        results.error_message !== undefined ) {
+                        mhs_tm_utilities.utilities.show_message( 'error',
+                            'Google maps Directions API error! Message: ' + results.error_message );
+                        callback( { 'error': 'Google maps Geocoder API error! Message: ' +
+                                results.error_message } );
+                    } else {
+                        mhs_tm_utilities.utilities.show_message( 'error',
+                            'Google maps Directions API error!' );
+                        callback( { 'error': 'Google maps Geocoder API error!' } );
+                    }
+                    return;// failure!
+                    break;
             }
-        );
-    }
-    ;
+        } );
+    };
 };
 
 //Class popup window
@@ -548,6 +548,7 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = function 
     if ( coordinate.country || coordinate.state || coordinate.city ) {
         content_string += '</b> </br>';
     }
+    
     var coordinate_date = new Date( mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset( parseInt( coordinate.starttime ) ) * 1000 )
         .toLocaleString( [], { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' } );
     content_string += coordinate_date + '</br>';
@@ -617,7 +618,8 @@ mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview = function 
     //if coordinate is last coordinate on the route return lift count etc. 
     if ( mhs_tm_utilities.utilities.is_equivalent( coordinate, coordinates[id_last_coordinate] ) ) {
         for ( var x = 0; x < coordinates.length; ++x ) {
-            if ( coordinates[x].ishitchhikingspot && coordinates[x].ispartofaroute ) {
+            if ( coordinates[x].ishitchhikingspot && coordinates[x].ispartofaroute && 
+                x !== id_last_coordinate ) {
                 if ( coordinates[x].waitingtime !== '' ) {
                     waiting_time_total += parseInt( coordinates[x].waitingtime );
                 }
@@ -638,8 +640,8 @@ mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview = function 
             coordinate_time_total_hours * 60 * 60 ) / ( 60 );
         coordinate_time_total_minutes = Math.floor( coordinate_time_total_minutes );
 
-        if ( is_hitchhiking_spot ) {
-            string += 'Total: ' + ( lifts - 1 ) + ' lifts | ';
+        if ( is_hitchhiking_spot && lifts > 0 ) {
+            string += 'Total: ' + ( lifts ) + ' lifts | ';
         }
 
         string += 'Journey total: ';
@@ -835,15 +837,15 @@ mhs_tm_utilities.utilities.sort_results = function ( arr, key, asc ) {
 };
 
 // Function to get a timestamp - the local timezone offset 
-// (timestamp could be in milliseconds or seconds)
+// (timestamp in seconds)
 mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset = function ( timestamp ) {
-    return timestamp + ( new Date().getTimezoneOffset() * 60 );
+    return timestamp + ( new Date( timestamp * 1000 ).getTimezoneOffset() * 60 );
 };
 
 // Function to get a timestamp + the local timezone offset 
-// (timestamp could be in milliseconds or seconds)
+// (timestamp in seconds)
 mhs_tm_utilities.utilities.get_timestamp_plus_timezone_offset = function ( timestamp ) {
-    return timestamp - ( new Date().getTimezoneOffset() * 60 );
+    return timestamp - ( new Date( timestamp * 1000 ).getTimezoneOffset() * 60 );
 };
 
 // Function to get hours from minutes

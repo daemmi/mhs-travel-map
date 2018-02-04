@@ -421,10 +421,16 @@ jQuery( function ( $ ) {
         var marker_buff = marker[map_canvas_id][new_order - 1];
         marker[map_canvas_id][new_order - 1] = marker[map_canvas_id][old_order - 1];
         marker[map_canvas_id][old_order - 1] = marker_buff;
-
+        
+        //swap the id back, because the id is also swapped before
+        marker_buff = marker[map_canvas_id][new_order - 1].get("id");
+        marker[map_canvas_id][new_order - 1].set("id", marker[map_canvas_id][old_order - 1].get("id"));
+        marker[map_canvas_id][old_order - 1].set("id", marker_buff);
+        
         // swap the coordinates in coordinates array
-        var marker_buff = coordinates[map_canvas_id]['coordinates'][new_order - 1];
-        coordinates[map_canvas_id]['coordinates'][new_order - 1] = coordinates[map_canvas_id]['coordinates'][old_order - 1];
+        marker_buff = coordinates[map_canvas_id]['coordinates'][new_order - 1];
+        coordinates[map_canvas_id]['coordinates'][new_order - 1] = 
+            coordinates[map_canvas_id]['coordinates'][old_order - 1];
         coordinates[map_canvas_id]['coordinates'][old_order - 1] = marker_buff;
 
         // change the icon number
@@ -770,7 +776,7 @@ jQuery( function ( $ ) {
         $( '#waitingtime_' + coordinate_id ).val( '0' );
         coordinates[map_canvas_id]['coordinates'][coordinate_id - 1]['waitingtime'] = 0;
 
-        $( '.mhs_tm_datetimepicker' ).datetimepicker( {
+        new_coordinate.find( '.mhs_tm_datetimepicker' ).datetimepicker( {
             step: 10,
             value: new Date()
         } );

@@ -23,22 +23,27 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 
 			extract( shortcode_atts( array(
 				'map_id'			 => 0,
-				'coord_center_lat'	 => 54.0237934,
-				'coord_center_lng'	 => 9.3754401,
 				'height'			 => 500,
-				'run_shortcodes'	 => 1
+				'run_shortcodes'	 => 1,
+				'auto_window_ratio'   => 1,
 			), $atts ) );
 
 			//validate shortcode_atts
 			$map_id				 = (int) $map_id;
 			$height				 = (int) $height;
-			$coord_center_lng	 = (float) $coord_center_lng;
-			$coord_center_lat	 = (float) $coord_center_lat;
 			$run_shortcodes		 = $run_shortcodes == 1 ? 1 : 0;
+			$auto_window_ratio	 = $auto_window_ratio == 1 ? 1 : 0;
+			
+			$shortcode_options = array(
+				'auto_window_ratio'	=> $auto_window_ratio,
+			);
 			
 			$coordinates = array();
 			$coordinates = $this->get_coordinates( $map_id, 'map' );
 			$map_options = $this->get_map_options( $map_id );
+			
+			$coord_center_lng	 = 9.3754401;
+			$coord_center_lat	 = 54.0237934;
 			
 			//display all note and do shortcodes
 			$note_output = '';
@@ -76,6 +81,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 				'auto_load'			 => true,
 				'map_id'			 => $map_id,
 				'map_options'		 => $map_options,
+				'shortcode_options'	 => $shortcode_options,
 				'plugin_dir'		 => MHS_TM_RELPATH
 			)
 			);

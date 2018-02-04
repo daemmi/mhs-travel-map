@@ -8,38 +8,40 @@ mhs_tm_map = {
     bounds: {},
     coordinates: {},
     map_options: {},
+    shortcode_options: {},
     coord_center_lat: {},
     coord_center_lng: {},
     auto_load: {},
     plugin_dir: '',
-    dummyPath: [
-        new google.maps.LatLng( 0, 0 ),
-        new google.maps.LatLng( 0, 0 )
-    ],
     route_path: [],
     no_mousover_out: {},
 };
 
 jQuery( function ( $ ) {
     $( '.mhs_tm-map' ).each( function ( index ) {
-        var map_canvas_id = parseInt( $( this ).attr( 'id' ).replace( 'mhs_tm_map_canvas_', '' ) );
-        mhs_tm_map.coordinates[map_canvas_id] = window["mhs_tm_app_vars_" + map_canvas_id].coordinates;
-        mhs_tm_map.map_options[map_canvas_id] = window["mhs_tm_app_vars_" + map_canvas_id].map_options;
-        mhs_tm_map.coord_center_lat[map_canvas_id] = parseFloat( window["mhs_tm_app_vars_" + map_canvas_id].coord_center_lat );
-        mhs_tm_map.coord_center_lng[map_canvas_id] = parseFloat( window["mhs_tm_app_vars_" + map_canvas_id].coord_center_lng );
-        mhs_tm_map.auto_load[map_canvas_id] = window["mhs_tm_app_vars_" + map_canvas_id].auto_load;
-        mhs_tm_map.no_mousover_out[map_canvas_id] = false;
-        mhs_tm_map.plugin_dir = window["mhs_tm_app_vars_" + map_canvas_id].plugin_dir;
+        var map_canvas_id                           = parseInt( $( this ).attr( 'id' ).replace( 'mhs_tm_map_canvas_', '' ) );
+        mhs_tm_map.coordinates[map_canvas_id]       = window["mhs_tm_app_vars_" + map_canvas_id].coordinates;
+        mhs_tm_map.map_options[map_canvas_id]       = window["mhs_tm_app_vars_" + map_canvas_id].map_options;
+        mhs_tm_map.shortcode_options[map_canvas_id] = window["mhs_tm_app_vars_" + map_canvas_id].shortcode_options;
+        mhs_tm_map.coord_center_lat[map_canvas_id]  = parseFloat( window["mhs_tm_app_vars_" + map_canvas_id].coord_center_lat );
+        mhs_tm_map.coord_center_lng[map_canvas_id]  = parseFloat( window["mhs_tm_app_vars_" + map_canvas_id].coord_center_lng );
+        mhs_tm_map.auto_load[map_canvas_id]         = window["mhs_tm_app_vars_" + map_canvas_id].auto_load;
+        mhs_tm_map.no_mousover_out[map_canvas_id]   = false;
+        mhs_tm_map.plugin_dir                       = window["mhs_tm_app_vars_" + map_canvas_id].plugin_dir;
         if ( mhs_tm_map.auto_load[map_canvas_id] )
         {
             //set gmap window size
-            mhs_tm_utilities.utilities.set_div_16_9( '#mhs_tm_map_canvas_' + map_canvas_id );
+            if( mhs_tm_map.shortcode_options[map_canvas_id].auto_window_ratio ) {
+                mhs_tm_utilities.utilities.set_div_16_9( '#mhs_tm_map_canvas_' + map_canvas_id );
+            }
             google.maps.event.addDomListener( window, 'load', mhs_tm_map.gmap_initialize( map_canvas_id, 'map' ) );
         }
         
         $( window ).resize( function () {
-           //change gmap window size
-           mhs_tm_utilities.utilities.set_div_16_9( '#mhs_tm_map_canvas_' + map_canvas_id );
+            //change gmap window size
+            if( mhs_tm_map.shortcode_options[map_canvas_id].auto_window_ratio ) {
+                mhs_tm_utilities.utilities.set_div_16_9( '#mhs_tm_map_canvas_' + map_canvas_id );
+            }
        } );
     } );
 } );
@@ -178,6 +180,8 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
                 mhs_tm_map.no_mousover_out[map_canvas_id] = true;
                 mhs_tm_map.set_opacity( mhs_tm_map.marker, mhs_tm_map.route_path, map_canvas_id, 
                     'single_marker', this );
+                //Set ZIndex for this marker to the highest
+                this.setZIndex( google.maps.Marker.MAX_ZINDEX + 2 );
                 mhs_tm_map.map[map_canvas_id].setCenter( this.getPosition() ); 
                 setTimeout( function () {
                     document.getElementById( marker.note_div_id )
@@ -191,6 +195,8 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
                     mhs_tm_map.set_opacity( mhs_tm_map.marker, mhs_tm_map.route_path, map_canvas_id, 
                         'marker', this );
                 }
+                //Set ZIndex for this marker to the highest
+                this.setZIndex( google.maps.Marker.MAX_ZINDEX + 2 );
             } );
             
             mhs_tm_map.marker[map_canvas_id][i][mark_counter].addListener( 'mouseout', function () {
@@ -211,10 +217,15 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
             lines.push( new google.maps.LatLng( item['lat'], item['lng'] ) );
         } );
         
+        var route_color = mhs_tm_map.coordinates[map_canvas_id][i]['options']['route_color'];
+        if( typeof route_color !== 'string' || route_color[0] !== '#' ) {
+            route_color = '#000000';
+        }
+        
         mhs_tm_map.route_path[map_canvas_id][i] = new google.maps.Polyline( {
             path: lines,
             geodesic: true,
-            strokeColor: mhs_tm_map.coordinates[map_canvas_id][i]['options']['route_color'],
+            strokeColor: route_color,
             strokeOpacity: 1.0,
             strokeWeight: 3
         } );
@@ -253,7 +264,11 @@ mhs_tm_map.set_opacity = function( marker, line_path, map_canvas_id, from_listen
             }
         }
         
-        line_path[map_canvas_id][y].setOptions( { strokeOpacity: mhs_tm_map.opacity_strength } );
+        line_path[map_canvas_id][y].setOptions( { 
+            strokeOpacity: mhs_tm_map.opacity_strength,
+            zIndex: 0  
+        } );
+        
         for ( var j = 0; j < marker[map_canvas_id][y].length; ++j ) {
             // find route id
             if( from_listener === 'marker' || from_listener === 'single_marker' ) { 
@@ -262,16 +277,23 @@ mhs_tm_map.set_opacity = function( marker, line_path, map_canvas_id, from_listen
                 }
             }
             marker[map_canvas_id][y][j].setOpacity( mhs_tm_map.opacity_strength );
+            marker[map_canvas_id][y][j].setZIndex( 0 );
         }
     }
 
-    line_path[map_canvas_id][route_id].setOptions( { strokeOpacity: 1 } );
+    line_path[map_canvas_id][route_id].setOptions( { 
+        strokeOpacity: 1,
+        zIndex: 100,
+        strokeColor: line_path[map_canvas_id][route_id].strokeColor,
+    } );
 
     if( from_listener === 'single_marker' ) { 
         listener.setOpacity( 1 );
+        listener.setZIndex( google.maps.Marker.MAX_ZINDEX + 1 );
     } else {
         for ( var z = 0; z < marker[map_canvas_id][route_id].length; z++ ) {
             marker[map_canvas_id][route_id][z].setOpacity( 1 );
+            marker[map_canvas_id][route_id][z].setZIndex( google.maps.Marker.MAX_ZINDEX + 1 );
         }
     }
 };
