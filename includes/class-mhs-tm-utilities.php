@@ -76,6 +76,7 @@ class MHS_TM_Utilities {
 		$data	 = $data[ 0 ];
 
 		$json_array = json_decode( $data[ 'options' ], true );
+		$json_array['transport_classes'] = json_decode( $json_array['transport_classes'], true );
 
 		return $json_array;
 	}

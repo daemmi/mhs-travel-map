@@ -493,8 +493,13 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					break;
 
 				case 'color_picker':
-					echo '<input type="text" class="color_picker" id="' . esc_attr( $field[ 'id' ] ) . '"  
-						value="' . esc_attr( $field[ 'value' ] ) . '" >';
+					echo '<input type="text" class="color_picker" id="' . esc_attr( $field[ 'id' ] ) . '"';
+					
+					if ( isset( $field[ 'disabled' ] ) && $field[ 'disabled' ] === true ) {
+						echo ' disabled="disabled"';
+					}
+					
+					echo 'value="' . esc_attr( $field[ 'value' ] ) . '" >';
 					echo '<script>
 							jQuery( function ($) { 
 								$( document ).ready( function() {
@@ -671,6 +676,9 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 					break;
 
 				case 'content':
+					echo $field[ 'value' ];
+					break;
+				
 				default:
 					echo wp_kses_post( $field[ 'value' ] );
 					break;

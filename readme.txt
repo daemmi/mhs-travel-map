@@ -2,10 +2,10 @@
 Contributors: daemmi
 Donate link: https://profiles.wordpress.org/daemmi
 Tags: map, google maps, hitchhike, hitchhiking, travel, backpacking, traveling
-Tested up to: 4.9.1
+Tested up to: 4.9.4
 Requires at least: 3.8.0
 Requires PHP: 5.2.0
-Stable tag: 1.1.2
+Stable tag: 1.2.0
 License: GPL3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -21,6 +21,8 @@ coordinate and import backup files from the Android app
 
 = Features =
 
+Got to [the demo page](http://mhs-tm.goip.de) to have a look of a couple of example maps and to try out the backend!
+
 * create you own travel map with use of google maps
 * import backup files from the Android app `My Hitchhiking Spots`
 * add coordinates to the route
@@ -30,7 +32,8 @@ coordinate and import backup files from the Android app
 * add to each coordinate start time and waiting time
 * for each route the total waiting time, the number of lifts, journey time and distance will be calculated
 * geocode your coordinate automatically
-* set the colour of each route
+* set the colour of each route 
+* or set a route to a predefined transportation class
 * get a whole statistic about all route in one map
 
 == Installation ==
@@ -45,10 +48,21 @@ This section describes how to install and use the plugin.
 6. Use the shortcode in a post or page to make the map public
 
 == Screenshots ==
+1. Frontend Map
+2. Frontend Map with a selected route / hover effect for marker and route path
+3. Frontend Popup window for a clicked coordinate
+4. Frontend Statistics popup window of a map
+5. Backend map in route edit menu
+6. Backend main settings in route edit menu
+7. Backend settings for a coordinate in route edit menu
 
 == Frequently Asked Questions ==
 
 == Changelog ==
+
+= 1.2.0 (2018-02-19) =
+- added, transportation classes
+- changed, statistics for each transportation class in a map
 
 = 1.1.2 (2018-01-27) =
 - changed, close button in popup window
@@ -92,9 +106,12 @@ This section describes how to install and use the plugin.
 - fixed, problems with tinyMCE editor
 
 = 1.0.3 (2017-11-20) =
-*first release
+* first release
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+major bugs fixed and most comfort right now
 
 = 1.0.3 =
 First release

@@ -127,6 +127,9 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			'SELECT * FROM ' . $table_name .
 			' WHERE active = 1 order by updated DESC', ARRAY_A
 			);
+			
+			$plugin_settings = $MHS_TM_Utilities->get_plugin_settings();
+			$map_options['transport_classes'] = $plugin_settings['transport_classes'];
 
 			wp_enqueue_script( 'mhs_tm_map' );
 			wp_localize_script( 'mhs_tm_map', 'mhs_tm_app_vars_0', array(
@@ -135,6 +138,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				'coord_center_lng'	 => 9.377068,
 				'auto_load'			 => false,
 				'map_id'			 => 0,
+				'map_options'		 => $map_options,
 				'plugin_dir'		 => MHS_TM_RELPATH
 			) );
 
@@ -162,11 +166,11 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				$nonce				 = 'mhs_tm_route_save';
 
 				//if no id create a dumy for js functions
-				$coordinates						 = [ ];
+				$coordinates							 = [ ];
 				$coordinates[ 0 ]						 = [ ];
 				$coordinates[ 0 ][ 'coordinates' ]		 = [ ];
-				$coordinates[ 0 ][ 'options' ][ 'name' ]	 = '';
-				$coordinates[ 0 ][ 'options' ][ 'path' ]	 = [ ];
+				$coordinates[ 0 ][ 'options' ][ 'name' ] = '';
+				$coordinates[ 0 ][ 'options' ][ 'path' ] = [ ];
 			} else {
 				$coordinates = $MHS_TM_Maps->get_coordinates( $id, 'route' );
 
@@ -282,7 +286,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$settings[ 'api_key_gmap' ]	 = $MHS_TM_Utilities->get_gmaps_api_key();
 
 			wp_register_script( 'googlemap', 'https://maps.googleapis.com/maps/api/js?key=' . $settings[ 'api_key_gmap' ] .
-			'&libraries=drawing,places&language=' . $settings[ 'lang_geocoding_gmap' ] , true );
+			'&libraries=drawing,places&language=' . $settings[ 'lang_geocoding_gmap' ], true );
 			wp_enqueue_script( 'googlemap' );
 
 			wp_enqueue_script( 'jquery_ui_touch_punch_min' );
@@ -433,16 +437,29 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 		 * @access private
 		 */
 		private function routes_fields( $id = NULL, $part = '' ) {
-			global $wpdb, $MHS_TM_Maps;
+			global $wpdb, $MHS_TM_Maps, $MHS_TM_Utilities;
 			/* @var $wpdb wpdb */
 			/* @var $MHS_TM_Maps MHS_TM_Maps */
+			/* @var $MHS_TM_Utilities MHS_TM_Utilities */
 
 			$table_name = $wpdb->prefix . 'mhs_tm_routes ';
 
 			// static route fields
-			// by adding new fields also change the sanitize function!
+			// !!!!!! by adding new fields also change the sanitize function !!!!!!
 			$routes_fields = [ ];
 			if ( $part == 'The Route' ) {
+				//get transport classes
+				$plugin_settings		 = $MHS_TM_Utilities->get_plugin_settings();
+				$transport_classes[ 0 ]	 = [
+					'value'	 => '',
+					'label'	 => '---' ];
+
+				foreach ( $plugin_settings[ 'transport_classes' ] as $transport_class ) {
+					$transport_classes[] = [
+						'value'	 => $transport_class[ 'name' ],
+						'label'	 => $transport_class[ 'name' ] ];
+				}
+
 				$routes_fields = array(
 					array(
 						'title'	 => __( 'The Route', 'mhs_tm' ),
@@ -453,6 +470,14 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 								'label'	 => __( 'Name of Route', 'mhs_tm' ),
 								'id'	 => 'name',
 								'desc'	 => __( 'The name or title of the route.', 'mhs_tm' )
+							),
+							array(
+								'type'		 => 'select',
+								'label'		 => __( 'Transport class', 'mhs_tm' ),
+								'id'		 => 'transport_class',
+								'options'	 => $transport_classes,
+								'desc'		 => __( 'The transport class of the route. It will ignore the chosen color 
+									of the route and will set the route color to the color of the transport class.', 'mhs_tm' )
 							),
 							array(
 								'type'	 => 'color_picker',
@@ -661,7 +686,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 							$fcount = count( $routes_fields[ $i ][ 'fields' ] );
 							for ( $j = 0; $j < $fcount; $j++ ) {
 								if ( isset( $data[ $routes_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] ) ) {
-									$routes_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = stripslashes( $data[ $routes_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] );
+									$routes_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = stripslashes( 
+									$data[ $routes_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] );
 								}
 							}
 						}
@@ -675,7 +701,19 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 							$fcount = count( $routes_fields[ $i ][ 'fields' ] );
 							for ( $j = 0; $j < $fcount; $j++ ) {
 								if ( isset( $data[ 'options' ][ $routes_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] ) ) {
-									$routes_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = stripslashes( $data[ 'options' ][ $routes_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] );
+									$routes_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = stripslashes( $data[ 'options' ]
+									[ $routes_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] );
+									
+									//check if route has a class then disable route_color field
+									if( $routes_fields[ $i ][ 'fields' ][ $j ][ 'id' ] == 'route_color' && 
+									$data[ 'options' ][ 'transport_class' ] != '' ) {
+										$routes_fields[ $i ][ 'fields' ][ $j ][ 'disabled' ] = true;
+										foreach ( $plugin_settings[ 'transport_classes' ] as $transport_class ) {
+											if( $transport_class[ 'name' ] == $data[ 'options' ][ 'transport_class' ] ) {
+												$routes_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = $transport_class[ 'color' ];
+											}
+										}
+									}
 								}
 							}
 						}
@@ -696,14 +734,16 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			global $wpdb, $MHS_TM_Admin_Maps, $MHS_TM_Maps;
 
 			// save variables and sanitize 
+			// the variables are send by ajax so add it to the save routine in mhs-tm-map-edit.js
 			$coordinates			 = isset( $_POST[ 'route' ] ) ? $MHS_TM_Maps->sanitize_coordinates_array( json_decode( stripslashes( $_POST[ 'route' ] ) ) ) : [ ];
 			$path					 = isset( $_POST[ 'path' ] ) ? $MHS_TM_Maps->sanitize_path_array( json_decode( stripslashes( $_POST[ 'path' ] ) ) ) : [ ];
 			$name					 = isset( $_POST[ 'name' ] ) ? sanitize_text_field( $_POST[ 'name' ] ) : null;
 			$route_color			 = ( isset( $_POST[ 'route_color' ] ) && is_string( $_POST[ 'route_color' ] ) &&
-			$_POST[ 'route_color' ][ 0 ] == '#' ) ? sanitize_text_field( $_POST[ 'route_color' ] ) : '#000000';
+				$_POST[ 'route_color' ][ 0 ] == '#' ) ? sanitize_text_field( $_POST[ 'route_color' ] ) : '#000000';
 			$dis_route_snap_to_road	 = $_POST[ 'dis_route_snap_to_road' ] == 1 ? 1 : 0;
 			$nonce_key				 = isset( $_POST[ 'mhs_tm_route_save_nonce' ] ) ? esc_attr( $_POST[ 'mhs_tm_route_save_nonce' ] ) : null;
 			$id						 = isset( $_GET[ 'id' ] ) ? absint( $_GET[ 'id' ] ) : null;
+			$transport_class		 = isset( $_POST[ 'transport_class' ] ) ? sanitize_text_field( $_POST[ 'transport_class' ] ) : null;
 
 			if ( NULL != $id ) {
 				$nonce = 'mhs_tm_route_save_' . $id;
@@ -735,9 +775,10 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 
 			$options = array(
 				'name'					 => $name,
+				'transport_class'		 => $transport_class,
 				'route_color'			 => $route_color,
 				'dis_route_snap_to_road' => $dis_route_snap_to_road,
-				'path'					 => $path
+				'path'					 => $path,
 			);
 
 			$options	 = wp_json_encode( $options );
@@ -794,6 +835,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 		}
 
 	}
+
+	
 
 	 // class
 

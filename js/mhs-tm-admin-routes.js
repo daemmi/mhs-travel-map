@@ -4,8 +4,7 @@ jQuery( function ( $ ) {
         //in coordinates are all routes directly out off the db
         //save it to a buffer for later
         coordinates_buff = mhs_tm_map.coordinates;
-    }
-    ;
+    };
 
     $( "#mhs_tm_dialog_info" ).dialog( {
         modal: false,

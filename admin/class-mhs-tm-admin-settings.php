@@ -56,6 +56,7 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 			$new_coordinate_is_geocoded         = isset( $_POST[ 'new_coordinate_is_geocoded' ] ) && $_POST[ 'new_coordinate_is_geocoded' ] == true ? 1 : 0;
 			$moved_coordinate_is_geocoded       = isset( $_POST[ 'moved_coordinate_is_geocoded' ] ) && $_POST[ 'moved_coordinate_is_geocoded' ] == true ? 1 : 0;
 			$nonce_key	                        = isset( $_POST[ 'mhs_tm_settings_save_nonce' ] ) ? esc_attr( $_POST[ 'mhs_tm_settings_save_nonce' ] ) : null;
+			$transport_classes                  = isset( $_POST[ 'transport_classes' ] ) ? sanitize_text_field( stripslashes( $_POST[ 'transport_classes' ] ) ) : null;
 
 			if ( !wp_verify_nonce( $nonce_key, 'mhs_tm_settings_save' ) ) {
 				$messages[] = array(
@@ -73,6 +74,7 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 				'new_coordinate_is_hitchhiking_spot' => $new_coordinate_is_hitchhiking_spot,
 				'new_coordinate_is_geocoded'         => $new_coordinate_is_geocoded,
 				'moved_coordinate_is_geocoded'       => $moved_coordinate_is_geocoded,
+				'transport_classes'                  => $transport_classes,
 			) );
 			
 			$wpdb->update(
@@ -150,8 +152,31 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 						'nonce'		 => 'mhs_tm_settings_save'
 					);
 					$form	 = new MHS_TM_Admin_Form( $args );
+										
+					$fields	 = $this->transport_class_fields();
+					$args	 = array(
+						'echo'		 => false,
+						'form'		 => false,
+						'metaboxes'	 => false,
+						'action'	 => $form_action,
+						'back'		 => true,
+						'back_url'	 => $url,
+						'fields'	 => $fields,
+						'nonce'		 => 'mhs_tm_settings_save'
+					);
+					$form_transport	 = new MHS_TM_Admin_Form( $args );
 					
 					echo  $form->output();
+					
+					//add or edit new transport class dialog
+					echo '<div style="display: none;" id="mhs_tm_transport" title="Add transport class" >';
+					echo $form_transport->output(); 
+					echo '</div>';
+					
+					// Error or Update Message to set by jquery
+					echo '<div id="mhs-tm-dialog-message" class="updated" style="display: none;"><p>TEXT</p></div>';
+
+					wp_enqueue_script( 'mhs_tm_admin_settings' );
 					
 					break;
 					
@@ -195,7 +220,19 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 		 * @access private
 		 */
 		private function settings_fields() {
-			global $wpdb, $MHS_TM_Utilities;
+			global $MHS_TM_Utilities;
+			//get all transport calsses in settings to display them in the transport calsses table
+			$plugin_settings = $MHS_TM_Utilities->get_plugin_settings();
+			$transport_classes_table_rows = '';
+			
+			foreach ( $plugin_settings['transport_classes'] as $key => $transport_class ) {
+				$transport_classes_table_rows .= '<tr><td class="transport_class_color" style="background-color: ' . $transport_class['color'] . 
+				';"></td><td>' . $transport_class['name'] . '</td>
+				<td class="transport_class_settings">
+				<a class="mhs_tm_edit_transport" href="javascript:void(0)">Edit</a> | 
+				<a class="mhs_tm_delete_transport" href="javascript:void(0)">Delete</a>
+				</td></tr>';
+			}
 
 			$settings_fields = array(
 				array(
@@ -257,12 +294,33 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 							'desc'	 => __( 'If checked, moved coordinates in the route edit menu will automatically	
 								get geocoded location (Country-, State- and City Name).', 'mhs_tm' )
 						),
+						array(
+							'type'	 => 'content',
+							'label'	 => __( 'Defined transportation classes', 'mhs_tm' ),
+							'id'	 => 'transport_table',
+							'desc'	 => __( '<a class="button-secondary margin" id="mhs_tm_add_transport" 
+												href="javascript:void(0)">Add new</a> <br>
+												Define transportation classes with a name and a color. Routes can then be
+												added to a transportation class. The route will be displayed in the 
+												class color and the map statistic will be splitted in the different
+												classes.', 'mhs_tm' ),
+							'value'	 => '<div class="mhs_tm_table_div"> 
+											<table id="mhs_tm_transport_table"> <tbody>' . 
+												$transport_classes_table_rows .
+											'</tbody> </table>
+										</div>'
+						),
+						array(
+							'type'		 => 'hidden',
+							'id'		 => 'transport_classes',
+						)
 					)
 				)
 							
 			);
 
 			$json_array = $MHS_TM_Utilities->get_plugin_settings();
+			$json_array['transport_classes'] = json_encode( $json_array['transport_classes'] );
 			
 			if ( !empty( $json_array ) ) {
 				$json_array_keys = array_keys( $json_array );
@@ -280,12 +338,38 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 					for ( $j = 0; $j < $fcount; $j++ ) {
 						if( isset( $data[ $settings_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] ) ) {
 							$settings_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = stripslashes( $data[ $settings_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] );
+//							$settings_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = $data[ $settings_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ];
 						}
 					}	
 				}
 			}
 
 			return $settings_fields;
+		}
+
+		/**
+		 * transport class fields
+		 *
+		 * @since 1.2.0
+		 * @access private
+		 */
+		private function transport_class_fields() {
+			$transport_class_fields = array(
+				array(
+					'type'	 => 'text_long',
+					'label'	 => __( 'Name of class', 'mhs_tm' ),
+					'id'	 => 'name_transport_class',
+					'desc'	 => __( 'The name or title of the transport class.', 'mhs_tm' )
+				),
+				array(
+					'type'	 => 'color_picker',
+					'label'	 => __( 'Color of class', 'mhs_tm' ),
+					'id'	 => 'color_transport_class',
+					'desc'	 => __( 'The color of the transport class.', 'mhs_tm' )
+				)						
+			);
+
+			return $transport_class_fields;
 		}
 
 	} // class

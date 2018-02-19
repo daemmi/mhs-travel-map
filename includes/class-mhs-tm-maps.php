@@ -40,10 +40,15 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			
 			$coordinates = array();
 			$coordinates = $this->get_coordinates( $map_id, 'map' );
+			$plugin_settings = $MHS_TM_Utilities->get_plugin_settings();
 			$map_options = $this->get_map_options( $map_id );
+			$map_options['transport_classes'] = $plugin_settings['transport_classes'];
 			
 			$coord_center_lng	 = 9.3754401;
 			$coord_center_lat	 = 54.0237934;
+			
+			//sort the coordinates array by date of first coordinate in route 
+			usort( $coordinates, array($this, 'date_compare' ) );	
 			
 			//display all note and do shortcodes
 			$note_output = '';
@@ -54,6 +59,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 					} else {
 						$coordinates[$key]['coordinates'][$key2]['note'] = balanceTags( wp_kses_post( $coordinate_coordinate['note'] ), true );
 					}
+					
 					$note_output .= '<div  style="display: none;" id="note_output_' . $map_id . '-' . $key . '-' . $key2 . '">' . 
 					$coordinates[$key]['coordinates'][$key2]['note'] . '</div>';
 				}
@@ -63,7 +69,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			esc_attr( $height ) . 'px; margin: 0; padding: 0;"></div>';
 			//control button for gmaps popup window
 			$output .= '<div id="mhs-tm-gmap-show-info-' . esc_attr( $map_id ) . '" 
-				class="mhs-tm-gmap-controls mhs-tm-gmap-controls-button">Statistics</div>';
+				class="mhs-tm-gmap-controls mhs-tm-gmap-controls-button">Info</div>';
 			//div for gmaps popup window
 			$output .= '<div id="mhs-tm-gmap-popup-window-' . esc_attr( $map_id ) . '" class="mhs-tm-gmap-popup-window">' . 
 			$note_output . '</div>';
@@ -94,7 +100,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 		 * **************************************************************************** */
 
 		/**
-		 * Funktion to get coordinates by map_id odr route_id
+		 * Funktion to get coordinates by map_id or route_id
 		 *
 		 * @since 1.0
 		 * @access public
@@ -199,6 +205,8 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			if ( is_array( $array ) ) {
 				$new_input[ 'path' ]					 = $this->sanitize_path_array( $array[ 'path' ] );
 				$new_input[ 'name' ]					 = sanitize_text_field( $array[ 'name' ] );
+				$new_input[ 'transport_class' ]			 = array_key_exists( 'transport_class', $array ) ? 
+					sanitize_text_field( $array[ 'transport_class' ] ) : '';
 				$new_input[ 'route_color' ]				 = array_key_exists( 'route_color', $array ) ? 
 					sanitize_text_field( $array[ 'route_color' ] ) : '000000';
 				$new_input[ 'dis_route_snap_to_road' ]	 = array_key_exists( 'dis_route_snap_to_road', $array ) ?
@@ -303,6 +311,19 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			}
 			return $new_input;
 		}
+		
+		/**
+		 * Funktion to sort date arra of coordinates in routes
+		 *
+		 * @since 1.2.0
+		 * @access private
+		 */
+		private function date_compare($a, $b)
+		{
+			$t1 = intval($a['coordinates'][0]['starttime']);
+			$t2 = intval($b['coordinates'][0]['starttime']);
+			return $t2 - $t1;
+		} 
 
 		/**
 		 * PHP5 style constructor

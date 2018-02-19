@@ -77,7 +77,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
         mhs_tm_map.map[map_canvas_id].popup_window.content_control =
             mhs_tm_utilities.coordinate_handling.
             get_contentstring_of_map( mhs_tm_map.coordinates[map_canvas_id],
-                mhs_tm_map.map_options[map_canvas_id].name );        
+                mhs_tm_map.map_options[map_canvas_id] );        
     }
         
     mhs_tm_map.bounds[map_canvas_id] = new google.maps.LatLngBounds();
@@ -184,8 +184,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
                 this.setZIndex( google.maps.Marker.MAX_ZINDEX + 2 );
                 mhs_tm_map.map[map_canvas_id].setCenter( this.getPosition() ); 
                 setTimeout( function () {
-                    document.getElementById( marker.note_div_id )
-                    .style.display = '';
+                    document.getElementById( marker.note_div_id ).style.display = '';
                     mhs_tm_map.map[map_canvas_id].popup_window.show( marker.content_string );
                 }, 700 );
             } );
@@ -213,14 +212,12 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
         }
         
         var lines = [];
-        mhs_tm_map.coordinates[map_canvas_id][i]['options']['path'].forEach(function(item, index) {
+        mhs_tm_map.coordinates[map_canvas_id][i]['options']['path'].forEach( function(item, index) {
             lines.push( new google.maps.LatLng( item['lat'], item['lng'] ) );
         } );
         
-        var route_color = mhs_tm_map.coordinates[map_canvas_id][i]['options']['route_color'];
-        if( typeof route_color !== 'string' || route_color[0] !== '#' ) {
-            route_color = '#000000';
-        }
+        var route_color = mhs_tm_map.get_route_color( mhs_tm_map.map_options[map_canvas_id]['transport_classes'],
+            mhs_tm_map.coordinates[map_canvas_id][i] );
         
         mhs_tm_map.route_path[map_canvas_id][i] = new google.maps.Polyline( {
             path: lines,
@@ -305,4 +302,24 @@ mhs_tm_map.set_full_opacity = function ( marker, line_path) {
             marker[i][j].setOpacity( 1 );
         }
     }
+};
+
+mhs_tm_map.get_route_color = function ( transport_classes, route) {
+    var route_color;
+    
+    if( route.options.transport_class === '' ) {
+        if( route.options.route_color !== 'string' || route.options.route_color[0] !== '#' ) {
+            route_color = '#000000';
+        } else {
+            route_color = route.options.route_color;
+        }
+    } else {
+        transport_classes.forEach( function(item, index) {
+            if( item.name === route.options.transport_class ) {
+                route_color = item.color;
+            }
+        } );
+    }
+    
+    return route_color;
 };

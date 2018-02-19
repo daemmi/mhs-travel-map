@@ -8,6 +8,7 @@ input.mhs_tm_prim_button.button {
 
 div.ui-dialog_mhs_tm {
     padding: 0px;
+    z-index: 999999;
 }
 
 .ui-dialog_mhs_tm div.ui-dialog-titlebar {
@@ -27,4 +28,28 @@ div.ui-dialog_mhs_tm {
     -webkit-box-shadow: 0px 0px 75px 5px rgba(0,0,0,0.75);
     -moz-box-shadow: 0px 0px 75px 5px rgba(0,0,0,0.75);
     box-shadow: 0px 0px 75px 5px rgba(0,0,0,0.75);
+}
+
+/* Settings Menu
+----------------------------------------- */
+.mhs_tm_table_div {
+    max-height: 15em;
+    overflow: auto;    
+}
+
+table#mhs_tm_transport_table {
+    width: 100%;
+}
+
+table#mhs_tm_transport_table td {
+    padding: 0px 5px;
+}
+
+td.transport_class_color {
+    width: 30px;
+    height: 1em;
+}
+
+td.transport_class_settings {
+    text-align: right;
 }
