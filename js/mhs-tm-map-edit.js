@@ -113,19 +113,22 @@ jQuery( function ( $ ) {
             $( "#mhs_tm_dialog_loading" ).dialog( "open" );
 
             // snap the route to the roads via gmaps directions
-            mhs_tm_utilities.gmaps.route_snap_to_road( coordinates_on_route, 0, path, $( "#dis_route_snap_to_road" ).is( ':checked' ), function ( path ) {
+            mhs_tm_utilities.gmaps.route_snap_to_road( coordinates_on_route, 0, path,
+                $( "#dis_route_snap_to_road" ).is( ':checked' ), function ( path ) {
                 if ( path === false ) {
                     //something went wrong do not save the route
                     path = [ ];
-                    mhs_tm_utilities.utilities.show_message( 'error', 'Something went wrong, \n\
-                        route not saved!' );
+                    mhs_tm_utilities.utilities.show_message( 'notice notice-warning', 'Something went wrong with \n\
+                        calculating the route path via google maps, \n\
+                        route will be saved anyway!' );
+                    save_route( path );
                 } else {
                     // everything is fine save the  route
                     save_route( path );
                 }
             } );
         } else {
-            mhs_tm_utilities.utilities.show_message( 'error', 'Please enter a name at least!' );
+            mhs_tm_utilities.utilities.show_message( 'notice notice-error', 'Please enter a name at least!' );
         }
     } );
 
@@ -308,6 +311,10 @@ jQuery( function ( $ ) {
         if( $( "#transport_class" ).val() !== '' ) {
             route_color = coordinates[0]['options']['route_color'];
         }
+        if( route_color === undefined || route_color === '' ) {
+            route_color = '#000000';
+            $( "#route_color" ).val( '#000000' );
+        }
         
         $.post(
             ajax_url + '?action=routes_save&id=' + getUrlParameter( 'id' ),
@@ -326,7 +333,7 @@ jQuery( function ( $ ) {
                 route_path.setOptions( { strokeColor: $( '#route_color' ).val() } );
                 
                 //update saved route color
-                coordinates[0]['options']['route_color'] = route_color;
+                coordinates[0]['options']['route_color'] = $( '#route_color' ).val();
 
                 // make the content string for the gmap info window
                 for ( var x = 0; x < marker[map_canvas_id].length; x++ ) {
@@ -350,7 +357,11 @@ jQuery( function ( $ ) {
 
                 $( ".admin_title_mhs_tm h1" ).html( 'Edit "' + $( "#name" ).val() + '"' );
                 $( "#mhs_tm_dialog_loading" ).dialog( "close" );
-                mhs_tm_utilities.utilities.show_message( response.type, response.message );
+                if( response.type === 'updated' ) {
+                    mhs_tm_utilities.utilities.show_message( 'notice notice-success', response.message );
+                } else {
+                    mhs_tm_utilities.utilities.show_message( 'notice notice-error', response.message );
+                }
             },
             "json"
             );
@@ -752,6 +763,8 @@ jQuery( function ( $ ) {
         if ( first_coordinate ) {
             coordinates = [ ];
             coordinates[0] = [ ];
+            coordinates[0]['options'] = [ ];
+            coordinates[0]['options']['route_color'] = '#000000';
             coordinates[0]['coordinates'] = [ ];
             coordinates[0]['coordinates'][0] = {
                 latitude: lat,
