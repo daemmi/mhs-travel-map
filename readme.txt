@@ -5,7 +5,7 @@ Tags: map, google maps, hitchhike, hitchhiking, travel, backpacking, traveling
 Tested up to: 4.9.4
 Requires at least: 3.8.0
 Requires PHP: 5.2.0
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPL3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -60,6 +60,9 @@ This section describes how to install and use the plugin.
 
 == Changelog ==
 
+= 1.2.1 (2018-02-22) =
+- fixed, after activation settings could be saved
+
 = 1.2.0 (2018-02-19) =
 - added, transportation classes
 - changed, statistics for each transportation class in a map
@@ -109,6 +112,9 @@ This section describes how to install and use the plugin.
 * first release
 
 == Upgrade Notice ==
+
+= 1.2.1 =
+major bug fixed, settings could be used now
 
 = 1.2.0 =
 major bugs fixed and most comfort right now
