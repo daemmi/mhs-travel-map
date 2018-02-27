@@ -187,11 +187,22 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 						<h1>My Hitchhiking Spot Travel Map </h1>
 						<p>My Hitchhiking Spot Travel Map (MHS Travel Map) is for travelers who loves to log there route. It\'s designed mainly for hitchhikers but could also good be used by backpackers, hikers, cyclist, overland travelers with car or motorbike or traveler with any other kind of transportation. Create a Map, add coordinates where you have been, draw your travel route, write a story for each coordinate. You will use the wordpress text editor to write the stories, so you could add images and videos to it.</p>
 						<p>For logging of&nbsp; the route you could use the Android app "<a title="My Hitchhiking Spots" href="https://play.google.com/store/apps/details?id=com.myhitchhikingspots" target="_blank">My Hitchhiking Spots</a>" The app runs without mobile internet. You could save a backup and then import the file in the MHS Travel Map plugin. After the import save the routes you would like and change each route individual..</p>	
-						<h1>Settings and Functions </h1>
+						
+						<h1 style="clear: left;">Settings and Functions </h1>
+						
 						<h2>Shortcodes</h2>
+						<p>There are just one shortcode name to display a map or a route. Just copy the shortcode 
+						you will find in the Maps or routes menu. The shortcode decides if the map_id is a map id or a 
+						route id by the addional option "type". </p>
 						<p>There are additional option you could add to the shortcode to show a map. Just add it like 
-						following and the end of the short code: <strong>[mhs-travel-map map_id=12 auto_window_size=0]</strong></p>
+						following at the end of the short code: <strong>[mhs-travel-map map_id=12 auto_window_size=0]</strong></p>
+						
 						<h3>Shortcode options</h3>
+						<span style="font-size: 12pt;"><strong>map_id</strong></span> <br> 
+						<span style="font-size: 10pt;">values: number; default = 0 </span> <br>
+						<p>The map or route ID which should be loaded. It has to be a number.</p>
+						<br>
+						
 						<span style="font-size: 12pt;"><strong>auto_window_ratio</strong></span> <br> 
 						<span style="font-size: 10pt;">values: 1/0; default = 1 </span> <br>
 						<p>Disable the automatic sizing of the map window. If enabled (default) the map window will automatically set to a 16:9 ratio calculated from the screen size</p>
@@ -205,6 +216,13 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 						<span style="font-size: 12pt;"><strong>run_shortcodes</strong></span> <br>
 						<span style="font-size: 10pt;">values: 1/0; default = 1 </span> <br>
 						<p>If 1, shortcodes on the coordinate notes will converted.&nbsp;</p>
+						<br>
+
+						<span style="font-size: 12pt;"><strong>type</strong></span> <br>
+						<span style="font-size: 10pt;">values: map/route; default = map </span> <br>
+						<p>Change the interpretation of the option map_id, if it is a map id or a route id. So the 
+						shortcode will load a map with all routes added to the map or just one particluar route by id.
+						&nbsp;</p>
 						<br>
 						';
 					

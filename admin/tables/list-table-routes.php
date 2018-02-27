@@ -89,7 +89,7 @@ class List_Table_Routes extends WP_List_Table_My {
 	 * ************************************************************************ */
 	function column_default( $item, $column_name ) {
 		switch ( $column_name ) {
-			case 'id':
+			case 'short_code':
 			case 'date':
 			case 'name':
 			case 'update':
@@ -179,7 +179,7 @@ class List_Table_Routes extends WP_List_Table_My {
 			'route_start_date' => 'Start date',
 			'update'           => 'Last updated',
 			'date'	           => 'Create date',
-			'id'	           => 'ID'
+			'short_code'	   => 'Shortcode and ID'
 		);
 		return $columns;
 	}
@@ -201,7 +201,7 @@ class List_Table_Routes extends WP_List_Table_My {
 	function get_sortable_columns() {
 
 		$sortable_columns = array(
-			'id'	           => array( 'id', false ),
+			'short_code'	   => array( 'short_code', false ),
 			'date'	           => array( 'date', false ), //true means it's already sorted 
 			'update'           => array( 'update', false ),
 			'route_start_date' => array( 'route_start_date', false ),
@@ -479,13 +479,17 @@ class List_Table_Routes extends WP_List_Table_My {
 			$route_options		 = $MHS_TM_Maps->sanitize_coordinate_option_array( json_decode( $route['options'], true ) );
 			$route_coordinates	 = array();
 			$route_coordinates	 = $MHS_TM_Maps->sanitize_coordinates_array( json_decode( $route['coordinates'], true ) );
-			
+			If( $route_coordinates == null ) {
+				$route_coordinates[0] = [];
+				$route_coordinates[0]['starttime'] = '0000000000';
+			}
 			date_default_timezone_set( 'Europe/London' );
 			$data[ $id ]['date']	         = $date;
 			$data[ $id ]['update']           = $update;
 			$data[ $id ]['name']	         = $route_options['name'];
 			$data[ $id ]['route_start_date'] = date( 'Y-m-d', $route_coordinates[0]['starttime'] );
 			$data[ $id ]['id']	             = $route['id'];
+			$data[ $id ]['short_code']		 = '[mhs-travel-map type=route map_id=' . $route['id'] . ']';
 			$id						         = $id + 1;
 		}
 
@@ -498,7 +502,7 @@ class List_Table_Routes extends WP_List_Table_My {
 		 * sorting technique would be unnecessary.
 		 */
 		function usort_reorder( $a, $b ) {
-			$orderby_options = ['update', 'date', 'name', 'id', 'route_start_date'];
+			$orderby_options = ['update', 'date', 'name', 'id', 'route_start_date', 'short_code'];
 			$order_options   = ['DESC', 'ASC', 'desc', 'asc'];
 			
 			if ( isset( $_GET['orderby'], $_GET['order'] ) && in_array( $_GET['orderby'], $orderby_options ) && in_array( $_GET['order'], $order_options ) ) {

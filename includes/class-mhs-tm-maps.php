@@ -22,13 +22,15 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			global $wpdb, $MHS_TM_Utilities;
 
 			extract( shortcode_atts( array(
+				'type'				 => 'map',
 				'map_id'			 => 0,
 				'height'			 => 500,
 				'run_shortcodes'	 => 1,
-				'auto_window_ratio'   => 1,
+				'auto_window_ratio'  => 1,
 			), $atts ) );
 
 			//validate shortcode_atts
+			$type				 = $type == 'map' || $type == 'route' ? $type : 'map';
 			$map_id				 = (int) $map_id;
 			$height				 = (int) $height;
 			$run_shortcodes		 = $run_shortcodes == 1 ? 1 : 0;
@@ -39,7 +41,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			);
 			
 			$coordinates = array();
-			$coordinates = $this->get_coordinates( $map_id, 'map' );
+			$coordinates = $this->get_coordinates( $map_id, $type );
 			$plugin_settings = $MHS_TM_Utilities->get_plugin_settings();
 			$map_options = $this->get_map_options( $map_id );
 			$map_options['transport_classes'] = $plugin_settings['transport_classes'];
@@ -68,8 +70,10 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			$output = '<div class="mhs_tm-map" id="mhs_tm_map_canvas_' . esc_attr( $map_id ) . '" style="height: ' .
 			esc_attr( $height ) . 'px; margin: 0; padding: 0;"></div>';
 			//control button for gmaps popup window
-			$output .= '<div id="mhs-tm-gmap-show-info-' . esc_attr( $map_id ) . '" 
-				class="mhs-tm-gmap-controls mhs-tm-gmap-controls-button">Info</div>';
+			if( $type == 'map' ) {
+				$output .= '<div id="mhs-tm-gmap-show-info-' . esc_attr( $map_id ) . '" 
+					class="mhs-tm-gmap-controls mhs-tm-gmap-controls-button">Info</div>';
+			}
 			//div for gmaps popup window
 			$output .= '<div id="mhs-tm-gmap-popup-window-' . esc_attr( $map_id ) . '" class="mhs-tm-gmap-popup-window">' . 
 			$note_output . '</div>';
@@ -272,6 +276,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 				foreach ( $array as $key => $val ) {
 					if ( isset( $array[ $key ] ) ) {
 						if ( is_object( $array[ $key ] ) ) {
+							$starttime = substr( sanitize_text_field( $val->starttime ), 0, 10 );
 							$new_input[ $key ] = (object) array(
 								'city'				 => sanitize_text_field( $val->city ),
 								'country'			 => sanitize_text_field( $val->country ),
@@ -280,7 +285,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 								'latitude'			 => floatval( $val->latitude ),
 								'longitude'			 => floatval( $val->longitude ),
 								'note'				 => balanceTags( wp_kses_post( $val->note ), true ),
-								'starttime'			 => substr( sanitize_text_field( $val->starttime ), 0, 10 ),
+								'starttime'			 => strlen( $starttime ) == 10 ? $starttime : '0000000000',
 								'state'				 => sanitize_text_field( $val->state ),
 								'street'			 => sanitize_text_field( $val->street ),
 								'waitingtime'		 => intval( $val->waitingtime ),
@@ -288,6 +293,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 								'distance'			 => property_exists( $val, 'distance' ) ? intval( $val->distance ) : false,
 							);
 						} elseif ( is_array( $array[ $key ] ) ) {
+							$starttime = substr( sanitize_text_field( $val[ 'starttime' ] ), 0, 10 );
 							$new_input[ $key ] = array(
 								'city'				 => sanitize_text_field( $val[ 'city' ] ),
 								'country'			 => sanitize_text_field( $val[ 'country' ] ),
@@ -296,7 +302,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 								'latitude'			 => floatval( $val[ 'latitude' ] ),
 								'longitude'			 => floatval( $val[ 'longitude' ] ),
 								'note'				 => balanceTags( wp_kses_post( $val[ 'note' ] ), true ),
-								'starttime'			 => substr( sanitize_text_field( $val[ 'starttime' ] ), 0, 10 ),
+								'starttime'			 => strlen( $starttime ) == 10 ? $starttime : '0000000000',
 								'state'				 => sanitize_text_field( $val[ 'state' ] ),
 								'street'			 => sanitize_text_field( $val[ 'street' ] ),
 								'waitingtime'		 => intval( $val[ 'waitingtime' ] ),
@@ -320,9 +326,14 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 		 */
 		private function date_compare($a, $b)
 		{
-			$t1 = intval($a['coordinates'][0]['starttime']);
-			$t2 = intval($b['coordinates'][0]['starttime']);
-			return $t2 - $t1;
+			// sort only if array
+			if( is_array( $a['coordinates'] ) && is_array( $b['coordinates'] ) && count( $a['coordinates'] ) > 0 && 
+			count( $b['coordinates'] ) > 0 ) {
+				$t1 = intval($a['coordinates'][0]['starttime']);
+				$t2 = intval($b['coordinates'][0]['starttime']);
+				return $t2 - $t1;
+			} 
+			return 0;
 		} 
 
 		/**
