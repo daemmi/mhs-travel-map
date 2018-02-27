@@ -195,7 +195,7 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 						you will find in the Maps or routes menu. The shortcode decides if the map_id is a map id or a 
 						route id by the addional option "type". </p>
 						<p>There are additional option you could add to the shortcode to show a map. Just add it like 
-						following at the end of the short code: <strong>[mhs-travel-map map_id=12 auto_window_size=0]</strong></p>
+						following at the end of the short code: <strong>[mhs-travel-map map_id=12 auto_window_ratio=0]</strong></p>
 						
 						<h3>Shortcode options</h3>
 						<span style="font-size: 12pt;"><strong>map_id</strong></span> <br> 

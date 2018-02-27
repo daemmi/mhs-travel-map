@@ -38,6 +38,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			
 			$shortcode_options = array(
 				'auto_window_ratio'	=> $auto_window_ratio,
+				'type'				=> $type
 			);
 			
 			$coordinates = array();
@@ -67,8 +68,15 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 				}
 			}
 			
-			$output = '<div class="mhs_tm-map" id="mhs_tm_map_canvas_' . esc_attr( $map_id ) . '" style="height: ' .
-			esc_attr( $height ) . 'px; margin: 0; padding: 0;"></div>';
+			// Make an div over the whole content when loading the page
+			$output = '<div " style="position: relative;"><div id="mhs_tm_loading_' . $map_id . '" class="mhs_tm_loading">' .
+			$MHS_TM_Utilities->loading_spinner() .
+			'</div>';
+			$output .= '<div class="mhs_tm-map" id="mhs_tm_map_canvas_' . esc_attr( $map_id ) . '" style="height: ' .
+			esc_attr( $height ) . 'px; margin: 0; padding: 0;">' .
+			'</div></div>';
+			
+				
 			//control button for gmaps popup window
 			if( $type == 'map' ) {
 				$output .= '<div id="mhs-tm-gmap-show-info-' . esc_attr( $map_id ) . '" 

@@ -229,7 +229,9 @@ jQuery( function ( $ ) {
         this.content_control = '';
 
         this.show_control_button = function () {
-            $( this.control_button ).fadeIn();
+            console.log('jetzt');
+            this.gmap.controls[google.maps.ControlPosition.LEFT_TOP].push( this.control_button );
+            $( this.control_button ).delay( 1000 ).fadeIn();
             this.change_gm_style();
         };
 
@@ -287,11 +289,10 @@ jQuery( function ( $ ) {
         };
 
         //place it in the map
-        this.gmap.controls[google.maps.ControlPosition.LEFT_TOP].push( this.control_button );
         this.gmap.controls[google.maps.ControlPosition.BOTTOM_CENTER].push( this.popup_div );
         //make the control button visible
-        google.maps.event.addListenerOnce( this.gmap, 'idle', this.show_control_button.bind( this ) );
-        google.maps.event.addListenerOnce( this.gmap, 'idle', this.change_gm_style.bind( this ) );
+        google.maps.event.addListenerOnce( this.gmap, 'tilesloaded', this.show_control_button.bind( this ) );
+        google.maps.event.addListenerOnce( this.gmap, 'tilesloaded', this.change_gm_style.bind( this ) );
 
         this.gmap.addListener( 'bounds_changed', this.set_size.bind( this ) );
 

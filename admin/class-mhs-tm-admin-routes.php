@@ -243,8 +243,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 
 			echo $adminpage->top();
 			// Make an div over the whole content when loading the page
-			echo '<div id="wrap_content">
-					<div id="mhs_tm_loading">' .
+			echo '<div id="wrap_content" style="position: relative;">
+					<div class="mhs_tm_loading">' .
 			$MHS_TM_Utilities->loading_spinner()
 			. '</div>';
 			echo $output;

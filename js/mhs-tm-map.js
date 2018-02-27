@@ -34,7 +34,8 @@ jQuery( function ( $ ) {
             if( mhs_tm_map.shortcode_options[map_canvas_id].auto_window_ratio ) {
                 mhs_tm_utilities.utilities.set_div_16_9( '#mhs_tm_map_canvas_' + map_canvas_id );
             }
-            google.maps.event.addDomListener( window, 'load', mhs_tm_map.gmap_initialize( map_canvas_id, 'map' ) );
+            google.maps.event.addDomListener( window, 'load', mhs_tm_map.gmap_initialize( 
+                map_canvas_id, mhs_tm_map.shortcode_options[map_canvas_id]['type'] ) );
         }
         
         $( window ).resize( function () {
@@ -55,7 +56,15 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
     mhs_tm_map.route_path[map_canvas_id] = [];
     mhs_tm_map.map[map_canvas_id] = new google.maps.Map( document.getElementById( 'mhs_tm_map_canvas_' + map_canvas_id ),
         mapOptions );   
-        
+    
+    // Event listener fires if map is loaded and hide the loaing overlay
+    google.maps.event.addListenerOnce( mhs_tm_map.map[map_canvas_id], 'tilesloaded', function () {
+        // do something only the first time the map is loaded
+        jQuery( function ( $ ) {
+            $( '#mhs_tm_loading_' + map_canvas_id ).slideUp( 1500 );
+        } );
+    } );
+    
     //if type route no content for statistics and no button
     if ( type === 'route' ) { 
         //Make new popup window for the map

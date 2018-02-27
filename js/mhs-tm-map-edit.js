@@ -15,7 +15,7 @@ jQuery( function ( $ ) {
 
     marker[map_canvas_id] = [ ];
 
-    $( '#mhs_tm_loading' ).css( "background-color", $( 'body' ).css( "background-color" ) );
+    $( '.mhs_tm_loading' ).css( "background-color", $( 'body' ).css( "background-color" ) );
 
     // Resize the window resize other stuff too
     $( window ).resize( function () {
@@ -521,7 +521,7 @@ jQuery( function ( $ ) {
         map[map_canvas_id] = new google.maps.Map( document.getElementById( 'mhs_tm_map_canvas_' + map_canvas_id ), mapOptions );
 
         // Event listener fires if map is loaded and hide the loaing overlay
-        google.maps.event.addListenerOnce( map[map_canvas_id], 'idle', function () {
+        google.maps.event.addListenerOnce( map[map_canvas_id], 'tilesloaded', function () {
             // do something only the first time the map is loaded
             //show the form with the coordinates
             $( '#mhs_tm-form ' ).show();
@@ -529,7 +529,7 @@ jQuery( function ( $ ) {
             $( '#mhs-tm-gmap-search-input' ).show();
             //enable sortable, otherwise touch punch doesnt work with sortable
             $( '.mhs_tm_normal_sortables' ).sortable( 'enable' );
-            $( '#mhs_tm_loading' ).slideUp( 1500 );
+            $( '.mhs_tm_loading' ).slideUp( 1500 );
         } );
 
         // Event listener fires after a resize of the window
