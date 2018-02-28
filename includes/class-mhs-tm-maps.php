@@ -223,6 +223,8 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 					sanitize_text_field( $array[ 'route_color' ] ) : '000000';
 				$new_input[ 'dis_route_snap_to_road' ]	 = array_key_exists( 'dis_route_snap_to_road', $array ) ?
 					$MHS_TM_Utilities->sanitize_checkbox( $array[ 'dis_route_snap_to_road' ] ) : false;
+				$new_input[ 'dis_route_time_date' ]	 = array_key_exists( 'dis_route_time_date', $array ) ?
+					$MHS_TM_Utilities->sanitize_checkbox( $array[ 'dis_route_time_date' ] ) : false;
 			} else {
 				$new_input[ 0 ] = (int) sanitize_text_field( $array );
 			}

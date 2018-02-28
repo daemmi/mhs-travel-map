@@ -321,7 +321,7 @@ mhs_tm_utilities.coordinate_handling.get_only_on_route_coordinates = function ( 
     return coordinates_on_route;
 };
 
-mhs_tm_utilities.coordinate_handling.get_title = function ( coordinate, coordinates ) {
+mhs_tm_utilities.coordinate_handling.get_title = function ( coordinate, coordinates, route_options ) {
     var content_string = '';
     if ( coordinate.country )
     {
@@ -343,9 +343,12 @@ mhs_tm_utilities.coordinate_handling.get_title = function ( coordinate, coordina
     if ( coordinate.country || coordinate.state || coordinate.city ) {
         content_string += ' - ';
     }
-    var coordinate_date = new Date( mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset( parseInt( coordinate.starttime ) ) * 1000 )
-        .toLocaleString( [], { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' } );
-    content_string += coordinate_date + ' - ';
+    
+    if( route_options['dis_route_time_date'] !== 1 ) {
+        var coordinate_date = new Date( mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset( parseInt( coordinate.starttime ) ) * 1000 )
+            .toLocaleString( [], { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' } );
+        content_string += coordinate_date + ' - ';
+    }
 
     if ( mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview( coordinate, coordinates ) ||
         mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ) ) {
@@ -614,7 +617,8 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
     return return_string;
 };
 
-mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = function ( coordinate, coordinates ) {
+mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = 
+    function ( coordinate, coordinates, route_options ) {
 
     var content_string = '<div class="mhs-tm-map-message"> <p class="mhs-tm-map-message-title">';
 
@@ -642,9 +646,11 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = function 
         content_string += '</b> </br>';
     }
     
-    var coordinate_date = new Date( mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset( parseInt( coordinate.starttime ) ) * 1000 )
-        .toLocaleString( [], { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' } );
-    content_string += coordinate_date + '</br>';
+    if( route_options['dis_route_time_date'] !== 1 ) {
+        var coordinate_date = new Date( mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset( parseInt( coordinate.starttime ) ) * 1000 )
+            .toLocaleString( [], { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' } );
+        content_string += coordinate_date + '</br>';
+    }
 
     if ( mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview( coordinate, coordinates ) ||
         mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ) ) {

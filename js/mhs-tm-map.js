@@ -171,7 +171,8 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
                 map: mhs_tm_map.map[map_canvas_id],
                 title: mhs_tm_utilities.coordinate_handling.get_title(
                     mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j],
-                    mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'] ),
+                    mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'],
+                    mhs_tm_map.coordinates[map_canvas_id][i]['options'] ),
                 id: map_canvas_id + '_' + i + '_' + mark_counter,
                 icon: pinIcon
             } );
@@ -179,7 +180,8 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
             mhs_tm_map.marker[map_canvas_id][i][mark_counter].content_string =
                 mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                     mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j],
-                    mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'] );
+                    mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'],
+                    mhs_tm_map.coordinates[map_canvas_id][i]['options'] );
                 
             mhs_tm_map.marker[map_canvas_id][i][mark_counter].note_div_id =
                 'note_output_' + map_canvas_id + '-' + i + '-' + mark_counter;

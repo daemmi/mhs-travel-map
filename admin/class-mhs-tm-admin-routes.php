@@ -194,7 +194,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$args			 = array(
 				'echo'			 => false,
 				'form'			 => true,
-				'js'			 => false,
+				'js'			 => true,
 				'metaboxes'		 => true,
 				'action'		 => $form_action,
 				'id'			 => $id,
@@ -445,7 +445,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$table_name = $wpdb->prefix . 'mhs_tm_routes ';
 
 			// static route fields
-			// !!!!!! by adding new fields also change the sanitize function !!!!!!
+			// !!!!!! by adding new fields also change the sanitize function sanitize_coordinate_option_array !!!!!!
+			// !!!!!! by adding new fields also change the save function routes_save php and js !!!!!!
 			$routes_fields = [ ];
 			if ( $part == 'The Route' ) {
 				//get transport classes
@@ -490,6 +491,13 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 								'label'	 => __( 'Disable snap to road?', 'mhs_tm' ),
 								'id'	 => 'dis_route_snap_to_road',
 								'desc'	 => __( 'If checked, the whole route path will not snapped to the road.', 'mhs_tm' )
+							),
+							array(
+								'type'	 => 'checkbox',
+								'label'	 => __( 'Don\'t show time and date?', 'mhs_tm' ),
+								'id'	 => 'dis_route_time_date',
+								'desc'	 => __( 'If checked, at all coordinates will be no time and date shown in the 
+									popup window.', 'mhs_tm' )
 							),
 						)
 					)
@@ -741,6 +749,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$route_color			 = ( isset( $_POST[ 'route_color' ] ) && is_string( $_POST[ 'route_color' ] ) &&
 				$_POST[ 'route_color' ][ 0 ] == '#' ) ? sanitize_text_field( $_POST[ 'route_color' ] ) : '#000000';
 			$dis_route_snap_to_road	 = $_POST[ 'dis_route_snap_to_road' ] == 1 ? 1 : 0;
+			$dis_route_time_date	 = $_POST[ 'dis_route_time_date' ] == 1 ? 1 : 0;
 			$nonce_key				 = isset( $_POST[ 'mhs_tm_route_save_nonce' ] ) ? esc_attr( $_POST[ 'mhs_tm_route_save_nonce' ] ) : null;
 			$id						 = isset( $_GET[ 'id' ] ) ? absint( $_GET[ 'id' ] ) : null;
 			$transport_class		 = isset( $_POST[ 'transport_class' ] ) ? sanitize_text_field( $_POST[ 'transport_class' ] ) : null;
@@ -778,6 +787,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				'transport_class'		 => $transport_class,
 				'route_color'			 => $route_color,
 				'dis_route_snap_to_road' => $dis_route_snap_to_road,
+				'dis_route_time_date'    => $dis_route_time_date,
 				'path'					 => $path,
 			);
 

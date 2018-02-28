@@ -198,6 +198,11 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 				$fields	 = $this->maps_fields( $id );
 				$nonce	 = 'mhs_tm_maps_save_' . $id;
 			}
+			
+			$custom_buttons = array(
+				'<a href="javascript:void(0);" id="mhs_tm_update_map" class="button-secondary margin" 
+					title="Update the map">' . __( 'update map', 'mhs_tm' ) . '</a>',
+			);
 
 			$adminpage = new MHS_TM_Admin_Page( array(
 				'title'	 => $title,
@@ -205,15 +210,16 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			) );
 
 			$args	 = array(
-				'echo'		 => false,
-				'form'		 => true,
-				'metaboxes'	 => true,
-				'action'	 => $form_action,
-				'id'		 => $id,
-				'back'		 => true,
-				'back_url'	 => $url,
-				'fields'	 => $fields,
-				'nonce'		 => $nonce
+				'echo'		     => false,
+				'form'		     => true,
+				'metaboxes'	     => true,
+				'action'	     => $form_action,
+				'custom_buttons' => $custom_buttons,
+				'id'		     => $id,
+				'back'		     => true,
+				'back_url'	     => $url,
+				'fields'	     => $fields,
+				'nonce'		     => $nonce
 			);
 			$form	 = new MHS_TM_Admin_Form( $args );
 

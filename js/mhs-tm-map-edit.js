@@ -104,6 +104,29 @@ jQuery( function ( $ ) {
     $( '.coordinate input' ).focusout( function ( event ) {
         focusout_input( $( this ) );
     } );
+    
+    //check if a change to the option "Don'tshow time and date?" occurred
+    $('#dis_route_time_date').click(function(){
+        //change the option in array
+        coordinates[map_canvas_id]['options']['dis_route_time_date'] = 
+            $( "#dis_route_time_date" ).is( ':checked' ) ? 1 : 0;
+        // make the content string for all gmap info window
+        for ( var x = 0; x < coordinates[map_canvas_id]['coordinates'].length; x++ ) {
+            marker[map_canvas_id][x].content_string =
+                mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
+                    coordinates[map_canvas_id]['coordinates'][x],
+                    coordinates[map_canvas_id]['coordinates'],
+                    coordinates[map_canvas_id]['options'] ) +
+                coordinates[map_canvas_id]['coordinates'][x].note;
+
+            marker[map_canvas_id][x].setTitle(
+                mhs_tm_utilities.coordinate_handling.get_title(
+                    coordinates[map_canvas_id]['coordinates'][x],
+                    coordinates[map_canvas_id]['coordinates'],
+                    coordinates[map_canvas_id]['options'] )
+                );
+        }
+    } );
 
     $( ".mhs_tm_admin_form_submit" ).on( 'click', $( this ), function () {
         var coordinates_on_route = mhs_tm_utilities.coordinate_handling.get_only_on_route_coordinates( coordinates[map_canvas_id]['coordinates'] );
@@ -157,13 +180,15 @@ jQuery( function ( $ ) {
             marker[map_canvas_id][coordinate_index_global].content_string =
                 mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                     coordinates[map_canvas_id]['coordinates'][coordinate_index_global],
-                    coordinates[map_canvas_id]['coordinates'] ) +
+                    coordinates[map_canvas_id]['coordinates'],
+                    coordinates[map_canvas_id]['options'] ) +
                 coordinates[map_canvas_id]['coordinates'][coordinate_index_global].note;
 
             marker[map_canvas_id][coordinate_index_global].setTitle(
                 mhs_tm_utilities.coordinate_handling.get_title(
                     coordinates[map_canvas_id]['coordinates'][coordinate_index_global],
-                    coordinates[map_canvas_id]['coordinates'] )
+                    coordinates[map_canvas_id]['coordinates'],
+                    coordinates[map_canvas_id]['options'] )
                 );
         },
         open: function ( event, ui ) {
@@ -250,13 +275,15 @@ jQuery( function ( $ ) {
                     marker[map_canvas_id][x].content_string =
                         mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                             coordinates[map_canvas_id]['coordinates'][x],
-                            coordinates[map_canvas_id]['coordinates']
+                            coordinates[map_canvas_id]['coordinates'],
+                            coordinates[map_canvas_id]['options']
                             ) + coordinates[map_canvas_id]['coordinates'][x].note;
 
                     marker[map_canvas_id][x].setTitle(
                         mhs_tm_utilities.coordinate_handling.get_title(
                             coordinates[map_canvas_id]['coordinates'][x],
-                            coordinates[map_canvas_id]['coordinates'] )
+                            coordinates[map_canvas_id]['coordinates'],
+                            coordinates[map_canvas_id]['options'] )
                         );
                 }
             }
@@ -323,6 +350,7 @@ jQuery( function ( $ ) {
                 route_color: route_color,
                 transport_class: $( "#transport_class" ).val(),
                 dis_route_snap_to_road: $( "#dis_route_snap_to_road" ).is( ':checked' ) ? 1 : 0,
+                dis_route_time_date: $( "#dis_route_time_date" ).is( ':checked' ) ? 1 : 0,
                 route: JSON.stringify( coordinates[map_canvas_id]['coordinates'] ),
                 path: JSON.stringify( path ),
                 mhs_tm_route_save_nonce: $( '#mhs_tm_route_save_' + getUrlParameter( 'id' ) + '_nonce' ).val(),
@@ -340,13 +368,15 @@ jQuery( function ( $ ) {
                     marker[map_canvas_id][x].content_string =
                         mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                             coordinates[map_canvas_id]['coordinates'][x],
-                            coordinates[map_canvas_id]['coordinates'] ) +
+                            coordinates[map_canvas_id]['coordinates'],
+                            coordinates[map_canvas_id]['options'] ) +
                         coordinates[map_canvas_id]['coordinates'][x].note;
 
                     marker[map_canvas_id][x].setTitle(
                         mhs_tm_utilities.coordinate_handling.get_title(
                             coordinates[map_canvas_id]['coordinates'][x],
-                            coordinates[map_canvas_id]['coordinates'] )
+                            coordinates[map_canvas_id]['coordinates'],
+                            coordinates[map_canvas_id]['options'] )
                         );
                 }
 
@@ -433,13 +463,15 @@ jQuery( function ( $ ) {
             marker[map_canvas_id][x].content_string =
                 mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                     coordinates[map_canvas_id]['coordinates'][x],
-                    coordinates[map_canvas_id]['coordinates'] ) +
+                    coordinates[map_canvas_id]['coordinates'],
+                    coordinates[map_canvas_id]['options'] ) +
                 coordinates[map_canvas_id]['coordinates'][x].note;
 
             marker[map_canvas_id][x].setTitle(
                 mhs_tm_utilities.coordinate_handling.get_title(
                     coordinates[map_canvas_id]['coordinates'][x],
-                    coordinates[map_canvas_id]['coordinates'] )
+                    coordinates[map_canvas_id]['coordinates'],
+                    coordinates[map_canvas_id]['options'] )
                 );
         }
 
@@ -647,12 +679,14 @@ jQuery( function ( $ ) {
                         marker[map_canvas_id][marker[map_canvas_id].length - 1].setTitle(
                             mhs_tm_utilities.coordinate_handling.get_title(
                                 coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1],
-                                coordinates[0]['coordinates'] )
+                                coordinates[0]['coordinates'],
+                                coordinates[0]['options'] )
                             );
                         marker[map_canvas_id][marker[map_canvas_id].length - 1].content_string =
                             mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                                 coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1],
-                                coordinates[0]['coordinates'] ) +
+                                coordinates[0]['coordinates'],
+                                coordinates[map_canvas_id]['options'] ) +
                             coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1].note;
                         $( "#mhs_tm_dialog_loading" ).dialog( "close" );
                     } );
@@ -660,12 +694,14 @@ jQuery( function ( $ ) {
                     marker[map_canvas_id][marker[map_canvas_id].length - 1].setTitle(
                         mhs_tm_utilities.coordinate_handling.get_title(
                             coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1],
-                            coordinates[0]['coordinates'] )
+                            coordinates[0]['coordinates'],
+                            coordinates[0]['options'] )
                         );
                     marker[map_canvas_id][marker[map_canvas_id].length - 1].content_string =
                         mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
                             coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1],
-                            coordinates[0]['coordinates'] ) +
+                            coordinates[0]['coordinates'],
+                            coordinates[map_canvas_id]['options'] ) +
                         coordinates[0]['coordinates'][coordinates[0]['coordinates'].length - 1].note;
                     $( "#mhs_tm_dialog_loading" ).dialog( "close" );
                 }
@@ -694,7 +730,9 @@ jQuery( function ( $ ) {
                         position: myLatlng,
                         map: map[map_canvas_id],
                         title: mhs_tm_utilities.coordinate_handling.get_title(
-                            coordinates[i]['coordinates'][j], coordinates[i]['coordinates'] ),
+                            coordinates[i]['coordinates'][j], 
+                            coordinates[i]['coordinates'],
+                            coordinates[i]['options'] ),
                         id: mark_counter,
                         icon: pinIcon,
                         draggable: true
@@ -702,12 +740,16 @@ jQuery( function ( $ ) {
 
                     marker[map_canvas_id][mark_counter].content_string =
                         mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
-                            coordinates[i]['coordinates'][j], coordinates[i]['coordinates'] ) +
+                            coordinates[i]['coordinates'][j], 
+                            coordinates[i]['coordinates'],
+                            coordinates[i]['options'] ) +
                         coordinates[i]['coordinates'][j].note;
 
                     marker[map_canvas_id][mark_counter].setTitle(
                         mhs_tm_utilities.coordinate_handling.get_title(
-                            coordinates[i]['coordinates'][j], coordinates[i]['coordinates'] )
+                            coordinates[i]['coordinates'][j], 
+                            coordinates[i]['coordinates'],
+                            coordinates[i]['options'] )
                         );
 
                     add_dragend_listener( marker[map_canvas_id][mark_counter] );
