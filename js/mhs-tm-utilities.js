@@ -229,7 +229,6 @@ jQuery( function ( $ ) {
         this.content_control = '';
 
         this.show_control_button = function () {
-            console.log('jetzt');
             this.gmap.controls[google.maps.ControlPosition.LEFT_TOP].push( this.control_button );
             $( this.control_button ).delay( 1000 ).fadeIn();
             this.change_gm_style();

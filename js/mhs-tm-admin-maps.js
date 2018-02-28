@@ -18,7 +18,7 @@ jQuery( function ( $ ) {
          $( ".wrap" ).append( '<div id="mhs-tm-gmap-popup-window-' + map_canvas_id + '" class="mhs-tm-gmap-popup-window"></div>' );
 
         mhs_tm_map.gmap_initialize( map_canvas_id, 'map' );
-        //find popup and will with new note content
+        //find popup and fill with new note content
         var popup_window_before = $( '#mhs-tm-gmap-popup-window-' + map_canvas_id )
             .find( '.mhs-tm-gmap-popup-window-content-before' );
         //fill with content again
