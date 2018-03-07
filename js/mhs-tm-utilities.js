@@ -596,11 +596,11 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
         } else {
             title = item;
         }
-        header_string[item] = '<p class="mhs-tm-map-message-title"> \n\
-                            <b ' + style_block + '>' + title + '</b><br>' + 
+        header_string[item] = '<div class="mhs-tm-map-message-title"> \n\
+                            <h1 ' + style_block + '>' + title + '</h1>' + 
                             start_date[item] + ' to ' + end_date[item] + '<br>' +
                             lift_string[item] + journey_string[item] + waited_string[item] + ' | ' +
-                            'Distance: ' + total_distance[item] + 'km <hr></p> ' + break_block;
+                            'Distance: ' + total_distance[item] + 'km <hr></div>';
     } );
     
     var return_string = '<div class="mhs-tm-map-message">';
@@ -620,10 +620,10 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
 mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate = 
     function ( coordinate, coordinates, route_options ) {
 
-    var content_string = '<div class="mhs-tm-map-message"> <p class="mhs-tm-map-message-title">';
+    var content_string = '<div class="mhs-tm-map-message-title">';
 
     if ( coordinate.country || coordinate.state || coordinate.city ) {
-        content_string += '<b style="font-size: 120%;">';
+        content_string += '<h1 style="font-size: 120%;">'; //'<b style="font-size: 120%;">'
     }
     if ( coordinate.country )
     {
@@ -643,8 +643,10 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate =
     }
 
     if ( coordinate.country || coordinate.state || coordinate.city ) {
-        content_string += '</b> </br>';
+        content_string += '</h1>';
     }
+    
+    content_string += '<p>';
     
     if( route_options['dis_route_time_date'] !== 1 ) {
         var coordinate_date = new Date( mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset( parseInt( coordinate.starttime ) ) * 1000 )
@@ -661,14 +663,15 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate =
         content_string += mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview( coordinate, coordinates ).string;
         if ( mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ) ) {
             content_string += ' | ' + mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ).string +
-                ') </p>';
+                ')';
         } else {
-            content_string += ') </p>';
+            content_string += ')';
         }
     } else if ( mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ) ) {
         content_string += mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ).string +
-            ') </p>';
+            ')';
     }
+    content_string += '</p>';
 
 
     if ( coordinate.note !== null && coordinate.note !== undefined && coordinate.note !== '' ) {
