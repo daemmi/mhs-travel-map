@@ -644,13 +644,10 @@ jQuery( function ( $ ) {
                 
                 // Add new coordinate in coordinate array
                 if ( coordinates[0]['coordinates'].length > 0 ) {
-                        console.log('second');
-
                     add_coordinate( event.overlay.getPosition().lat(),
                         event.overlay.getPosition().lng(), false );
                 } else {
-                    //  Its the first coordinate       
-                        console.log('first');                 
+                    //  Its the first coordinate                   
                     add_coordinate( event.overlay.getPosition().lat(),
                         event.overlay.getPosition().lng(), true );
                 }
@@ -835,7 +832,6 @@ jQuery( function ( $ ) {
 
         change_coordinate_id( new_coordinate, coordinate_id );
 
-//        console.log(coordinates[0]);
         new_coordinate.find( 'input' ).each( function () {
             $( this ).val( null );
             $( this ).removeAttr( 'value' );
