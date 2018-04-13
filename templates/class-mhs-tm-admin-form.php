@@ -31,6 +31,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 			'action'		 => '',
 			'nonce'			 => 'mhs_tm',
 			'id'			 => 0,
+			'form_id'		 => 0,
 			'button'		 => 'Save',
 			'custom_buttons' => array(),
 			'top_button'	 => true,
@@ -80,7 +81,7 @@ if ( !class_exists( 'MHS_TM_Admin_Form' ) ) :
 			$the_button = '<input type="submit" name="submit" class="button-primary ' . esc_attr( $this->slug ) . '_admin_form_submit" value="' . esc_attr( $button ) . '">';
 
 			if ( $form ) {
-				echo '<form id="mhs_tm-form" enctype="multipart/form-data" method="' . esc_attr( $method ) . '" action="' . esc_attr( $action ) . '"';
+				echo '<form id="mhs_tm_form_'. $form_id . '" class="mhs_tm_form" enctype="multipart/form-data" method="' . esc_attr( $method ) . '" action="' . esc_attr( $action ) . '"';
 				if ( $headspace ) {
 					echo ' class="headspace"';
 				}

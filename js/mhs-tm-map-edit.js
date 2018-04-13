@@ -556,7 +556,7 @@ jQuery( function ( $ ) {
         google.maps.event.addListenerOnce( map[map_canvas_id], 'tilesloaded', function () {
             // do something only the first time the map is loaded
             //show the form with the coordinates
-            $( '#mhs_tm-form ' ).show();
+            $( '.mhs_tm_form' ).show();
             //show the gmap search box
             $( '#mhs-tm-gmap-search-input' ).show();
             //enable sortable, otherwise touch punch doesnt work with sortable
@@ -641,14 +641,16 @@ jQuery( function ( $ ) {
         google.maps.event.addListener( drawingManager, 'overlaycomplete', function ( event ) {
             if ( event.type == 'marker' ) {
                 $( "#mhs_tm_dialog_loading" ).dialog( "open" );
-
+                
                 // Add new coordinate in coordinate array
                 if ( coordinates[0]['coordinates'].length > 0 ) {
+                        console.log('second');
 
                     add_coordinate( event.overlay.getPosition().lat(),
                         event.overlay.getPosition().lng(), false );
                 } else {
-                    //  Its the first coordinate                        
+                    //  Its the first coordinate       
+                        console.log('first');                 
                     add_coordinate( event.overlay.getPosition().lat(),
                         event.overlay.getPosition().lng(), true );
                 }
@@ -814,7 +816,7 @@ jQuery( function ( $ ) {
             };
 
             var coordinate_id = 1;
-            var new_coordinate = $( '.mhs_tm_normal_sortables' ).find( '.coordinate_new' ).clone( true );
+            var new_coordinate = $( '#mhs_tm_form_1 .mhs_tm_normal_sortables' ).find( '.coordinate_new' ).clone( true );
             new_coordinate.removeAttr( 'style' ).removeClass( 'coordinate_new' ).addClass( 'coordinate' );
         } else {
             // Make a copy of the object without any references 
@@ -824,8 +826,8 @@ jQuery( function ( $ ) {
                 longitude: lng
             };
 
-            var coordinate_id = $( '.mhs_tm_normal_sortables' ).find( '.coordinate' ).length + 1;
-            var new_coordinate = $( '.mhs_tm_normal_sortables' ).find( '.coordinate_new' ).clone( true );
+            var coordinate_id = $( '#mhs_tm_form_1 .mhs_tm_normal_sortables' ).find( '.coordinate' ).length + 1;
+            var new_coordinate = $( '#mhs_tm_form_1 .mhs_tm_normal_sortables' ).find( '.coordinate_new' ).clone( true );
             new_coordinate.removeAttr( 'style' ).removeClass( 'coordinate_new' ).addClass( 'coordinate' );
         }
 
@@ -833,6 +835,7 @@ jQuery( function ( $ ) {
 
         change_coordinate_id( new_coordinate, coordinate_id );
 
+//        console.log(coordinates[0]);
         new_coordinate.find( 'input' ).each( function () {
             $( this ).val( null );
             $( this ).removeAttr( 'value' );
@@ -846,9 +849,9 @@ jQuery( function ( $ ) {
             coordinates[0]['coordinates'][coordinate_id - 1][input_id] = '';
         } );
 
-        $( '.mhs_tm_normal_sortables' ).append( new_coordinate );
+        $( '#mhs_tm_form_1 .mhs_tm_normal_sortables' ).append( new_coordinate );
 
-        $( '.mhs_tm_normal_sortables' ).accordion( 'refresh' );
+        $( '#mhs_tm_form_1 .mhs_tm_normal_sortables' ).accordion( 'refresh' );
 
         if ( settings['new_coordinate_part_of_the_road'] ) {
             $( '#ispartofaroute_' + coordinate_id ).prop( "checked", true );

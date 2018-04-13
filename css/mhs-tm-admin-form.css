@@ -40,13 +40,13 @@
     color: #ffffff;
 }
 
-#mhs_tm-form .button-secondary.margin {
+.mhs_tm_form .button-secondary.margin {
     margin-bottom: 20px;
     margin-top: 10px;
     margin-right: 6px;
 }
 
-#mhs_tm-form .button-primary {
+.mhs_tm_form .button-primary {
     margin-bottom: 20px;
     margin-top: 10px;
     margin-right: 6px;
