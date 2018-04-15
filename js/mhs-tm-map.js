@@ -317,8 +317,9 @@ mhs_tm_map.set_full_opacity = function ( marker, line_path) {
 
 mhs_tm_map.get_route_color = function ( transport_classes, route) {
     var route_color;
-    
-    if( route.options.transport_class === '' ) {
+    console.log(route.options.hasOwnProperty('transport_class'));
+    if( route.options.hasOwnProperty('transport_class') === false || 
+        route.options.transport_class === '' ) {
         if( route.options.route_color !== 'string' || route.options.route_color[0] !== '#' ) {
             route_color = '#000000';
         } else {
