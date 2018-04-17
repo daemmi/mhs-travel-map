@@ -321,6 +321,19 @@ mhs_tm_utilities.coordinate_handling.get_only_on_route_coordinates = function ( 
     return coordinates_on_route;
 };
 
+mhs_tm_utilities.coordinate_handling.get_last_on_route_coordinate_id_in_route = function ( coordinates ) {
+    var last_coordinate_id_on_route = 0;
+    
+    for( i = coordinates.length - 1; i > 0; i-- ) {
+        if ( coordinates[i]['ispartofaroute'] ) {
+            last_coordinate_id_on_route = i;
+            break;
+        }
+    }
+
+    return last_coordinate_id_on_route;
+};
+
 mhs_tm_utilities.coordinate_handling.get_title = function ( coordinate, coordinates, route_options ) {
     var content_string = '';
     if ( coordinate.country )
@@ -399,7 +412,7 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
 
     for ( var x = 0; x < routes.length; x++ ) {
         //check if route has coordinates
-        if( routes[x].coordinates.length !== 0 ) {
+        if( routes[x].coordinates.length > 1 ) {
             //Get all transport classes
             if( routes[x].options.transport_class === '' ) {
                 transport_class = 'Other';
@@ -411,6 +424,9 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
                     }
                 } );
             }
+            
+            var last_on_route_coordinate_id = mhs_tm_utilities.coordinate_handling.
+                get_last_on_route_coordinate_id_in_route( routes[x].coordinates );
             
             if( transport_classes.indexOf( transport_class ) === -1 ) {
                 //add new class to array of all appearing classes
@@ -436,12 +452,12 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
             } 
             
             if( typeof end_date['all'] === 'undefined' || 
-                routes[x].coordinates[routes[x].coordinates.length - 1].starttime > end_date['all'] ) {
-                end_date['all'] = routes[x].coordinates[routes[x].coordinates.length - 1].starttime;
+                routes[x].coordinates[last_on_route_coordinate_id].starttime > end_date['all'] ) {
+                end_date['all'] = routes[x].coordinates[last_on_route_coordinate_id].starttime;
             } 
             if( typeof end_date[transport_class] === 'undefined' || 
-                routes[x].coordinates[routes[x].coordinates.length - 1].starttime > end_date[transport_class] ) {
-                end_date[transport_class] = routes[x].coordinates[routes[x].coordinates.length - 1].starttime;
+                routes[x].coordinates[last_on_route_coordinate_id].starttime > end_date[transport_class] ) {
+                end_date[transport_class] = routes[x].coordinates[last_on_route_coordinate_id].starttime;
             } 
             
             content_string[transport_class] += routes[x].options.name + ' - ';
@@ -451,20 +467,20 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
             content_string[transport_class] += coordinate_date + '</br>';
 
             if ( mhs_tm_utilities.coordinate_handling.
-                get_coordinate_waiting_overview( routes[x].coordinates[routes[x].coordinates.length - 1],
+                get_coordinate_waiting_overview( routes[x].coordinates[last_on_route_coordinate_id],
                     routes[x].coordinates ) ||
                 mhs_tm_utilities.coordinate_handling.
-                get_coordinate_distance_overview( routes[x].coordinates[routes[x].coordinates.length - 1],
+                get_coordinate_distance_overview( routes[x].coordinates[last_on_route_coordinate_id],
                     routes[x].coordinates ) ) {
 
                 content_string[transport_class] += '(';
             }
 
             if ( mhs_tm_utilities.coordinate_handling.
-                get_coordinate_waiting_overview( routes[x].coordinates[routes[x].coordinates.length - 1],
+                get_coordinate_waiting_overview( routes[x].coordinates[last_on_route_coordinate_id],
                     routes[x].coordinates ) ) {
                 var overview = mhs_tm_utilities.coordinate_handling.
-                    get_coordinate_waiting_overview( routes[x].coordinates[routes[x].coordinates.length - 1],
+                    get_coordinate_waiting_overview( routes[x].coordinates[last_on_route_coordinate_id],
                         routes[x].coordinates );
 
                 journey_string[transport_class] = 'Journey: ';
@@ -507,10 +523,10 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
                 waited_total_min['all'] += overview.waiting_time_min;
 
                 if ( mhs_tm_utilities.coordinate_handling.
-                    get_coordinate_distance_overview( routes[x].coordinates[routes[x].coordinates.length - 1],
+                    get_coordinate_distance_overview( routes[x].coordinates[last_on_route_coordinate_id],
                         routes[x].coordinates ) ) {
                     var distance = mhs_tm_utilities.coordinate_handling.
-                        get_coordinate_distance_overview( routes[x].coordinates[routes[x].coordinates.length - 1],
+                        get_coordinate_distance_overview( routes[x].coordinates[last_on_route_coordinate_id],
                             routes[x].coordinates );
                     content_string[transport_class] += ' | Total distance: ' + distance.total_distance + 'km) <br> <br>  ';
 
@@ -520,10 +536,10 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
                     content_string[transport_class] += ') <br>  <br> ';
                 }
             } else if ( mhs_tm_utilities.coordinate_handling.
-                get_coordinate_distance_overview( routes[x].coordinates[routes[x].coordinates.length - 1],
+                get_coordinate_distance_overview( routes[x].coordinates[last_on_route_coordinate_id],
                     routes[x].coordinates ) ) {
                 distance[transport_class] = mhs_tm_utilities.coordinate_handling.
-                    get_coordinate_distance_overview( routes[x].coordinates[routes[x].coordinates.length - 1],
+                    get_coordinate_distance_overview( routes[x].coordinates[last_on_route_coordinate_id],
                         routes[x].coordinates );
                 content_string[transport_class] += ' | Total distance: ' + distance.total_distance + 'km) <br> <br>  ';
 
