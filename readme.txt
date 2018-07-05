@@ -2,10 +2,10 @@
 Contributors: daemmi
 Donate link: https://profiles.wordpress.org/daemmi
 Tags: map, google maps, hitchhike, hitchhiking, travel, backpacking, traveling
-Tested up to: 4.9.4
+Tested up to: 4.9.6
 Requires at least: 3.8.0
 Requires PHP: 5.2.0
-Stable tag: 1.2.2
+Stable tag: 1.2.4
 License: GPL3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -59,6 +59,16 @@ This section describes how to install and use the plugin.
 == Frequently Asked Questions ==
 
 == Changelog ==
+
+= 1.2.4 (2018-07-05) =
+- added, shortcode work just with a route id
+- added, option that time and date won't be shown in coordinate info  
+- changed, style of header in coordinate popup window and statistics
+popup window
+- changed, admin form classes
+- fixed, loading overlay in front end
+- fixed, error by import of routes
+- fixed, wrong calculation of info 
 
 = 1.2.2 (2018-02-21) =
 - fixed, new added route can't be saved
