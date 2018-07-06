@@ -167,7 +167,7 @@ require_once ( MHS_TM_ABSPATH . '/includes/class-mhs-tm-utilities.php' );
  *
  * @since 1.3.0
  */
-add_action( 'wp_ajax_get_coordinate_note', array( 'MHS_TM_Maps', 'get_coordinate_note' ) );
+add_action( 'wp_ajax_nopriv_get_coordinate_note', array( 'MHS_TM_Maps', 'get_coordinate_note' ) );
 
 
 /**
