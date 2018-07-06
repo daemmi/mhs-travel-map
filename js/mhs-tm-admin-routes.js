@@ -25,9 +25,10 @@ jQuery( function ( $ ) {
         } );
 
         //convert the jason strings
-        mhs_tm_map.coordinates[0][0]['coordinates'] = JSON.parse( result[0]['coordinates'] );
-        mhs_tm_map.coordinates[0][0]['options'] = JSON.parse( result[0]['options'] );
-
+        mhs_tm_map.coordinates[0][0]['coordinates']     = JSON.parse( result[0]['coordinates'] );
+        mhs_tm_map.coordinates[0][0]['options']         = JSON.parse( result[0]['options'] );
+        mhs_tm_map.coordinates[0][0]['options'][ 'id' ]	= id_number;
+        
         var window_height = $( window ).height();
         var window_width = $( "#list_table" ).width();
         window_height = window_height * 0.7;
@@ -53,12 +54,9 @@ jQuery( function ( $ ) {
         var popup_window_before = $( '#mhs-tm-gmap-popup-window-0' ).find( '.mhs-tm-gmap-popup-window-content-before' );
         $( popup_window_before ).html('');
         //fill with content again
-        var html = '';
-        for ( var i = 0; i < mhs_tm_map.coordinates[0][0]['coordinates'].length; ++i ) {
-            html = '<div  style="display: none;" id="note_output_0-0-' + i + '">' + 
-                mhs_tm_map.coordinates[0][0]['coordinates'][i].note + '</div>';
+        var html = '<div  id="note_output_0"> </div>';
             
-            $( popup_window_before ).append( html );
-        }
+        $( popup_window_before ).append( html );
+        
     } );
 } );

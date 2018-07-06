@@ -210,6 +210,8 @@ if ( is_admin() ) {
 	 * @since 1.0.1
 	 */
 	add_action( 'wp_ajax_routes_save', array( 'MHS_TM_Admin_Routes', 'routes_save' ) );
+	add_action( 'wp_ajax_get_coordinate_note', array( 'MHS_TM_Maps', 'get_coordinate_note' ) );
+	
 }
 
 /**

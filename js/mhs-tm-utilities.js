@@ -207,10 +207,11 @@ mhs_tm_utilities.gmaps.geocode_lat_lng = function ( lat, lng, settings, callback
 
 //Class popup window
 jQuery( function ( $ ) {
-    mhs_tm_utilities.gmaps.popup_window = function ( gmap, gmap_div, popup_div, control_button ) {
+    mhs_tm_utilities.gmaps.popup_window = function ( gmap, gmap_div, popup_div, loading_div, control_button ) {
         this.gmap = gmap;
         this.gmap_div = gmap_div;
         this.popup_div = popup_div;
+        this.loading_div = loading_div;
         this.control_button = control_button;
         this.popup_div_content_before = $( this.popup_div ).html();
         
@@ -264,6 +265,16 @@ jQuery( function ( $ ) {
             } );
         };
 
+        this.show_loading = function ( time ) {
+            $( this.loading_div ).css( {
+                'left': 0,
+                'top': 0,
+                'z-index': 1000000000000
+            } );
+            
+            $( this.loading_div ).fadeIn( time );
+        };
+
         this.show_control = function () {
             this.show( this.content_control );
         };
@@ -273,6 +284,10 @@ jQuery( function ( $ ) {
             $( this.popup_div_content_before ).children('div').each(function () {
                 $( this ).fadeOut();
             });
+        };
+
+        this.hide_loading = function ( time ) {
+            $( this.loading_div ).fadeOut( time );
         };
 
         this.set_size = function () {
@@ -289,6 +304,8 @@ jQuery( function ( $ ) {
 
         //place it in the map
         this.gmap.controls[google.maps.ControlPosition.BOTTOM_CENTER].push( this.popup_div );
+        ////place loading_div in the map
+        this.gmap.controls[google.maps.ControlPosition.BOTTOM_CENTER].push( this.loading_div );
         //make the control button visible
         google.maps.event.addListenerOnce( this.gmap, 'tilesloaded', this.show_control_button.bind( this ) );
         google.maps.event.addListenerOnce( this.gmap, 'tilesloaded', this.change_gm_style.bind( this ) );

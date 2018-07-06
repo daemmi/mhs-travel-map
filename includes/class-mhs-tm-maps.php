@@ -53,23 +53,11 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			//sort the coordinates array by date of first coordinate in route 
 			usort( $coordinates, array($this, 'date_compare' ) );	
 			
-			//display all note and do shortcodes
-			$note_output = '';
-			foreach ( $coordinates as $key => $coordinate ) {
-				foreach ( $coordinate['coordinates'] as $key2 => $coordinate_coordinate ) {
-					if( $run_shortcodes ) {
-						$coordinates[$key]['coordinates'][$key2]['note'] = do_shortcode( balanceTags( wp_kses_post( $coordinate_coordinate['note'] ), true ) );
-					} else {
-						$coordinates[$key]['coordinates'][$key2]['note'] = balanceTags( wp_kses_post( $coordinate_coordinate['note'] ), true );
-					}
-					
-					$note_output .= '<div  style="display: none;" id="note_output_' . $map_id . '-' . $key . '-' . $key2 . '">' . 
-					$coordinates[$key]['coordinates'][$key2]['note'] . '</div>';
-				}
-			}
+			//create a div for coordinate note which will be filled by ajax
+			$note_output = '<div  id="note_output_' . $map_id . '"> </div>';
 			
 			// Make an div over the whole content when loading the page
-			$output = '<div " style="position: relative;"><div id="mhs_tm_loading_' . $map_id . '" class="mhs_tm_loading">' .
+			$output = '<div " style="position: relative;"><div id="mhs_tm_loading_' . esc_attr( $map_id ) . '" class="mhs_tm_loading">' .
 			$MHS_TM_Utilities->loading_spinner() .
 			'</div>';
 			$output .= '<div class="mhs_tm-map" id="mhs_tm_map_canvas_' . esc_attr( $map_id ) . '" style="height: ' .
@@ -83,8 +71,12 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 					class="mhs-tm-gmap-controls mhs-tm-gmap-controls-button">Info</div>';
 			}
 			//div for gmaps popup window
-			$output .= '<div id="mhs-tm-gmap-popup-window-' . esc_attr( $map_id ) . '" class="mhs-tm-gmap-popup-window">' . 
+			$output .= '<div style="position: relative;" id="mhs-tm-gmap-popup-window-' . esc_attr( $map_id ) . '" class="mhs-tm-gmap-popup-window">' . 
 			$note_output . '</div>';
+			
+			//div for gmaps popup window loading
+			$output .= '<div id="mhs-tm-gmap-popup-window-loading-' . esc_attr( $map_id ) . 
+			'" class="mhs-tm-gmap-popup-window-loading" style="width: 100%; display: none;">' . $MHS_TM_Utilities->loading_spinner() . '</div>';
 
 			$key = $MHS_TM_Utilities->get_gmaps_api_key();
 
@@ -100,7 +92,8 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 				'map_id'			 => $map_id,
 				'map_options'		 => $map_options,
 				'shortcode_options'	 => $shortcode_options,
-				'plugin_dir'		 => MHS_TM_RELPATH
+				'plugin_dir'		 => MHS_TM_RELPATH,
+				'ajax_url'			 => admin_url( 'admin-ajax.php' ),
 			)
 			);
 
@@ -149,14 +142,35 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 						) );
 						$route_options	 = json_decode( $route_options, true );
 
-						$coordinates[ $key ][ 'options' ]		 = $this->sanitize_coordinate_option_array( $route_options );
-						$coordinates[ $key ][ 'coordinates' ]	 = $this->sanitize_coordinates_array( $temp_coordinates );
+						$coordinates[ $key ][ 'options' ]			= $this->sanitize_coordinate_option_array( $route_options );
+						$coordinates[ $key ][ 'options' ] [ 'id' ]	= (int) $route_id;
+						$coordinates[ $key ][ 'coordinates' ]		= $this->sanitize_coordinates_array( $temp_coordinates );
 						$key++;
 					}
 				}
 			}
 
 			return $coordinates;
+		}
+
+		/**
+		 * Funktion to get coordinates note by id (ajax)
+		 *
+		 * @since 1.3.0
+		 * @access public
+		 */
+		public function get_coordinate_note() {
+			global $MHS_TM_Maps;
+			
+			$route_id	= isset( $_POST[ 'route_id' ] ) ? absint( $_POST[ 'route_id' ] ) : null;
+			$marker_id	= isset( $_POST[ 'marker_id' ] ) ? absint( $_POST[ 'marker_id' ] ) : null;
+			
+			$coordinates = $MHS_TM_Maps->get_coordinates( $route_id, 'route' );
+			$note = do_shortcode( balanceTags( wp_kses_post( 
+			$coordinates[0][ 'coordinates' ][ $marker_id ][ 'note' ] ), true ) );
+			
+			echo json_encode( $note );
+			wp_die();
 		}
 
 		/**

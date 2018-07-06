@@ -117,7 +117,6 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			. '<div class="mhs_tm-map" id="mhs_tm_map_canvas_0" style="height: ' . esc_attr( $height ) . 'px; margin-right: auto ; margin-left: auto ; padding: 0;"></div>'
 			. '</div>';
 
-
 			$key = $MHS_TM_Utilities->get_gmaps_api_key();
 
 			wp_register_script( 'googlemap', 'https://maps.googleapis.com/maps/api/js?key=' . $key, true );
@@ -139,7 +138,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				'auto_load'			 => false,
 				'map_id'			 => 0,
 				'map_options'		 => $map_options,
-				'plugin_dir'		 => MHS_TM_RELPATH
+				'plugin_dir'		 => MHS_TM_RELPATH,
+				'ajax_url'			 => admin_url( 'admin-ajax.php' ),
 			) );
 
 			wp_enqueue_script( 'mhs_tm_admin_routes' );
@@ -383,7 +383,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				'coord_center_lng'	 => 14.4170272,
 				'auto_load'			 => false,
 				'map_options'		 => $map_options,
-				'plugin_dir'		 => MHS_TM_RELPATH
+				'plugin_dir'		 => MHS_TM_RELPATH,
+				'ajax_url'			 => admin_url( 'admin-ajax.php' ),
 			)
 			);
 		}

@@ -390,7 +390,8 @@ class List_Table_Routes extends WP_List_Table_My {
 					'coord_center_lng'	 => 9.377068,
 					'auto_load'			 => false,
 					'map_id'			 => 0,
-					'plugin_dir'	     => MHS_TM_RELPATH 
+					'plugin_dir'	     => MHS_TM_RELPATH,
+					'ajax_url'			 => admin_url( 'admin-ajax.php' ),
 				) );
 			} else {
 				$messages[] = array(

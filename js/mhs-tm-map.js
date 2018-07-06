@@ -28,6 +28,7 @@ jQuery( function ( $ ) {
         mhs_tm_map.auto_load[map_canvas_id]         = window["mhs_tm_app_vars_" + map_canvas_id].auto_load;
         mhs_tm_map.no_mousover_out[map_canvas_id]   = false;
         mhs_tm_map.plugin_dir                       = window["mhs_tm_app_vars_" + map_canvas_id].plugin_dir;
+        mhs_tm_map.ajax_url                       = window["mhs_tm_app_vars_" + map_canvas_id].ajax_url;
         if ( mhs_tm_map.auto_load[map_canvas_id] )
         {
             //set gmap window size
@@ -72,6 +73,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
             mhs_tm_map.map[map_canvas_id], 
             document.getElementById( 'mhs_tm_map_canvas_' + map_canvas_id ),
             document.getElementById( 'mhs-tm-gmap-popup-window-' + map_canvas_id ),
+            document.getElementById( 'mhs-tm-gmap-popup-window-loading-' + map_canvas_id ),
             document.getElementById( '' )
         );
     } else {
@@ -80,6 +82,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
             mhs_tm_map.map[map_canvas_id], 
             document.getElementById( 'mhs_tm_map_canvas_' + map_canvas_id ),
             document.getElementById( 'mhs-tm-gmap-popup-window-' + map_canvas_id ),
+            document.getElementById( 'mhs-tm-gmap-popup-window-loading-' + map_canvas_id ),
             document.getElementById( 'mhs-tm-gmap-show-info-' + map_canvas_id )
         );
         //set content for statistics button
@@ -174,7 +177,11 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
                     mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'],
                     mhs_tm_map.coordinates[map_canvas_id][i]['options'] ),
                 id: map_canvas_id + '_' + i + '_' + mark_counter,
-                icon: pinIcon
+                icon: pinIcon,
+                note_div_id: {
+                    route_id: mhs_tm_map.coordinates[map_canvas_id][i].options.id,
+                    marker_id: mark_counter
+                }
             } );
             
             mhs_tm_map.marker[map_canvas_id][i][mark_counter].content_string =
@@ -182,22 +189,37 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
                     mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j],
                     mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'],
                     mhs_tm_map.coordinates[map_canvas_id][i]['options'] );
-                
-            mhs_tm_map.marker[map_canvas_id][i][mark_counter].note_div_id =
-                'note_output_' + map_canvas_id + '-' + i + '-' + mark_counter;
-            
+                            
             mhs_tm_map.marker[map_canvas_id][i][mark_counter].addListener('click', function() {
                 var marker = this;
+                // load via ajax note content 
+                jQuery( function ( $ ) {
+                    $.post(
+                        mhs_tm_map.ajax_url + '?action=get_coordinate_note',
+                        {
+                            route_id: marker.note_div_id.route_id,
+                            marker_id: marker.note_div_id.marker_id,
+                        },
+                        function ( response ) {
+                            $( '#note_output_' + map_canvas_id ).html( response );
+                            $( '#note_output_' + map_canvas_id ).css( {
+                                'display': '',
+                            } );  
+                            mhs_tm_map.map[map_canvas_id].popup_window.hide_loading( 200 );
+                            mhs_tm_map.map[map_canvas_id].popup_window.show( marker.content_string );
+                        },
+                        "json"
+                    );
+                } );
+
+                mhs_tm_map.map[map_canvas_id].popup_window.show_loading( 200 );
                 mhs_tm_map.no_mousover_out[map_canvas_id] = true;
                 mhs_tm_map.set_opacity( mhs_tm_map.marker, mhs_tm_map.route_path, map_canvas_id, 
-                    'single_marker', this );
-                //Set ZIndex for this marker to the highest
+                    'marker', this );
+                //Set ZIndex for this marker to the highest  single_marker
                 this.setZIndex( google.maps.Marker.MAX_ZINDEX + 2 );
+                //Set the Marker in center
                 mhs_tm_map.map[map_canvas_id].setCenter( this.getPosition() ); 
-                setTimeout( function () {
-                    document.getElementById( marker.note_div_id ).style.display = '';
-                    mhs_tm_map.map[map_canvas_id].popup_window.show( marker.content_string );
-                }, 700 );
             } );
             
             mhs_tm_map.marker[map_canvas_id][i][mark_counter].addListener('mouseover', function() {
