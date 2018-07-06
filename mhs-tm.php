@@ -53,8 +53,8 @@ if ( !defined( 'MHS_TM_DIRNAME' ) )
 function MHS_TM_enqueue() {
 	/* register scripts */ 
 	wp_register_script( 'google_jsapi','https://www.google.com/jsapi', true ); 
-	wp_register_script( 'mhs_tm_map', MHS_TM_RELPATH . 'js/mhs-tm-map.js', array(), '1.0.4' ); 
-	wp_register_script( 'mhs_tm_utilities', MHS_TM_RELPATH . 'js/mhs-tm-utilities.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.4' );
+	wp_register_script( 'mhs_tm_map', MHS_TM_RELPATH . 'js/mhs-tm-map.js', array(), '1.0.5' ); 
+	wp_register_script( 'mhs_tm_utilities', MHS_TM_RELPATH . 'js/mhs-tm-utilities.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.5' );
 	    
 	/* register styles */
     wp_register_style( 'mhs_tm_jquery_style', MHS_TM_RELPATH . 'css/jquery-ui/jquery-ui.css', false, '1.12.1' );
@@ -110,12 +110,12 @@ function MHS_TM_admin_enqueue() {
 	wp_register_script( 'jquery_datetimepicker', MHS_TM_RELPATH . 'js/jquery.datetimepicker.full.min.js', array( 'jquery' ), '1.0.1' );
 	wp_register_script( 'papaparse', MHS_TM_RELPATH . 'js/papaparse-4.1.2.js', array( 'jquery' ), '4.1.2' );
 	wp_register_script( 'mhs_tm_admin_import', MHS_TM_RELPATH . 'js/mhs-tm-admin-import.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery-ui-datepicker' ), '1.0.2' );
-	wp_register_script( 'mhs_tm_utilities', MHS_TM_RELPATH . 'js/mhs-tm-utilities.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.3' );
+	wp_register_script( 'mhs_tm_utilities', MHS_TM_RELPATH . 'js/mhs-tm-utilities.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.5' );
 	wp_register_script( 'mhs_tm_admin_maps', MHS_TM_RELPATH . 'js/mhs-tm-admin-maps.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable' ), '1.0.3' );
-	wp_register_script( 'mhs_tm_admin_routes', MHS_TM_RELPATH . 'js/mhs-tm-admin-routes.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.2' );
+	wp_register_script( 'mhs_tm_admin_routes', MHS_TM_RELPATH . 'js/mhs-tm-admin-routes.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.3' );
 	wp_register_script( 'google_jsapi','https://www.google.com/jsapi', true ); 
 	wp_register_script( 'jquery_ui_touch_punch_min', MHS_TM_RELPATH . 'js/jquery.ui.touch-punch.min.js', array(), '1.0.1' );
-	wp_register_script( 'mhs_tm_map', MHS_TM_RELPATH . 'js/mhs-tm-map.js', array(), '1.0.3' );
+	wp_register_script( 'mhs_tm_map', MHS_TM_RELPATH . 'js/mhs-tm-map.js', array(), '1.0.5' );
 	wp_register_script( 'mhs_tm_map_edit', MHS_TM_RELPATH . 'js/mhs-tm-map-edit.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery-ui-datepicker' ), '1.0.4' );
 	wp_register_script( 'spectrum', MHS_TM_RELPATH . 'js/spectrum.js', array(), '1.0.0' );
 	wp_register_script( 'mhs_tm_admin_settings', MHS_TM_RELPATH . 'js/mhs-tm-admin-settings.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.0' );
