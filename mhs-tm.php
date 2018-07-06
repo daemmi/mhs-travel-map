@@ -162,6 +162,13 @@ require_once ( MHS_TM_ABSPATH . '/includes/class-mhs-tm-maps.php' );
 // utilities for the plugin
 require_once ( MHS_TM_ABSPATH . '/includes/class-mhs-tm-utilities.php' );
 
+/**
+ * MHS_TM_Admin ajax
+ *
+ * @since 1.3.0
+ */
+add_action( 'wp_ajax_get_coordinate_note', array( 'MHS_TM_Maps', 'get_coordinate_note' ) );
+
 
 /**
  * MHS_TM Objects
