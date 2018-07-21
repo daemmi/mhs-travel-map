@@ -214,17 +214,41 @@ jQuery( function ( $ ) {
         this.loading_div = loading_div;
         this.control_button = control_button;
         this.popup_div_content_before = $( this.popup_div ).html();
+        this.gmap_id = this.gmap_div.id.slice(18);
         
         //add aditonal div to the popup div
         $( this.popup_div ).html( '<div class="mhs-tm-gmap-popup-window-inner">\n\
         <div class="mhs-tm-gmap-popup-window-close" href="javascript:void(0)" title="close"></div> </div> \n\
-        <div class="mhs-tm-gmap-popup-window-content">\n\
-        <div class="mhs-tm-gmap-popup-window-new"></div> \n\
-        <div class="mhs-tm-gmap-popup-window-content-before">' + this.popup_div_content_before + '</div> </div> ');
+        <div class="mhs-tm-gmap-popup-window-content-wrapper">\n\
+            <div class="mhs-tm-gmap-popup-window-control"> \n\
+                <div class="mhs-tm-gmap-popup-control-arrow-left" data-map-id="' + this.gmap_id + '"\n\
+                style="float: left;"> \n\
+                <a href="javascript:void(0)" id="mhs-tm-gmap-popup-previous">\n\
+                <img border="0" alt="previous" \n\
+                src="' + mhs_tm_map.plugin_dir + 'img/Arrow_Left.png"> </a> \n\
+                <a href="javascript:void(0)" style="font-size: 15px; vertical-align: super;"> \n\
+                Previous </a></div>\n\
+                <div style="float: right;" class="mhs-tm-gmap-popup-control-arrow-right" \n\
+                data-map-id="' + this.gmap_id + '"> \n\
+                <a href="javascript:void(0)" style="font-size: 15px; vertical-align: super;"> \n\
+                Next </a>\n\
+                <a href="javascript:void(0)" id="mhs-tm-gmap-popup-next">\n\
+                <img border="0" alt="next" \n\
+                src="' + mhs_tm_map.plugin_dir + 'img/Arrow_Right.png"> </a> </div>\n\
+            </div>\n\
+            <div class="mhs-tm-gmap-popup-window-content">\n\
+                <div class="mhs-tm-gmap-popup-window-new"></div> \n\
+                <div class="mhs-tm-gmap-popup-window-content-before">' + this.popup_div_content_before + '</div> \n\
+            </div> \n\
+        </div>');
 
         this.popup_div_close = $( this.popup_div ).find( '.mhs-tm-gmap-popup-window-close' );
         this.popup_div_inner = $( this.popup_div ).find( '.mhs-tm-gmap-popup-window-inner' );
+        this.popup_div_content_wrapper = $( this.popup_div ).find( '.mhs-tm-gmap-popup-window-content-wrapper' );
         this.popup_div_content = $( this.popup_div ).find( '.mhs-tm-gmap-popup-window-content' );
+        this.popup_div_content_control = $( this.popup_div ).find( '.mhs-tm-gmap-popup-window-control' );
+        this.popup_div_content_control_left = $( this.popup_div ).find( '.mhs-tm-gmap-popup-control-arrow-left' );
+        this.popup_div_content_control_right = $( this.popup_div ).find( '.mhs-tm-gmap-popup-control-arrow-right' );
         this.popup_div_content_new = $( this.popup_div ).find( '.mhs-tm-gmap-popup-window-new' );
         this.popup_div_content_before = $( this.popup_div ).find( '.mhs-tm-gmap-popup-window-content-before' );
         this.content_control = '';
@@ -246,6 +270,7 @@ jQuery( function ( $ ) {
         };
 
         this.show = function ( content ) {
+            this.popup_div_content_control.show();
             $( this.popup_div ).outerHeight( $( this.gmap_div ).find( '.gm-style' ).height() );
             $( this.popup_div ).outerWidth( $( this.gmap_div ).find( '.gm-style' ).width() );
             $( this.popup_div ).css( {
@@ -254,15 +279,9 @@ jQuery( function ( $ ) {
             } );
             $( this.popup_div_content_new ).html( content );
             $( this.popup_div ).fadeIn();
-
-            $( this.popup_div_inner ).css( {
-                'margin-top': ( $( this.popup_div ).height() -
-                    $( this.popup_div_content ).outerHeight() ) / 2
-            } );
-            $( this.popup_div_content ).css( {
-                'margin-top': ( $( this.popup_div ).height() -
-                    $( this.popup_div_content ).outerHeight() ) / 2
-            } );
+            $( this.popup_div_content ).scrollTop( 0 );
+            
+            this.set_size();
         };
 
         this.show_loading = function ( time ) {
@@ -276,7 +295,57 @@ jQuery( function ( $ ) {
         };
 
         this.show_control = function () {
-            this.show( this.content_control );
+            this.popup_div_content_control.hide();
+            this.popup_div_content_before.html('');
+            $( this.popup_div ).outerHeight( $( this.gmap_div ).find( '.gm-style' ).height() );
+            $( this.popup_div ).outerWidth( $( this.gmap_div ).find( '.gm-style' ).width() );
+            $( this.popup_div ).css( {
+                'left': 0,
+                'z-index': 1000000000000
+            } );
+            $( this.popup_div_content_new ).html( this.content_control );
+            $( this.popup_div ).fadeIn();
+            $( this.popup_div_content ).scrollTop( 0 );
+            
+            this.set_size();
+        };
+        
+        this.show_control_div = function () {
+            this.popup_div_content_control.show();             
+        };
+        
+        this.hide_control_div = function () {
+            this.popup_div_content_control.hide();             
+        };
+         
+        this.show_control_arrow = function ( arrow ) {
+            switch ( arrow ) {
+                case 'left':
+                    this.popup_div_content_control_left.show();
+                    break;
+                case 'right':
+                    this.popup_div_content_control_right.show();
+                    break;
+                default:
+                    this.popup_div_content_control_left.show();
+                    this.popup_div_content_control_right.show();
+                    break;
+            }
+        };
+
+        this.hide_control_arrow = function ( arrow ) {
+            switch ( arrow ) {
+                case 'left':
+                    this.popup_div_content_control_left.hide();
+                    break;
+                case 'right':
+                    this.popup_div_content_control_right.hide();
+                    break;
+                default:
+                    this.popup_div_content_control_left.hide();
+                    this.popup_div_content_control_right.hide();
+                    break;
+            }
         };
 
         this.hide = function () {
@@ -293,12 +362,16 @@ jQuery( function ( $ ) {
         this.set_size = function () {
             $( this.popup_div ).outerHeight( $( this.gmap_div ).find( '.gm-style' ).height() );
             $( this.popup_div ).outerWidth( $( this.gmap_div ).find( '.gm-style' ).width() );
+            
+            $( this.popup_div_content ).css( {
+                'height': ( $( this.popup_div ).height() ) - 
+                    $( this.popup_div_content_control ).outerHeight( true ) - 
+                    ( $( this.popup_div_content_wrapper ).outerHeight() - 
+                    $( this.popup_div_content_wrapper ).innerHeight() )
+            } );
 
             $( this.popup_div_inner ).css( {
-                'margin-top': ( $( this.popup_div ).height() - $( this.popup_div_content ).outerHeight() ) / 2
-            } );
-            $( this.popup_div_content ).css( {
-                'margin-top': ( $( this.popup_div ).height() - $( this.popup_div_content ).outerHeight() ) / 2
+                'margin-top': ( $( this.popup_div ).height() - $( this.popup_div_content_wrapper ).outerHeight() ) / 2
             } );
         };
 
@@ -318,6 +391,60 @@ jQuery( function ( $ ) {
         $( this.control_button ).click( this.show_control.bind( this ) );
     };
 
+    mhs_tm_utilities.gmaps.popup_control_initialize = function () {
+        // handle gmap popup window control action
+        $('.mhs-tm-gmap-popup-control-arrow-left').on( 'click', $( this ), function () {
+            var map_canvas_id = $( this ).attr( "data-map-id" );
+            var active_coordinate = mhs_tm_map.active_coordinate[map_canvas_id];
+            var next_route_id = 0;
+            var next_coordinate_id = 0;
+            var change_bounce = 0;
+            
+            //calculate which id are for the nextcoordinate
+            if( active_coordinate.route_id === 0 ) {
+                if( active_coordinate.coordinate_id !== 0 ) {
+                    next_coordinate_id = active_coordinate.coordinate_id - 1;
+                }
+            } else if( active_coordinate.route_id !== 0 && active_coordinate.coordinate_id !== 0 ) {
+                next_coordinate_id = active_coordinate.coordinate_id - 1;
+                next_route_id = active_coordinate.route_id;
+            } else if( active_coordinate.route_id !== 0 && active_coordinate.coordinate_id === 0 ) {
+                next_route_id = active_coordinate.route_id - 1;       
+                next_coordinate_id = mhs_tm_map.marker[map_canvas_id][next_route_id].length - 1;
+
+                change_bounce = 1;
+            }
+
+            var marker = mhs_tm_map.marker[map_canvas_id][next_route_id][next_coordinate_id];
+
+            mhs_tm_map.next_coordinate_animation( map_canvas_id, marker, active_coordinate, 
+                next_route_id, next_coordinate_id, change_bounce );
+        } );
+
+        $('.mhs-tm-gmap-popup-control-arrow-right').on( 'click', $( this ), function () {
+            var map_canvas_id = $( this ).attr( "data-map-id" );
+            var active_coordinate = mhs_tm_map.active_coordinate[map_canvas_id];
+            var next_route_id = 0;
+            var next_coordinate_id = 0;
+            var change_bounce = 0;
+
+            //calculate which id are for the nextcoordinate
+            if( active_coordinate.coordinate_id < mhs_tm_map.marker[map_canvas_id][active_coordinate.route_id].length - 1 ) {
+                next_coordinate_id = active_coordinate.coordinate_id + 1;
+                next_route_id = active_coordinate.route_id;
+            } else {
+                next_coordinate_id = 0;
+                next_route_id = active_coordinate.route_id + 1;
+
+                change_bounce = 1; 
+            } 
+
+            var marker = mhs_tm_map.marker[map_canvas_id][next_route_id][next_coordinate_id];
+
+            mhs_tm_map.next_coordinate_animation( map_canvas_id, marker, active_coordinate, 
+                next_route_id, next_coordinate_id, change_bounce );
+        } );
+    };
 } );
 
 /**************************************************************************************************

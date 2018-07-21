@@ -53,9 +53,6 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			//sort the coordinates array by date of first coordinate in route 
 			usort( $coordinates, array($this, 'date_compare' ) );	
 			
-			//create a div for coordinate note which will be filled by ajax
-			$note_output = '<div  id="note_output_' . $map_id . '"> </div>';
-			
 			// Make an div over the whole content when loading the page
 			$output = '<div " style="position: relative;"><div id="mhs_tm_loading_' . esc_attr( $map_id ) . '" class="mhs_tm_loading">' .
 			$MHS_TM_Utilities->loading_spinner() .
@@ -71,8 +68,8 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 					class="mhs-tm-gmap-controls mhs-tm-gmap-controls-button">Info</div>';
 			}
 			//div for gmaps popup window
-			$output .= '<div style="position: relative;" id="mhs-tm-gmap-popup-window-' . esc_attr( $map_id ) . '" class="mhs-tm-gmap-popup-window">' . 
-			$note_output . '</div>';
+			$output .= '<div style="position: relative;" id="mhs-tm-gmap-popup-window-' . esc_attr( $map_id ) . 
+				'" class="mhs-tm-gmap-popup-window"></div>';
 			
 			//div for gmaps popup window loading
 			$output .= '<div id="mhs-tm-gmap-popup-window-loading-' . esc_attr( $map_id ) . 
@@ -132,8 +129,8 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 					'WHERE active = 1 AND id = %d ORDER BY id DESC', (int) $route_id
 					) );
 					$temp_coordinates	 = json_decode( $temp_coordinates, true );
-
-					if ( $temp_coordinates !== Null ) {
+					
+					if ( $temp_coordinates !== Null && !empty( $temp_coordinates ) ) {
 						$route_options	 = array();
 						$route_options	 = $wpdb->get_var( $wpdb->prepare(
 						'SELECT options FROM ' .
@@ -343,7 +340,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 		}
 		
 		/**
-		 * Funktion to sort date arra of coordinates in routes
+		 * Funktion to sort date array of coordinates in routes
 		 *
 		 * @since 1.2.0
 		 * @access private
@@ -355,7 +352,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			count( $b['coordinates'] ) > 0 ) {
 				$t1 = intval($a['coordinates'][0]['starttime']);
 				$t2 = intval($b['coordinates'][0]['starttime']);
-				return $t2 - $t1;
+				return $t1 - $t2;
 			} 
 			return 0;
 		} 

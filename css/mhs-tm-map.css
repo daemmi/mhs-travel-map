@@ -84,24 +84,38 @@ from .gm-style class*/
     z-index: 10000000000;
 }
 
-.mhs-tm-gmap-popup-window-content,
+.mhs-tm-gmap-popup-window-content-wrapper,
 .mhs-tm-gmap-popup-window-inner {
     position: relative;
     max-height: 100%;
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
-    padding: 0px 5px 0px 5px;
 }
 
-.mhs-tm-gmap-popup-window-content {
-    overflow: auto;
+.mhs-tm-gmap-popup-window-content-wrapper {
     background-color: #fff;
     border: 1px solid transparent;
     border-bottom-width: 5px;
     border-radius: 5px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
     font: inherit;
+}
+
+.mhs-tm-gmap-popup-window-control {
+    overflow: auto;
+    border-bottom: 1px solid black;
+    margin-bottom: 5px;
+}
+
+.mhs-tm-gmap-popup-window-control img {
+    height: 20px;
+    margin: 5px 0px 0px 0px !important;
+}
+
+.mhs-tm-gmap-popup-window-content { 
+    overflow: auto;
+    padding: 0px 5px 0px 5px;
 }
 
 .mhs-tm-gmap-popup-window-content img {
