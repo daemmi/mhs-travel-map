@@ -109,7 +109,7 @@ from .gm-style class*/
 }
 
 .mhs-tm-gmap-popup-window-control img {
-    height: 20px;
+    height: 20px !important;
     margin: 5px 0px 0px 0px !important;
 }
 

@@ -20,23 +20,15 @@ jQuery( function ( $ ) {
                     var transport_classes = {
                         name: $( '#name_transport_class' ).val(),
                         color: $( '#color_transport_class' ).val(),
+                        id: $( '#transport_classes_next_id' ).val(),
                     };
-
-
+                    
                     var transport_classes_table = $.parseJSON( $( '#transport_classes' ).val() );
                     if ( transport_classes_table === null ) {
                         transport_classes_table = [ ];
                     }
                     
-                    //check if name already exist
-                    var not_in_array = 1;
-                    transport_classes_table.forEach(function (element, index) { 
-                        if( element.name === transport_classes.name ) {
-                            not_in_array = 0;
-                        }
-                    });
-                    
-                    if ( transport_classes.name.length > 0 && not_in_array) {
+                    if ( transport_classes.name.length > 0 ) {
                         if ( transport_classes.color.length === 0 ) {
                             transport_classes.color = '#000000';
                         }
@@ -49,9 +41,10 @@ jQuery( function ( $ ) {
                         </td></tr>' );
                         transport_classes_table[transport_classes_table.length] = transport_classes;
                         $( '#transport_classes' ).val( JSON.stringify( transport_classes_table ) );
-                    } else {
-                        mhs_tm_utilities.utilities.show_message( 'error',
-                            'Name already exist or enter a name at least, please!' );
+
+                        //Inrease the transport_classes_next_id if a new class are added
+                        var transport_classes_next_id = $( '#transport_classes_next_id' ).val();
+                        $( '#transport_classes_next_id' ).val( parseInt( parseInt( transport_classes_next_id ) + 1 ) );
                     }
                 },
                 'Cancel': function () {
@@ -74,19 +67,10 @@ jQuery( function ( $ ) {
                     var transport_classes = {
                         name: $( '#name_transport_class' ).val(),
                         color: $( '#color_transport_class' ).val(),
+                        id: $( '#transport_classes_next_id' ).val(),
                     };
-                    
-                    //check if name already exist
-                    var not_in_array = 1;
-                    var old_name = transport_classes_table[id].name;
-                    transport_classes_table.forEach(function (element, index) { 
-                        if( element.name === transport_classes.name && 
-                            old_name !== transport_classes.name ) {
-                            not_in_array = 0;
-                        }
-                    });
 
-                    if ( transport_classes.name.length > 0 && not_in_array ) {
+                    if ( transport_classes.name.length > 0 ) {
                         if ( transport_classes.color.length === 0 ) {
                             transport_classes.color = '#000000';
                         }
@@ -111,9 +95,6 @@ jQuery( function ( $ ) {
                         } );
 
                         $( this ).dialog( "close" );
-                    } else {
-                        mhs_tm_utilities.utilities.show_message( 'error',
-                            'Name already exist or enter a name at least, please!' );
                     }
                 },
                 'Cancel': function () {

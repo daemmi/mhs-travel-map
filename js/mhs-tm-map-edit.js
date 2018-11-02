@@ -5,6 +5,7 @@ jQuery( function ( $ ) {
         auto_load = mhs_tm_app_vars.auto_load,
         ajax_url = mhs_tm_app_vars.ajax_url,
         settings = mhs_tm_app_vars.settings,
+        plugin_dir = mhs_tm_app_vars.plugin_dir,
         map = [ ],
         bounds = [ ],
         map_canvas_id = 0,
@@ -532,7 +533,7 @@ jQuery( function ( $ ) {
         var color = coordinates[0]['options']['route_color'];
         if( $( '#transport_class' ).val() !== '' ) {
             settings.transport_classes.forEach( function ( item, index ) {
-                if( $( '#transport_class' ).val() === item.name ) {
+                if( $( '#transport_class' ).val() === item.id.toString() ) {
                     color = item.color;
                 }
             } );
@@ -578,7 +579,9 @@ jQuery( function ( $ ) {
             map[map_canvas_id],
             document.getElementById( 'mhs_tm_map_canvas_0' ),
             document.getElementById( 'mhs-tm-gmap-popup-window-0' ),
-            document.getElementById( '' )
+            document.getElementById( '' ),
+            '',
+            plugin_dir
             );
 
         //set a search box to the map

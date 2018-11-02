@@ -207,7 +207,8 @@ mhs_tm_utilities.gmaps.geocode_lat_lng = function ( lat, lng, settings, callback
 
 //Class popup window
 jQuery( function ( $ ) {
-    mhs_tm_utilities.gmaps.popup_window = function ( gmap, gmap_div, popup_div, loading_div, control_button ) {
+    mhs_tm_utilities.gmaps.popup_window = function ( gmap, gmap_div, popup_div, loading_div, 
+    control_button, plugin_dir ) {
         this.gmap = gmap;
         this.gmap_div = gmap_div;
         this.popup_div = popup_div;
@@ -222,19 +223,19 @@ jQuery( function ( $ ) {
         <div class="mhs-tm-gmap-popup-window-content-wrapper">\n\
             <div class="mhs-tm-gmap-popup-window-control"> \n\
                 <div class="mhs-tm-gmap-popup-control-arrow-left" data-map-id="' + this.gmap_id + '"\n\
-                style="float: left;"> \n\
+                style="float: left; display: flex; flex-wrap: nowrap; align-items: center;"> \n\
                 <a href="javascript:void(0)" id="mhs-tm-gmap-popup-previous">\n\
                 <img border="0" alt="previous" \n\
-                src="' + mhs_tm_map.plugin_dir + 'img/Arrow_Left.png"> </a> \n\
-                <a href="javascript:void(0)" style="font-size: 15px; vertical-align: super;"> \n\
+                src="' + plugin_dir + 'img/Arrow_Left.png"> </a> \n\
+                <a href="javascript:void(0)" style="vertical-align: super;"> \n\
                 Previous </a></div>\n\
-                <div style="float: right;" class="mhs-tm-gmap-popup-control-arrow-right" \n\
-                data-map-id="' + this.gmap_id + '"> \n\
-                <a href="javascript:void(0)" style="font-size: 15px; vertical-align: super;"> \n\
+                <div class="mhs-tm-gmap-popup-control-arrow-right" data-map-id="' + this.gmap_id + '"\n\
+                style="float: right; display: flex; flex-wrap: nowrap; align-items: center;"> \n\
+                <a href="javascript:void(0)" style="vertical-align: super;"> \n\
                 Next </a>\n\
                 <a href="javascript:void(0)" id="mhs-tm-gmap-popup-next">\n\
                 <img border="0" alt="next" \n\
-                src="' + mhs_tm_map.plugin_dir + 'img/Arrow_Right.png"> </a> </div>\n\
+                src="' + plugin_dir + 'img/Arrow_Right.png"> </a> </div>\n\
             </div>\n\
             <div class="mhs-tm-gmap-popup-window-content">\n\
                 <div class="mhs-tm-gmap-popup-window-new"></div> \n\
@@ -364,7 +365,7 @@ jQuery( function ( $ ) {
             $( this.popup_div ).outerWidth( $( this.gmap_div ).find( '.gm-style' ).width() );
             
             $( this.popup_div_content ).css( {
-                'height': ( $( this.popup_div ).height() ) - 
+                'max-height': ( $( this.popup_div ).height() ) - 
                     $( this.popup_div_content_control ).outerHeight( true ) - 
                     ( $( this.popup_div_content_wrapper ).outerHeight() - 
                     $( this.popup_div_content_wrapper ).innerHeight() )
@@ -554,7 +555,7 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
     waited_total_min['all'] = 0;
     total_distance['all'] = 0;
 
-    for ( var x = 0; x < routes.length; x++ ) {
+    for ( var x = routes.length - 1; x >= 0 ; x-- ) {
         //check if route has coordinates
         if( routes[x].coordinates.length > 1 ) {
             //Get all transport classes

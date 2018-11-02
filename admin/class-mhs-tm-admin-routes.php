@@ -301,6 +301,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				'auto_load'			 => true,
 				'ajax_url'			 => admin_url( 'admin-ajax.php' ),
 				'settings'			 => $settings,
+				'plugin_dir'		 => MHS_TM_RELPATH,
 			) );
 		}
 
@@ -460,7 +461,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 
 				foreach ( $plugin_settings[ 'transport_classes' ] as $transport_class ) {
 					$transport_classes[] = [
-						'value'	 => $transport_class[ 'name' ],
+						'value'	 => $transport_class[ 'id' ],
 						'label'	 => $transport_class[ 'name' ] ];
 				}
 
@@ -594,7 +595,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			if ( is_numeric( $id ) ) {
 				$data	 = $MHS_TM_Maps->get_coordinates( $id, 'route' );
 				$data	 = $data[ 0 ];
-
+				
 				// display coordinates only if there are one and we will not get the "The Route" fields
 				$coordinate_id = 0;
 				if ( is_array( $data[ 'coordinates' ] ) && count( $data[ 'coordinates' ] ) > 0 && $part != 'The Route' ) {
@@ -703,7 +704,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 							}
 						}
 					}
-				} else {
+				} else {		
+				
 					//fill the route fields with values
 					//all the route fields are saved in options array of coordinate
 					$mcount = count( $routes_fields );
@@ -711,16 +713,17 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 						if ( isset( $routes_fields[ $i ][ 'fields' ] ) ) {
 							$fcount = count( $routes_fields[ $i ][ 'fields' ] );
 							for ( $j = 0; $j < $fcount; $j++ ) {
+				
 								if ( isset( $data[ 'options' ][ $routes_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] ) ) {
 									$routes_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = stripslashes( $data[ 'options' ]
 									[ $routes_fields[ $i ][ 'fields' ][ $j ][ 'id' ] ] );
 									
 									//check if route has a class then disable route_color field
 									if( $routes_fields[ $i ][ 'fields' ][ $j ][ 'id' ] == 'route_color' && 
-									$data[ 'options' ][ 'transport_class' ] != '' ) {
+									$data[ 'options' ][ 'transport_class' ] !== '' ) {
 										$routes_fields[ $i ][ 'fields' ][ $j ][ 'disabled' ] = true;
 										foreach ( $plugin_settings[ 'transport_classes' ] as $transport_class ) {
-											if( $transport_class[ 'name' ] == $data[ 'options' ][ 'transport_class' ] ) {
+											if( $transport_class[ 'id' ] == $data[ 'options' ][ 'transport_class' ] ) {
 												$routes_fields[ $i ][ 'fields' ][ $j ][ 'value' ] = $transport_class[ 'color' ];
 											}
 										}

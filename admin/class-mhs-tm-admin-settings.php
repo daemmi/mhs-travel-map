@@ -57,8 +57,9 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 			$moved_coordinate_is_geocoded       = isset( $_POST[ 'moved_coordinate_is_geocoded' ] ) && $_POST[ 'moved_coordinate_is_geocoded' ] == true ? 1 : 0;
 			$nonce_key	                        = isset( $_POST[ 'mhs_tm_settings_save_nonce' ] ) ? esc_attr( $_POST[ 'mhs_tm_settings_save_nonce' ] ) : null;
 			$transport_classes                  = isset( $_POST[ 'transport_classes' ] ) ? sanitize_text_field( stripslashes( $_POST[ 'transport_classes' ] ) ) : null;
+			$transport_classes_next_id           = isset( $_POST[ 'transport_classes_next_id' ] ) ? intval( stripslashes( $_POST[ 'transport_classes_next_id' ] ) ) : 'error';
 
-			if ( !wp_verify_nonce( $nonce_key, 'mhs_tm_settings_save' ) ) {
+			if ( !wp_verify_nonce( $nonce_key, 'mhs_tm_settings_save' ) || $transport_classes_next_id == 'error' ) {
 				$messages[] = array(
 					'type'		 => 'error',
 					'message'	 => __( 'Something went wrong!', 'mhs_tm' )
@@ -75,6 +76,7 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 				'new_coordinate_is_geocoded'         => $new_coordinate_is_geocoded,
 				'moved_coordinate_is_geocoded'       => $moved_coordinate_is_geocoded,
 				'transport_classes'                  => $transport_classes,
+				'transport_classes_next_id'          => $transport_classes_next_id,
 			) );
 			
 			$wpdb->update(
@@ -331,6 +333,10 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 						array(
 							'type'		 => 'hidden',
 							'id'		 => 'transport_classes',
+						),
+						array(
+							'type'		 => 'hidden',
+							'id'		 => 'transport_classes_next_id',
 						)
 					)
 				)
@@ -384,6 +390,10 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 					'label'	 => __( 'Color of class', 'mhs_tm' ),
 					'id'	 => 'color_transport_class',
 					'desc'	 => __( 'The color of the transport class.', 'mhs_tm' )
+				),
+				array(
+					'type'	 => 'hidden',
+					'id'	 => 'id_transport_class'
 				)						
 			);
 

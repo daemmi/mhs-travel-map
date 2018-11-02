@@ -80,7 +80,8 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
             document.getElementById( 'mhs_tm_map_canvas_' + map_canvas_id ),
             document.getElementById( 'mhs-tm-gmap-popup-window-' + map_canvas_id ),
             document.getElementById( 'mhs-tm-gmap-popup-window-loading-' + map_canvas_id ),
-            document.getElementById( '' )
+            document.getElementById( '' ),
+            mhs_tm_map.plugin_dir
         );
     } else {
         //Make new popup window for the map
@@ -89,7 +90,8 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
             document.getElementById( 'mhs_tm_map_canvas_' + map_canvas_id ),
             document.getElementById( 'mhs-tm-gmap-popup-window-' + map_canvas_id ),
             document.getElementById( 'mhs-tm-gmap-popup-window-loading-' + map_canvas_id ),
-            document.getElementById( 'mhs-tm-gmap-show-info-' + map_canvas_id )
+            document.getElementById( 'mhs-tm-gmap-show-info-' + map_canvas_id ),
+            mhs_tm_map.plugin_dir
         );
         //set content for statistics button
         mhs_tm_map.map[map_canvas_id].popup_window.content_control =
@@ -507,14 +509,14 @@ mhs_tm_map.get_route_color = function ( transport_classes, route) {
     
     if( route.options.hasOwnProperty('transport_class') === false || 
         route.options.transport_class === '' ) {
-        if( route.options.route_color !== 'string' || route.options.route_color[0] !== '#' ) {
+        if( typeof route.options.route_color !== 'string' || route.options.route_color[0] !== '#' ) {
             route_color = '#000000';
         } else {
             route_color = route.options.route_color;
         }
     } else {
         transport_classes.forEach( function(item, index) {
-            if( item.name === route.options.transport_class ) {
+            if( item.id.toString() === route.options.transport_class ) {
                 route_color = item.color;
             }
         } );

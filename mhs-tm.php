@@ -4,7 +4,7 @@
 Plugin Name: My Hitchhiking Spot Travel Map (MHS Travel Map)
 Plugin URI: 
 Description: Create your travel map with use of google maps by adding coordinates to a map, make your route public, write a story for each coordinate and import backup files from the Android app "<a title="My Hitchhiking Spots" href="https://play.google.com/store/apps/details?id=com.myhitchhikingspots" target="_blank" rel="noopener">My Hitchhiking Spots</a>"
-Version: 1.2.4
+Version: 1.2.5
 Author: Jonas Damhuis
 Author URI: 
 License: GPL3
@@ -226,7 +226,7 @@ if ( is_admin() ) {
  *
  * @since 1.0
  */
-$MHS_TM_db_version = "1.0";
+$MHS_TM_db_version = "1.1";
 
 /**
  * Installation & Update Routines
@@ -240,13 +240,13 @@ $MHS_TM_db_version = "1.0";
  * @since 1.0
  */
 function MHS_TM_install() {
-   global $wpdb, $MHS_TM_db_version;
+   global $wpdb, $MHS_TM_db_version, $MHS_TM_Utilities;
         
         $installed_ver = get_option( "MHS_TM_db_version" );
-
+		
 		// if the plugin is not installed the db version is false
         if ( $installed_ver === false ) {
-
+		
                 /* SQL statements to create required tables */
                 $sql = array();
                 $sql[] = "CREATE TABLE " . $wpdb->prefix . "mhs_tm_maps (
@@ -282,6 +282,66 @@ function MHS_TM_install() {
 				
                 add_option( 'MHS_TM_db_version', $MHS_TM_db_version ); 
         }   
+		
+		//First DB Update adding id for class option in json array
+		if ( version_compare( $installed_ver, '1.1' ) < 0 ) {
+			$plugin_settings = $MHS_TM_Utilities->get_plugin_settings();
+			$transport_classes = $plugin_settings['transport_classes'];
+			
+
+				error_log('$transport_classes: ' . print_r($transport_classes,1) . "\n", 3,
+				'D:\xampp\htdocs\Tramprennen\my_errors.log');
+				
+			//get the classes and add a unique id 
+			$x = 1;
+			foreach ( $transport_classes as $transport_class ) {
+				$transport_classes[$x - 1]['id'] = $x;  
+				$x++;
+			}
+			$plugin_settings['transport_classes'] = json_encode( $transport_classes );
+			
+			//save the last created id (highest one)
+			$plugin_settings['transport_classes_next_id'] = $x;
+			
+			//save the plugin setting array
+			$plugin_settings_json = json_encode( $plugin_settings );
+			
+			$wpdb->update(
+			$wpdb->prefix . 'mhs_tm_maps', array(
+				'active'	 => 0,
+				'options'	 => $plugin_settings_json,
+			), array( 'id' => 1 ), array( '%d', '%s' ), array( '%d' )
+			);
+			
+			//get options column of all routes in db
+			$routes = $wpdb->get_results("select * from " . $wpdb->prefix . "mhs_tm_routes", ARRAY_A );
+			
+			//find options rows with a transportation_class
+			foreach ( $routes as $key => $route_row ) {
+				$route_row_option = json_decode( $route_row['options'], true );
+				
+				if ( is_array( $route_row_option ) && array_key_exists('transport_class', $route_row_option)) {
+					$transport_class = $route_row_option['transport_class'];
+				
+					foreach ( $transport_classes as $transport_class_option ) {
+						if( $transport_class_option['name'] == $transport_class ) {
+							
+							//If a row has the key transportation_class and the value is also in the
+							//tranportation_class option array, save the id of the transportation_class 
+							//option in the route options row
+							$route_row_option['transport_class'] = $transport_class_option['id'];
+							
+							$wpdb->update(
+							$wpdb->prefix . 'mhs_tm_routes', array(
+								'options'	 => json_encode( $route_row_option ),
+							), array( 'id' => $route_row['id'] ), array( '%s' ), array( '%d' )
+							);	
+						}
+					}
+				}
+			}		
+		}
+		
 		update_option( 'MHS_TM_db_version', $MHS_TM_db_version );   
         register_uninstall_hook( __FILE__, 'MHS_TM_uninstall' );
 }
@@ -296,6 +356,7 @@ register_activation_hook( __FILE__, 'MHS_TM_install' );
  */
 function MHS_TM_update_db_check() {
     global $MHS_TM_db_version;
+		
     if ( get_site_option( 'MHS_TM_db_version' ) != $MHS_TM_db_version ) {
         MHS_TM_install();
     }
