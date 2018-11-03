@@ -286,6 +286,14 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 									'label'	 => 'No'
 								)
 							)
+						),
+						array(
+							'type'	 => 'text',
+							'label'	 => __( 'Start zoom on last added routes?', 'mhs_tm' ),
+							'id'	 => 'zoom',
+							'desc'	 => __( 'If you enter a number the map will zoom at the first load on the entered 
+								number of last routes sorted by time. If you which to zoom on all routes leave the field 
+								blank or enter 0. ', 'mhs_tm' )
 						)
 					)
 				),
@@ -357,6 +365,7 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			// save variables
 			$todo_check		= isset( $_POST['todo_check'] ) ? sanitize_text_field( $_POST['todo_check'] ) : null;
 			$name			= isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : null;
+			$zoom			= isset( $_POST['zoom'] ) ? sanitize_text_field( (int)$_POST['zoom'] ) : null;
 			$selected		= isset( $_POST['selected'] ) ? (int)$_POST['selected'] : null;
 			$route_ids		= isset( $_POST['route_ids'] ) ? $MHS_TM_Admin_Utilities->sanitize_id_array( ( $_POST['route_ids'] ) ) : [];
 			if ( $id != NULL ) {
@@ -394,10 +403,14 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			}
 			
 			if ( $id != NULL ) {
-				$options = array( 'name' => $name
+				$options = array( 
+					'name' => $name,
+					'zoom' => $zoom
 				);
 			} else {
-				$options = array( 'name' => $name
+				$options = array( 
+					'name' => $name,
+					'zoom' => $zoom
 				);
 			}
 			$options = json_encode( $options );
@@ -471,7 +484,7 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 				$route_option = json_decode( $route['options'], true );
 
 				$route_array[] = ['value'	 => $route['id'],
-					'label'	 => 'id: ' . $route['id'] . ' | ' . $route_option['name']
+					'label'	 => 'id: ' . $route['id'] . ' | ' . stripslashes( $route_option['name'] )
 				];
 			}
 

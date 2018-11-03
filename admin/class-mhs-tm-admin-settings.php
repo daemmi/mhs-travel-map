@@ -118,6 +118,9 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 						'value' => 'settings',
 						'title' => 'Settings' ),
 					array(
+						'value' => 'export',
+						'title' => 'Export' ),
+					array(
 						'value' => 'about',
 						'title' => 'About' )
 					)
@@ -135,6 +138,8 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 		 * @access private
 		 */
 		private function get_tab_content( $tab = 'settings' ) {
+			global $MHS_TM_Maps;
+			
 			$output = '';
 		
 			switch ( $tab ){
@@ -179,6 +184,24 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 					echo '<div id="mhs-tm-dialog-message" class="updated" style="display: none;"><p>TEXT</p></div>';
 
 					wp_enqueue_script( 'mhs_tm_admin_settings' );
+					
+					break;
+					
+				case 'export' :
+					
+					$routes = $MHS_TM_Maps->get_coordinates( 0, 'all' );
+					
+					$button = '<input id="mhs_tm_start_export" type="submit" class="mhs_tm_prim_button button" 
+						value="+ ' . __( 'Start export', 'mhs_tm' ) . '" />';
+			
+					echo '<p> This export function will search in all your saved routes for lifts and creates an 
+						overview with alll important information </p>' . 
+						$button;
+
+					wp_enqueue_script( 'mhs_tm_admin_export' );
+					wp_localize_script( 'mhs_tm_admin_export', 'mhs_tm_app_export_vars', array(
+						'routes' => $routes
+					) );
 					
 					break;
 					

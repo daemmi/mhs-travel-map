@@ -102,7 +102,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 		 * **************************************************************************** */
 
 		/**
-		 * Funktion to get coordinates by map_id or route_id
+		 * Funktion to get coordinates by map_id, route_id or all routes
 		 *
 		 * @since 1.0
 		 * @access public
@@ -112,7 +112,14 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 
 			$route_ids = array();
 
-			if ( $type == 'map' && $id != NULL ) {
+			if ( $type == 'all' ) {
+				$route_ids = $wpdb->get_results( 
+					'SELECT id FROM ' .
+					$wpdb->prefix . 'mhs_tm_routes ' .
+					'WHERE active = 1', 
+					ARRAY_N
+					);
+			} elseif ( $type == 'map' && $id != NULL ) {
 				$route_ids = $this->get_routes_of_map( $id );
 			} elseif ( $id != NULL ) {
 				$route_ids[ 0 ] = $id;
@@ -122,6 +129,10 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			$key		 = 0;
 			if ( !$route_ids == Null ) {
 				foreach ( $route_ids as $route_id ) {
+					if( is_array( $route_id ) ) {
+						$route_id = $route_id[0];
+					}
+					
 					$temp_coordinates	 = array();
 					$temp_coordinates	 = $wpdb->get_var( $wpdb->prepare(
 					'SELECT coordinates FROM ' .
@@ -227,7 +238,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 
 			if ( is_array( $array ) ) {
 				$new_input[ 'path' ]					 = $this->sanitize_path_array( $array[ 'path' ] );
-				$new_input[ 'name' ]					 = sanitize_text_field( $array[ 'name' ] );
+				$new_input[ 'name' ]					 = stripslashes ( sanitize_text_field( $array[ 'name' ] ) );
 				$new_input[ 'transport_class' ]			 = array_key_exists( 'transport_class', $array ) ? 
 					sanitize_text_field( $array[ 'transport_class' ] ) : '';
 				$new_input[ 'route_color' ]				 = array_key_exists( 'route_color', $array ) ? 
@@ -299,16 +310,16 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 						if ( is_object( $array[ $key ] ) ) {
 							$starttime = substr( sanitize_text_field( $val->starttime ), 0, 10 );
 							$new_input[ $key ] = (object) array(
-								'city'				 => sanitize_text_field( $val->city ),
-								'country'			 => sanitize_text_field( $val->country ),
+								'city'				 => stripslashes( sanitize_text_field( $val->city ) ),
+								'country'			 => stripslashes( sanitize_text_field( $val->country ) ),
 								'ishitchhikingspot'	 => $MHS_TM_Utilities->sanitize_checkbox( $val->ishitchhikingspot ),
 								'ispartofaroute'	 => $MHS_TM_Utilities->sanitize_checkbox( $val->ispartofaroute ),
 								'latitude'			 => floatval( $val->latitude ),
 								'longitude'			 => floatval( $val->longitude ),
-								'note'				 => balanceTags( wp_kses_post( $val->note ), true ),
+								'note'				 => balanceTags( wp_kses_post( stripslashes( $val->note ) ), true ),
 								'starttime'			 => strlen( $starttime ) == 10 ? $starttime : '0000000000',
-								'state'				 => sanitize_text_field( $val->state ),
-								'street'			 => sanitize_text_field( $val->street ),
+								'state'				 => stripslashes( sanitize_text_field( $val->state ) ),
+								'street'			 => stripslashes( sanitize_text_field( $val->street ) ),
 								'waitingtime'		 => intval( $val->waitingtime ),
 								'dissnaptoroad'		 => property_exists( $val, 'dissnaptoroad' ) && $val->dissnaptoroad == 1 ? 1 : 0,
 								'distance'			 => property_exists( $val, 'distance' ) ? intval( $val->distance ) : false,
@@ -316,16 +327,16 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 						} elseif ( is_array( $array[ $key ] ) ) {
 							$starttime = substr( sanitize_text_field( $val[ 'starttime' ] ), 0, 10 );
 							$new_input[ $key ] = array(
-								'city'				 => sanitize_text_field( $val[ 'city' ] ),
-								'country'			 => sanitize_text_field( $val[ 'country' ] ),
+								'city'				 => stripslashes( sanitize_text_field( $val[ 'city' ] ) ),
+								'country'			 => stripslashes( sanitize_text_field( $val[ 'country' ] ) ),
 								'ishitchhikingspot'	 => $MHS_TM_Utilities->sanitize_checkbox( $val[ 'ishitchhikingspot' ] ),
 								'ispartofaroute'	 => $MHS_TM_Utilities->sanitize_checkbox( $val[ 'ispartofaroute' ] ),
 								'latitude'			 => floatval( $val[ 'latitude' ] ),
 								'longitude'			 => floatval( $val[ 'longitude' ] ),
-								'note'				 => balanceTags( wp_kses_post( $val[ 'note' ] ), true ),
+								'note'				 => balanceTags( wp_kses_post( stripslashes( $val[ 'note' ] ) ), true ),
 								'starttime'			 => strlen( $starttime ) == 10 ? $starttime : '0000000000',
-								'state'				 => sanitize_text_field( $val[ 'state' ] ),
-								'street'			 => sanitize_text_field( $val[ 'street' ] ),
+								'state'				 => stripslashes( sanitize_text_field( $val[ 'state' ] ) ),
+								'street'			 => stripslashes( sanitize_text_field( $val[ 'street' ] ) ),
 								'waitingtime'		 => intval( $val[ 'waitingtime' ] ),
 								'dissnaptoroad'		 => array_key_exists( 'dissnaptoroad', $val ) && $val[ 'dissnaptoroad' ] == 1 ? 1 : 0,
 								'distance'			 => array_key_exists( 'distance', $val ) ? intval( $val[ 'distance' ] ) : false,

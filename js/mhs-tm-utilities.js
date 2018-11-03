@@ -479,6 +479,19 @@ mhs_tm_utilities.coordinate_handling.get_last_on_route_coordinate_id_in_route = 
     return last_coordinate_id_on_route;
 };
 
+mhs_tm_utilities.coordinate_handling.get_last_on_route_and_spot_coordinate_id_in_route = function ( coordinates ) {
+    var last_coordinate_id_on_route = 0;
+    
+    for( i = coordinates.length - 1; i > 0; i-- ) {
+        if ( coordinates[i]['ispartofaroute'] && coordinates[i]['ishitchhikingspot'] ) {
+            last_coordinate_id_on_route = i;
+            break;
+        }
+    }
+
+    return last_coordinate_id_on_route;
+};
+
 mhs_tm_utilities.coordinate_handling.get_title = function ( coordinate, coordinates, route_options ) {
     var content_string = '';
     if ( coordinate.country )
@@ -546,6 +559,7 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
     var header_string = [];
     var transport_class;
     var transport_color = [];
+    var transport_name = [];
     
     //create variables for all
     lifts_total['all'] = 0;
@@ -564,8 +578,9 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
             } else {
                 transport_class = routes[x].options.transport_class;
                 map_options.transport_classes.forEach( function( item, index ) {
-                    if( transport_class === item.name ) {
+                    if( parseInt( transport_class ) === parseInt( item.id ) ) {
                         transport_color[transport_class] = item.color;
+                        transport_name[transport_class] = item.name;
                     }
                 } );
             }
@@ -742,7 +757,6 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
         end_date[item] = new Date( mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset( parseInt( end_date[item] ) ) * 1000 )
             .toLocaleString( [], { year: 'numeric', month: 'numeric', day: 'numeric' } );
 
-
         var title = '';
         var break_block = '';
         var style_block = 'style="font-size: 120%; text-decoration: underline; -webkit-text-decoration-color: ' + 
@@ -755,7 +769,8 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
             title = item;
             style_block = 'style="font-size: 120%;"';
         } else {
-            title = item;
+            title = transport_name[item];
+//            title = item;
         }
         header_string[item] = '<div class="mhs-tm-map-message-title"> \n\
                             <h1 ' + style_block + '>' + title + '</h1>' + 

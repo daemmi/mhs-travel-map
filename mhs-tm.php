@@ -119,6 +119,7 @@ function MHS_TM_admin_enqueue() {
 	wp_register_script( 'mhs_tm_map_edit', MHS_TM_RELPATH . 'js/mhs-tm-map-edit.js', array( 'jquery', 'jquery-ui-draggable', 'jquery-ui-accordion', 'jquery-ui-dialog', 'jquery-ui-sortable', 'jquery-ui-datepicker' ), '1.0.4' );
 	wp_register_script( 'spectrum', MHS_TM_RELPATH . 'js/spectrum.js', array(), '1.0.0' );
 	wp_register_script( 'mhs_tm_admin_settings', MHS_TM_RELPATH . 'js/mhs-tm-admin-settings.js', array( 'jquery', 'jquery-ui-dialog' ), '1.0.0' );
+	wp_register_script( 'mhs_tm_admin_export', MHS_TM_RELPATH . 'js/mhs-tm-admin-export.js', array( 'jquery' ), '1.0.0' );
 
 	/* register styles */
     wp_register_style( 'mhs_tm_admin_jquery_style', MHS_TM_RELPATH . 'css/jquery-ui/jquery-ui.css', false, '1.12.1' );

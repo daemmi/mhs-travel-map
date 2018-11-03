@@ -143,7 +143,16 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
             var myLatlng = new google.maps.LatLng( lat, lng );
             var pin = mhs_tm_map.plugin_dir + '/img/Pin-Thumb.png';
 
-            mhs_tm_map.bounds[map_canvas_id].extend( myLatlng );
+            //Set the bound for zoom
+            if( mhs_tm_map.map_options[map_canvas_id]['zoom'] > 0 ) {
+                if( i >= mhs_tm_map.coordinates[map_canvas_id].length - 
+                    mhs_tm_map.map_options[map_canvas_id]['zoom'] ) {
+                    
+                    mhs_tm_map.bounds[map_canvas_id].extend( myLatlng );
+                }
+            } else {
+                mhs_tm_map.bounds[map_canvas_id].extend( myLatlng );
+            }
 
             // Get the icon for the marker
             // check if the coordinate is part of the route then set pin and set flag so that no other coordinate could get start pin
@@ -242,8 +251,8 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
                 this.setZIndex( google.maps.Marker.MAX_ZINDEX + 2 );
                 
                 // set bounds of map tp path
-                mhs_tm_map.set_bounds_via_path( map_canvas_id, 
-                    mhs_tm_map.route_path[map_canvas_id][marker.id_route], 
+                mhs_tm_map.set_bounds_via_marker( map_canvas_id, 
+                    mhs_tm_map.marker[map_canvas_id][marker.id_route], 
                     mhs_tm_map.map[map_canvas_id] );
             } );
             
@@ -283,7 +292,8 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
             geodesic: true,
             strokeColor: route_color,
             strokeOpacity: 1.0,
-            strokeWeight: 3
+            strokeWeight: 3,
+            id_route: i
         } );
         
         mhs_tm_map.route_path[map_canvas_id][i].addListener( 'click', function () {
@@ -292,8 +302,8 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
                 'route_path', this );
             
             // set bounds of map tp path
-            mhs_tm_map.set_bounds_via_path( map_canvas_id, 
-                this, 
+            mhs_tm_map.set_bounds_via_marker( map_canvas_id, 
+                mhs_tm_map.marker[map_canvas_id][this.id_route], 
                 mhs_tm_map.map[map_canvas_id] );
         } );
             
@@ -409,13 +419,25 @@ mhs_tm_map.set_pop_up_control = function ( marker ) {
     }
 };
 
-
 // set bounds of map via path
 mhs_tm_map.set_bounds_via_path = function ( map_id, path, map ) {
     var bounds = new google.maps.LatLngBounds();
     var points = path.getPath().getArray();
     for (var n = 0; n < points.length ; n++){
         bounds.extend(points[n]);
+    }
+    mhs_tm_map.bounds[map_id] = bounds;
+    
+    map.fitBounds( bounds );
+    map.panToBounds( bounds );
+};
+
+// set bounds of map via marker
+mhs_tm_map.set_bounds_via_marker = function ( map_id, marker, map ) {
+    var bounds = new google.maps.LatLngBounds();
+    
+    for (var n = 0; n < marker.length ; n++){
+        bounds.extend( marker[n].getPosition() );
     }
     mhs_tm_map.bounds[map_id] = bounds;
     
@@ -461,8 +483,8 @@ next_route_id, next_coordinate_id, change_bounce ) {
         
         setTimeout( function () {
             // set bounds of map tp path
-            mhs_tm_map.set_bounds_via_path( map_canvas_id, 
-                mhs_tm_map.route_path[map_canvas_id][next_route_id],
+            mhs_tm_map.set_bounds_via_marker( map_canvas_id, 
+                mhs_tm_map.marker[map_canvas_id][next_route_id],
                 mhs_tm_map.map[map_canvas_id] );
         }, 3000 );
     } else {
@@ -516,7 +538,7 @@ mhs_tm_map.get_route_color = function ( transport_classes, route) {
         }
     } else {
         transport_classes.forEach( function(item, index) {
-            if( item.id.toString() === route.options.transport_class ) {
+            if( item.id.toString() === route.options.transport_class.toString() ) {
                 route_color = item.color;
             }
         } );
