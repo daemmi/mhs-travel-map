@@ -2,10 +2,10 @@
 Contributors: daemmi
 Donate link: https://profiles.wordpress.org/daemmi
 Tags: map, google maps, hitchhike, hitchhiking, travel, backpacking, traveling
-Tested up to: 4.9.6
+Tested up to: 4.9.8
 Requires at least: 3.8.0
 Requires PHP: 5.2.0
-Stable tag: 1.2.4
+Stable tag: 1.3.0
 License: GPL3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -59,6 +59,13 @@ This section describes how to install and use the plugin.
 == Frequently Asked Questions ==
 
 == Changelog ==
+
+= 1.3.0 (2018-11-XX) =
+- added, browse through the coordinates in front end
+- added, export function for lifts in routes
+- added, ne option for maps of map zoom after first load 
+- changed, minior changes at the style of the routes
+- fixed, changing of transportation class name is possible now
 
 = 1.2.4 (2018-07-05) =
 - added, shortcode work just with a route id
