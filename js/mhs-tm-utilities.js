@@ -371,9 +371,11 @@ jQuery( function ( $ ) {
                     $( this.popup_div_content_wrapper ).innerHeight() )
             } );
 
-            $( this.popup_div_inner ).css( {
-                'margin-top': ( $( this.popup_div ).height() - $( this.popup_div_content_wrapper ).outerHeight() ) / 2
-            } );
+            //No margin on top, because if pictures get loaded later the div size with content
+            //gets bigger and get out of the map div because margin will be calculated before
+//            $( this.popup_div_inner ).css( {
+//                'margin-top': ( $( this.popup_div ).height() - $( this.popup_div_content_wrapper ).outerHeight() ) / 2
+//            } );
         };
 
         //place it in the map
@@ -399,6 +401,8 @@ jQuery( function ( $ ) {
             var active_coordinate = mhs_tm_map.active_coordinate[map_canvas_id];
             var next_route_id = 0;
             var next_coordinate_id = 0;
+            var five_next_route_id = 0;
+            var five_next_coordinate_id = 0;
             var change_bounce = 0;
             
             //calculate which id are for the nextcoordinate
@@ -415,11 +419,28 @@ jQuery( function ( $ ) {
 
                 change_bounce = 1;
             }
+            
+            for ( var y = 0; y < 5; y++ ) {
+                //calculate which id are for the 5th previous coordinate
+                if( active_coordinate.route_id === 0 ) {
+                    if( active_coordinate.coordinate_id !== 0 ) {
+                        active_coordinate.coordinate_id = active_coordinate.coordinate_id - 1;
+                    }
+                } else if( active_coordinate.route_id !== 0 && active_coordinate.coordinate_id !== 0 ) {
+                    active_coordinate.coordinate_id = active_coordinate.coordinate_id - 1;
+                } else if( active_coordinate.route_id !== 0 && active_coordinate.coordinate_id === 0 ) {
+                    active_coordinate.route_id = active_coordinate.route_id - 1;       
+                    active_coordinate.coordinate_id = mhs_tm_map.marker[map_canvas_id][active_coordinate.route_id].length - 1;
+                }
+            }
 
+            var five_next_route_id = active_coordinate.route_id;
+            var five_next_coordinate_id = active_coordinate.coordinate_id;
+            
             var marker = mhs_tm_map.marker[map_canvas_id][next_route_id][next_coordinate_id];
 
             mhs_tm_map.next_coordinate_animation( map_canvas_id, marker, active_coordinate, 
-                next_route_id, next_coordinate_id, change_bounce );
+                next_route_id, next_coordinate_id, change_bounce, five_next_route_id, five_next_coordinate_id );
         } );
 
         $('.mhs-tm-gmap-popup-control-arrow-right').on( 'click', $( this ), function () {
@@ -427,6 +448,8 @@ jQuery( function ( $ ) {
             var active_coordinate = mhs_tm_map.active_coordinate[map_canvas_id];
             var next_route_id = 0;
             var next_coordinate_id = 0;
+            var five_next_route_id = 0;
+            var five_next_coordinate_id = 0;
             var change_bounce = 0;
 
             //calculate which id are for the nextcoordinate
@@ -440,10 +463,23 @@ jQuery( function ( $ ) {
                 change_bounce = 1; 
             } 
 
+            for ( var y = 0; y < 5; y++ ) {
+                //calculate which id are for the 5th next coordinate
+                if( active_coordinate.coordinate_id < mhs_tm_map.marker[map_canvas_id][active_coordinate.route_id].length - 1 ) {
+                    active_coordinate.coordinate_id = active_coordinate.coordinate_id + 1;
+                } else if( active_coordinate.route_id < mhs_tm_map.marker[map_canvas_id].length - 1 ) {
+                    active_coordinate.route_id = active_coordinate.route_id + 1;
+                    active_coordinate.coordinate_id = 0;
+                }
+            }
+            
+            var five_next_route_id = active_coordinate.route_id;
+            var five_next_coordinate_id = active_coordinate.coordinate_id;
+            
             var marker = mhs_tm_map.marker[map_canvas_id][next_route_id][next_coordinate_id];
 
             mhs_tm_map.next_coordinate_animation( map_canvas_id, marker, active_coordinate, 
-                next_route_id, next_coordinate_id, change_bounce );
+                next_route_id, next_coordinate_id, change_bounce, five_next_route_id, five_next_coordinate_id );
         } );
     };
 } );

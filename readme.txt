@@ -2,7 +2,7 @@
 Contributors: daemmi
 Donate link: https://profiles.wordpress.org/daemmi
 Tags: map, google maps, hitchhike, hitchhiking, travel, backpacking, traveling
-Tested up to: 4.9.8
+Tested up to: 5.0.3
 Requires at least: 3.8.0
 Requires PHP: 5.2.0
 Stable tag: 1.3.0
