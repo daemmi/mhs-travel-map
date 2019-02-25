@@ -23,8 +23,9 @@ div.ui-dialog_mhs_tm {
 #mhs-tm-dialog-message {
     position:fixed;
     z-index: 100000;
-    top: 100px;
-    left: 50%; 
+    top: 100px;    
+    left: 50%;
+    transform: translateX(-50%);
     -webkit-box-shadow: 0px 0px 75px 5px rgba(0,0,0,0.75);
     -moz-box-shadow: 0px 0px 75px 5px rgba(0,0,0,0.75);
     box-shadow: 0px 0px 75px 5px rgba(0,0,0,0.75);

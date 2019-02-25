@@ -274,7 +274,6 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
                 
                 //Function to load more notes before and after the actual one
                 function load_next_notes() {
-                    console.log("call load next notes");
                     for ( var y = 0; y < 4; y++ ) {
                         load_next = false;
                         //calculate which id are for the nextcoordinate

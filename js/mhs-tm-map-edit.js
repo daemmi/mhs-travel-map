@@ -565,15 +565,6 @@ jQuery( function ( $ ) {
             $( '.mhs_tm_loading' ).slideUp( 1500 );
         } );
 
-        // Event listener fires after a resize of the window
-        google.maps.event.addDomListener( window, 'resize', function () {
-            //set a time out otherwise the function calls come to early after closing the full screen
-            setTimeout( function () {
-                map[map_canvas_id].fitBounds( bounds[map_canvas_id] );
-                map[map_canvas_id].panToBounds( bounds[map_canvas_id] );
-            }, 20 );
-        } );
-
         //Make ne popup window for the map
         map[map_canvas_id].popup_window = new mhs_tm_utilities.gmaps.popup_window(
             map[map_canvas_id],

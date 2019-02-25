@@ -744,6 +744,8 @@ class WP_List_Table_My {
 	 * @param string $which
 	 */
 	protected function pagination( $which ) {
+                global $wp_version;
+
 		if ( empty( $this->_pagination_args ) ) {
 			return;
 		}
@@ -789,22 +791,35 @@ class WP_List_Table_My {
 		if ( $current == $total_pages - 1 ) {
 			$disable_last = true;
 		}
+                
+                // Self added, check if WP Version is greater as 5.1. because 
+                // from this version there are changes at the table pagination
+                if ( version_compare( $wp_version, '5.1', '>=' ) ) {
+                    // WordPress version is greater than 5.1
+                    $tablenav_extra_class_disabled = "button disabled";
+                    $tablenav_extra_class = "button";   
+                } else {
+                    $tablenav_extra_class_disabled = "";
+                    $tablenav_extra_class = "";                      
+                }
 
 		if ( $disable_first ) {
-			$page_links[] = '<span class="tablenav-pages-navspan" aria-hidden="true">&laquo;</span>';
+			$page_links[] = '<span class="tablenav-pages-navspan ' . $tablenav_extra_class_disabled . '" aria-hidden="true">&laquo;</span>';
 		} else {
-			$page_links[] = sprintf( "<a class='first-page' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
-				esc_url( remove_query_arg( 'paged', $current_url ) ),
+			$page_links[] = sprintf( "<a class='first-page %s' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
+				$tablenav_extra_class,
+                                esc_url( remove_query_arg( 'paged', $current_url ) ),
 				__( 'First page' ),
 				'&laquo;'
 			);
 		}
 
 		if ( $disable_prev ) {
-			$page_links[] = '<span class="tablenav-pages-navspan" aria-hidden="true">&lsaquo;</span>';
+			$page_links[] = '<span class="tablenav-pages-navspan ' . $tablenav_extra_class_disabled . '" aria-hidden="true">&lsaquo;</span>';
 		} else {
-			$page_links[] = sprintf( "<a class='prev-page' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
-				esc_url( add_query_arg( 'paged', max( 1, $current-1 ), $current_url ) ),
+			$page_links[] = sprintf( "<a class='prev-page %s' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
+				$tablenav_extra_class,
+                                esc_url( add_query_arg( 'paged', max( 1, $current-1 ), $current_url ) ),
 				__( 'Previous page' ),
 				'&lsaquo;'
 			);
@@ -824,20 +839,22 @@ class WP_List_Table_My {
 		$page_links[] = $total_pages_before . sprintf( _x( '%1$s of %2$s', 'paging' ), $html_current_page, $html_total_pages ) . $total_pages_after;
 
 		if ( $disable_next ) {
-			$page_links[] = '<span class="tablenav-pages-navspan" aria-hidden="true">&rsaquo;</span>';
+			$page_links[] = '<span class="tablenav-pages-navspan ' . $tablenav_extra_class_disabled . '" aria-hidden="true">&rsaquo;</span>';
 		} else {
-			$page_links[] = sprintf( "<a class='next-page' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
-				esc_url( add_query_arg( 'paged', min( $total_pages, $current+1 ), $current_url ) ),
+			$page_links[] = sprintf( "<a class='next-page %s' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
+				$tablenav_extra_class,
+                                esc_url( add_query_arg( 'paged', min( $total_pages, $current+1 ), $current_url ) ),
 				__( 'Next page' ),
 				'&rsaquo;'
 			);
 		}
 
 		if ( $disable_last ) {
-			$page_links[] = '<span class="tablenav-pages-navspan" aria-hidden="true">&raquo;</span>';
+			$page_links[] = '<span class="tablenav-pages-navspan ' . $tablenav_extra_class_disabled . '" aria-hidden="true">&raquo;</span>';
 		} else {
-			$page_links[] = sprintf( "<a class='last-page' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
-				esc_url( add_query_arg( 'paged', $total_pages, $current_url ) ),
+			$page_links[] = sprintf( "<a class='last-page %s' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
+				$tablenav_extra_class,
+                                esc_url( add_query_arg( 'paged', $total_pages, $current_url ) ),
 				__( 'Last page' ),
 				'&raquo;'
 			);

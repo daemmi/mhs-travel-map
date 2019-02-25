@@ -906,8 +906,8 @@ mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview = function 
         return false;
     }
 
-    //is a hitchhiking spot on the route?      
-    for ( var x = 0; x < coordinates.length; x++ ) {
+    //is a hitchhiking spot on the route and is it not the last one?      
+    for ( var x = 0; x < coordinates.length - 1; x++ ) {
         if ( coordinates[x].ispartofaroute && coordinates[x].ishitchhikingspot ) {
             is_hitchhiking_spot = true;
             break;
