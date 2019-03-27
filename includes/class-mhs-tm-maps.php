@@ -322,6 +322,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 								'street'			 => stripslashes( sanitize_text_field( $val->street ) ),
 								'waitingtime'		 => intval( $val->waitingtime ),
 								'dissnaptoroad'		 => property_exists( $val, 'dissnaptoroad' ) && $val->dissnaptoroad == 1 ? 1 : 0,
+								'invisiblepin'		 => property_exists( $val, 'invisiblepin' ) && $val->invisiblepin == 1 ? 1 : 0,
 								'distance'			 => property_exists( $val, 'distance' ) ? intval( $val->distance ) : false,
 							);
 						} elseif ( is_array( $array[ $key ] ) ) {
@@ -339,6 +340,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 								'street'			 => stripslashes( sanitize_text_field( $val[ 'street' ] ) ),
 								'waitingtime'		 => intval( $val[ 'waitingtime' ] ),
 								'dissnaptoroad'		 => array_key_exists( 'dissnaptoroad', $val ) && $val[ 'dissnaptoroad' ] == 1 ? 1 : 0,
+								'invisiblepin'		 => array_key_exists( 'invisiblepin', $val ) && $val[ 'invisiblepin' ] == 1 ? 1 : 0,
 								'distance'			 => array_key_exists( 'distance', $val ) ? intval( $val[ 'distance' ] ) : false,
 							);
 						}

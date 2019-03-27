@@ -33,6 +33,22 @@
     height: 35px;
 }
 
+.mhs-tm-gmap-draw-controls {
+    display: none;
+    direction: ltr;
+    overflow: hidden;
+    text-align: center;
+    position: relative;
+    background-color: rgb(255, 255, 255);
+    padding: 4px 4px;
+    border-bottom-left-radius: 2px;
+    border-top-left-radius: 2px;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
+    margin-left: 5px;  
+}
+
 #mhs-tm-gmap-search-input:focus {
     border-color: #4d90fe;
 }

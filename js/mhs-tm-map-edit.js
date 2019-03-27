@@ -17,7 +17,24 @@ jQuery( function ( $ ) {
     marker[map_canvas_id] = [ ];
 
     $( '.mhs_tm_loading' ).css( "background-color", $( 'body' ).css( "background-color" ) );
-
+    
+    // hide options at coordinates where pin is hidden
+    $( '#mhs_tm_form_1' ).find( 'table' ).each( function( table ) {
+        if( $( this ).find( '#invisiblepin_' + ( table ) ).is(":checked") === true ) {
+            $( this ).find( '#invisiblepin_' + ( table ) ).closest('table' ).find( 'tr' ).each( function() {
+                if( $( this ).attr( 'id' ) != 'row-invisiblepin_' + ( table ) ) {
+                    $( this ).hide();
+                }     
+            } );
+        }
+    } );    
+    
+    // change coordinate header name if coordinate is hidden
+    $( '#mhs_tm_form_1' ).find( '.coordinate' ).each( function ( index ) {
+        var id = index + 1;
+        change_coordinate_header_name( $( this ), id );
+    } );
+        
     // Resize the window resize other stuff too
     $( window ).resize( function () {
         //change gmap window size
@@ -332,6 +349,11 @@ jQuery( function ( $ ) {
             }
         } );
     } );
+    
+    // if invisble checkbox is clicked hide other options
+    $( "[type=checkbox]" ).click( function() {
+        hide_elements_from_invisble_pin( $( this ) );
+    } );
 
     function save_route( path ) {
         //if a transport class is chosen don't change the route color
@@ -419,6 +441,13 @@ jQuery( function ( $ ) {
         if ( input_id == 'starttime' ) {
             coordinates[map_canvas_id]['coordinates'][coordinate_index][input_id] =
                 Math.round( mhs_tm_utilities.utilities.get_timestamp_plus_timezone_offset( new Date( element.val() ).getTime() / 1000 ) );
+        } else if ( input_id == 'invisiblepin' ) {
+            if ( element.is( ':checked' ) ) {
+                coordinates[map_canvas_id]['coordinates'][coordinate_index][input_id] = 1;
+                pin_color = '|ffffff|000000';
+            } else {
+                coordinates[map_canvas_id]['coordinates'][coordinate_index][input_id] = 0;
+            }
         } else if ( input_id == 'ispartofaroute' ) {
             if ( element.is( ':checked' ) ) {
                 coordinates[map_canvas_id]['coordinates'][coordinate_index][input_id] = 1;
@@ -444,6 +473,16 @@ jQuery( function ( $ ) {
             }
         } else {
             coordinates[map_canvas_id]['coordinates'][coordinate_index][input_id] = element.val();
+        }
+        
+        // if pin is invisble don't care about the other pin style related inputs 
+        // hide all other options
+        if ( coordinates[map_canvas_id]['coordinates'][coordinate_index]['invisiblepin'] ) {
+            pin_color = '|ffffff|000000';
+            pin_shape = 'd_map_pin_letter&chld='
+            // set is part of the route to true because a hidden pin which is not 
+            // on the route is senseless
+            coordinates[map_canvas_id]['coordinates'][coordinate_index]['ispartofaroute'] = 1;
         }
 
         var pin = pin_shape + ( coordinate_index + 1 ) + pin_color + pin_star_color;
@@ -560,6 +599,8 @@ jQuery( function ( $ ) {
             $( '.mhs_tm_form' ).show();
             //show the gmap search box
             $( '#mhs-tm-gmap-search-input' ).show();
+            //show the gmap checkbox
+            $( '#mhs-tm-invisible-pins' ).show();
             //enable sortable, otherwise touch punch doesnt work with sortable
             $( '.mhs_tm_normal_sortables' ).sortable( 'enable' );
             $( '.mhs_tm_loading' ).slideUp( 1500 );
@@ -577,8 +618,11 @@ jQuery( function ( $ ) {
 
         //set a search box to the map
         var search_input = document.getElementById( 'mhs-tm-gmap-search-input' );
+        //set a checkbox to the map
+        var invisible_pins = document.getElementById( 'mhs-tm-invisible-pins' );
 
         map[map_canvas_id].controls[google.maps.ControlPosition.TOP_LEFT].push( search_input );
+        map[map_canvas_id].controls[google.maps.ControlPosition.LEFT_BOTTOM].push( invisible_pins );
 
         var autocomplete = new google.maps.places.Autocomplete( search_input );
         autocomplete.bindTo( 'bounds', map[map_canvas_id] );
@@ -853,6 +897,12 @@ jQuery( function ( $ ) {
             coordinates[map_canvas_id]['coordinates'][coordinate_id - 1]['ishitchhikingspot'] = 1;
         }
 
+        if ( $( '#invisible-pins-checkbox' ).prop( "checked" ) ) {
+            $( '#invisiblepin_' + coordinate_id ).prop( "checked", true );
+            coordinates[map_canvas_id]['coordinates'][coordinate_id - 1]['invisiblepin'] = 1;
+            hide_elements_from_invisble_pin( $( '#invisiblepin_' + coordinate_id ) );
+        }
+
         $( '#latitude_' + coordinate_id ).val( lat );
         coordinates[map_canvas_id]['coordinates'][coordinate_id - 1]['latitude'] = lat;
         $( '#longitude_' + coordinate_id ).val( lng );
@@ -898,8 +948,40 @@ jQuery( function ( $ ) {
             }
 
         } );
+        
         // change coordinate header name
-        coordinate.find( 'h1 > span.postbox_title' ).text( 'Coordinate ' + new_id );
+        change_coordinate_header_name( coordinate, new_id )
+    }
+    
+    function hide_elements_from_invisble_pin( checkbox ) {
+        var coordinate_index = parseInt( $( checkbox ).attr( 'id' ).replace( 'invisiblepin_', '' ) );
+        
+        if( $( checkbox ).attr( 'id' ).substr( 0, $( checkbox ).attr( 'id' ).search( '_' ) ) == 'invisiblepin'
+            && $( checkbox ).is(":checked") ) {
+            $( checkbox ).closest('table' ).find( 'tr' ).each( function() {
+                if( $( this ).attr( 'id' ) != 'row-invisiblepin_' + ( coordinate_index ) ) {
+                    $( this ).hide();
+                }     
+            } );
+        } else {
+            $( checkbox ).closest('table' ).find( 'tr' ).each( function() {
+                if( $( this ).attr( 'id' ) != 'row-invisiblepin_' + ( coordinate_index ) ) {
+                    $( this ).show();
+                }     
+            } );
+        }
+        
+        // change the header name
+        change_coordinate_header_name( $( checkbox ).closest('.coordinate' ), coordinate_index );
+    }
+    
+    // change coordinate header name
+    function change_coordinate_header_name( coordinate, id ) {
+        var invisible_text = ''
+        if( coordinate.find( '#invisiblepin_' + id ).is( ':checked' ) ) {
+            invisible_text = '(invisible)'
+        }
+        coordinate.find( 'h1 > span.postbox_title' ).text( 'Coordinate ' + id + ' ' + invisible_text);
     }
 
     function get_geocoded_coordinate( coordinate_id, last_coordinate_id, callback ) {
@@ -949,6 +1031,12 @@ jQuery( function ( $ ) {
         if ( !coordinate.ishitchhikingspot ) {
             pin_shape = 'd_map_xpin_letter&chld=pin_star|';
             var pin_star_color = '|ffffff';
+        }
+        
+        // if pin is invisble don't care about the other pin style related inputs 
+        if ( coordinate.invisiblepin ) {
+            pin_color = '|ffffff|000000';
+            pin_shape = 'd_map_pin_letter&chld='
         }
 
         var pin = pin_shape + ( number ) + pin_color + pin_star_color;

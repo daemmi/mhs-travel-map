@@ -530,49 +530,54 @@ mhs_tm_utilities.coordinate_handling.get_last_on_route_and_spot_coordinate_id_in
 
 mhs_tm_utilities.coordinate_handling.get_title = function ( coordinate, coordinates, route_options ) {
     var content_string = '';
-    if ( coordinate.country )
-    {
-        content_string += coordinate.country;
-    }
-    if ( coordinate.state && coordinate.country )
-    {
-        content_string += ' - ' + coordinate.state;
-    } else {
-        content_string += coordinate.state;
-    }
-    if ( coordinate.city && coordinate.country || coordinate.city && coordinate.state )
-    {
-        content_string += ' - ' + coordinate.city;
-    } else {
-        content_string += coordinate.city;
-    }
-
-    if ( coordinate.country || coordinate.state || coordinate.city ) {
-        content_string += ' - ';
-    }
     
-    if( route_options['dis_route_time_date'] !== 1 ) {
-        var coordinate_date = new Date( mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset( parseInt( coordinate.starttime ) ) * 1000 )
-            .toLocaleString( [], { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' } );
-        content_string += coordinate_date + ' - ';
-    }
-
-    if ( mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview( coordinate, coordinates ) ||
-        mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ) ) {
-        content_string += '(';
-    }
-
-    if ( mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview( coordinate, coordinates ) ) {
-        content_string += mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview( coordinate, coordinates ).string;
-        if ( mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ) ) {
-            content_string += ' | ' + mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ).string +
-                ')';
-        } else {
-            content_string += ')';
+    if( coordinate.invisiblepin ) {
+        content_string = 'invisible';
+    } else {    
+        if ( coordinate.country )
+        {
+            content_string += coordinate.country;
         }
-    } else if ( mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ) ) {
-        content_string += mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ).string +
-            ')';
+        if ( coordinate.state && coordinate.country )
+        {
+            content_string += ' - ' + coordinate.state;
+        } else {
+            content_string += coordinate.state;
+        }
+        if ( coordinate.city && coordinate.country || coordinate.city && coordinate.state )
+        {
+            content_string += ' - ' + coordinate.city;
+        } else {
+            content_string += coordinate.city;
+        }
+
+        if ( coordinate.country || coordinate.state || coordinate.city ) {
+            content_string += ' - ';
+        }
+
+        if( route_options['dis_route_time_date'] !== 1 ) {
+            var coordinate_date = new Date( mhs_tm_utilities.utilities.get_timestamp_minus_timezone_offset( parseInt( coordinate.starttime ) ) * 1000 )
+                .toLocaleString( [], { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' } );
+            content_string += coordinate_date + ' - ';
+        }
+
+        if ( mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview( coordinate, coordinates ) ||
+            mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ) ) {
+            content_string += '(';
+        }
+
+        if ( mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview( coordinate, coordinates ) ) {
+            content_string += mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview( coordinate, coordinates ).string;
+            if ( mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ) ) {
+                content_string += ' | ' + mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ).string +
+                    ')';
+            } else {
+                content_string += ')';
+            }
+        } else if ( mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ) ) {
+            content_string += mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview( coordinate, coordinates ).string +
+                ')';
+        }
     }
 
     return content_string;
@@ -1011,6 +1016,7 @@ mhs_tm_utilities.coordinate_handling.get_coordinate_waiting_overview = function 
 
 mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview = function ( coordinate, coordinates ) {
     var distance_total = 0;
+    var distance = 0;
     var coordinate_on_route = 0;
     var id_last_coordinate = 0;
 
@@ -1042,24 +1048,35 @@ mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview = function
             distance_total += coordinates[x].distance;
         }
 
-        // if reached present coordinate in array break for loop
+        // if reached present coordinate in array break for loop and check if 
+        // a invisible pin is come before
         if ( mhs_tm_utilities.utilities.is_equivalent( coordinate, coordinates[x] ) ) {
+            distance += coordinates[x].distance;
             break;
+        } else if ( coordinates[x].invisiblepin ) {
+            distance += coordinates[x].distance;
+        } else {
+            distance = 0;
         }
     }
 
+    // take the right calculated distance
+    if ( distance === 0 ) {
+        distance = coordinate.distance;
+    }
+    
     //if coordinate is last coordinate on the route return Total distance. 
     if ( mhs_tm_utilities.utilities.is_equivalent( coordinate, coordinates[id_last_coordinate] ) ) {
-        var string = 'Distance: ' + Math.round( coordinate.distance / 1000 ) + 'km | Total distance: ' +
+        var string = 'Distance to pin: ' + Math.round( distance / 1000 ) + 'km | Total distance: ' +
             Math.round( distance_total / 1000 ) + 'km';
         return { 'string': string,
-            'coordinate_distance': Math.round( coordinate.distance / 1000 ),
+            'coordinate_distance': Math.round( distance / 1000 ),
             'total_distance': Math.round( distance_total / 1000 ) 
         };
     } else {
-        var string =  'Distance: ' + Math.round( coordinate.distance / 1000 ) + 'km';
+        var string =  'Distance to pin: ' + Math.round( distance / 1000 ) + 'km';
         return { 'string': string,
-            'coordinate_distance': Math.round( coordinate.distance / 1000 ),
+            'coordinate_distance': Math.round( distance / 1000 ),
             'total_distance': Math.round( distance_total / 1000 ) 
         };
     }

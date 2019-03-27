@@ -236,9 +236,9 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			'px; margin: 0; padding: 0;"></div>';
 			$output .= '<input id="mhs-tm-gmap-search-input" class="mhs-tm-gmap-controls" style="display: none;" 
 				type="text" placeholder="Enter a location">';
-			//control button for gmaps popup window
-			$output .= '<div id="mhs-tm-gmap-show-info-0" 
-				class="mhs-tm-gmap-controls mhs-tm-gmap-controls-button">Statistics</div>';
+			$output .= '<div id="mhs-tm-invisible-pins" class="mhs-tm-gmap-draw-controls">
+                                        <input name="invisible pin" id="invisible-pins-checkbox" type="checkbox"> add invisble pins
+                                    </div>';
 			//div for gmaps popup window
 			$output .= '<div id="mhs-tm-gmap-popup-window-0" class="mhs-tm-gmap-popup-window"></div>';
 
@@ -449,7 +449,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$table_name = $wpdb->prefix . 'mhs_tm_routes ';
 
 			// static route fields
-			// !!!!!! by adding new fields also change the sanitize function sanitize_coordinate_option_array !!!!!!
+			// !!!!!! by adding new fields also change the different sanitize functions like sanitize_coordinate_option_array in class-mhs-tm-maps.php!!!!!!
 			// !!!!!! by adding new fields also change the save function routes_save php and js !!!!!!
 			$routes_fields = [ ];
 			if ( $part == 'The Route' ) {
@@ -515,6 +515,13 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 					'display'	 => 'none',
 					'fields'	 => array(
 						//!!! No _ in id !!!
+						array(
+							'type'	 => 'checkbox',
+							'label'	 => __( 'Is pin invisible?', 'mhs_tm' ),
+							'id'	 => 'invisiblepin_' . $coordinate_id,
+							'desc'	 => __( 'If checked the pin will be not visible in the map. With this function you could '
+                                                                . 'change the route line manually.', 'mhs_tm' )
+						),
 						array(
 							'type'	 => 'checkbox',
 							'label'	 => __( 'Disable snap to road?', 'mhs_tm' ),
@@ -609,6 +616,13 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 							'class'	 => 'closed coordinate',
 							'fields' => array(
 								//!!! No _ in id !!!
+                                                                array(
+                                                                        'type'	 => 'checkbox',
+                                                                        'label'	 => __( 'Is pin invisible?', 'mhs_tm' ),
+                                                                        'id'	 => 'invisiblepin_' . $coordinate_id,
+                                                                        'desc'	 => __( 'If checked the pin will be not visible in the map. With this function you could '
+                                                                                . 'change the route line manually.', 'mhs_tm' )
+                                                                ),
 								array(
 									'type'	 => 'checkbox',
 									'label'	 => __( 'Disable snap to road?', 'mhs_tm' ),
@@ -749,16 +763,16 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 
 			// save variables and sanitize 
 			// the variables are send by ajax so add it to the save routine in mhs-tm-map-edit.js
-			$coordinates			 = isset( $_POST[ 'route' ] ) ? $MHS_TM_Maps->sanitize_coordinates_array( json_decode( stripslashes( $_POST[ 'route' ] ) ) ) : [ ];
-			$path					 = isset( $_POST[ 'path' ] ) ? $MHS_TM_Maps->sanitize_path_array( json_decode( stripslashes( $_POST[ 'path' ] ) ) ) : [ ];
+			$coordinates		 = isset( $_POST[ 'route' ] ) ? $MHS_TM_Maps->sanitize_coordinates_array( json_decode( stripslashes( $_POST[ 'route' ] ) ) ) : [ ];
+			$path			 = isset( $_POST[ 'path' ] ) ? $MHS_TM_Maps->sanitize_path_array( json_decode( stripslashes( $_POST[ 'path' ] ) ) ) : [ ];
 			$name					 = isset( $_POST[ 'name' ] ) ? sanitize_text_field( $_POST[ 'name' ] ) : null;
-			$route_color			 = ( isset( $_POST[ 'route_color' ] ) && is_string( $_POST[ 'route_color' ] ) &&
+			$route_color		 = ( isset( $_POST[ 'route_color' ] ) && is_string( $_POST[ 'route_color' ] ) &&
 				$_POST[ 'route_color' ][ 0 ] == '#' ) ? sanitize_text_field( $_POST[ 'route_color' ] ) : '#000000';
 			$dis_route_snap_to_road	 = $_POST[ 'dis_route_snap_to_road' ] == 1 ? 1 : 0;
 			$dis_route_time_date	 = $_POST[ 'dis_route_time_date' ] == 1 ? 1 : 0;
-			$nonce_key				 = isset( $_POST[ 'mhs_tm_route_save_nonce' ] ) ? esc_attr( $_POST[ 'mhs_tm_route_save_nonce' ] ) : null;
-			$id						 = isset( $_GET[ 'id' ] ) ? absint( $_GET[ 'id' ] ) : null;
-			$transport_class		 = isset( $_POST[ 'transport_class' ] ) ? sanitize_text_field( $_POST[ 'transport_class' ] ) : null;
+			$nonce_key		 = isset( $_POST[ 'mhs_tm_route_save_nonce' ] ) ? esc_attr( $_POST[ 'mhs_tm_route_save_nonce' ] ) : null;
+			$id			 = isset( $_GET[ 'id' ] ) ? absint( $_GET[ 'id' ] ) : null;
+			$transport_class	 = isset( $_POST[ 'transport_class' ] ) ? sanitize_text_field( $_POST[ 'transport_class' ] ) : null;
 
 			if ( NULL != $id ) {
 				$nonce = 'mhs_tm_route_save_' . $id;
@@ -789,12 +803,12 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			}
 
 			$options = array(
-				'name'					 => $name,
-				'transport_class'		 => $transport_class,
-				'route_color'			 => $route_color,
+				'name'			 => $name,
+				'transport_class'	 => $transport_class,
+				'route_color'		 => $route_color,
 				'dis_route_snap_to_road' => $dis_route_snap_to_road,
 				'dis_route_time_date'    => $dis_route_time_date,
-				'path'					 => $path,
+				'path'			 => $path,
 			);
 
 			$options	 = wp_json_encode( $options );

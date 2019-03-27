@@ -105,6 +105,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
     mhs_tm_map.bounds[map_canvas_id] = new google.maps.LatLngBounds();
     mhs_tm_map.bounds_map[map_canvas_id] = new google.maps.LatLngBounds();
     var mark_counter = 0;
+    var note_div_mark_counter = 0;
     mhs_tm_map.marker[map_canvas_id] = [];
     mhs_tm_map.marker_count[map_canvas_id] = 0;
     var last_spot_id  = 0;
@@ -134,6 +135,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
         last_spot_id = 0;
         start_is_set = 0;
         mark_counter = 0;
+        note_div_mark_counter = 0;
         mhs_tm_map.marker[map_canvas_id][i] = [];
         for ( var j = 0; j < mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'].length; ++j ) {
             var lat = parseFloat( mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j].latitude );
@@ -156,242 +158,247 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
                 mhs_tm_map.bounds[map_canvas_id].extend( myLatlng );
             }
 
-            // Get the icon for the marker
-            // check if the coordinate is part of the route then set pin and set flag so that no other coordinate could get start pin
-            if ( start_is_set === 0 && mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j].ispartofaroute ) {
-                start_is_set = 1;
-                pin = 'https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=S|7f7f7f|ffffff';
-            } else if ( mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j].ispartofaroute ) {
-                // if there is a new coordinate on the route change pin of old destination
-                if ( last_spot_id != 0 && last_mark_id != 0 && mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][last_spot_id].ishitchhikingspot ) {
-                    var pinIcon = {
-                                url: mhs_tm_map.plugin_dir + '/img/Pin-Thumb.png'
-                              };
+            // if the coordinate is invisible do nothing
+            // just count up the marker ID to count also the invisible markers
+            if ( !mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j].invisiblepin ) {
+                // Get the icon for the marker
+                // check if the coordinate is part of the route then set pin and set flag so that no other coordinate could get start pin
+                if ( start_is_set === 0 && mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j].ispartofaroute ) {
+                    start_is_set = 1;
+                    pin = 'https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=S|7f7f7f|ffffff';
+                } else if ( mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j].ispartofaroute ) {
+                    // if there is a new coordinate on the route change pin of old destination
+                    if ( last_spot_id != 0 && last_mark_id != 0 && mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][last_spot_id].ishitchhikingspot ) {
+                        var pinIcon = {
+                                    url: mhs_tm_map.plugin_dir + '/img/Pin-Thumb.png'
+                                  };
 
-                    mhs_tm_map.marker[map_canvas_id][last_route_id][last_mark_id].setIcon( pinIcon );
-                } else if ( last_spot_id != 0 && last_mark_id != 0 ) {
-                    var pinIcon = {
-                                url: mhs_tm_map.plugin_dir + '/img/Pin-Star.png'
-                              };
+                        mhs_tm_map.marker[map_canvas_id][last_route_id][last_mark_id].setIcon( pinIcon );
+                    } else if ( last_spot_id != 0 && last_mark_id != 0 ) {
+                        var pinIcon = {
+                                    url: mhs_tm_map.plugin_dir + '/img/Pin-Star.png'
+                                  };
 
-                    mhs_tm_map.marker[map_canvas_id][last_route_id][last_mark_id].setIcon( pinIcon );
-                }
-                // save the id, if the next coordinate is spot again change pin of this one
-                last_route_id = i;
-                last_mark_id = mark_counter;
-                last_spot_id = j;
-                pin = 'https://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=flag|000000';
-            } else if ( !mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j].ishitchhikingspot ) {
-                pin = mhs_tm_map.plugin_dir + '/img/Pin-Star.png';
-            } 
+                        mhs_tm_map.marker[map_canvas_id][last_route_id][last_mark_id].setIcon( pinIcon );
+                    }
+                    // save the id, if the next coordinate is spot again change pin of this one
+                    last_route_id = i;
+                    last_mark_id = mark_counter;
+                    last_spot_id = j;
+                    pin = 'https://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=flag|000000';
+                } else if ( !mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j].ishitchhikingspot ) {
+                    pin = mhs_tm_map.plugin_dir + '/img/Pin-Star.png';
+                } 
 
-            var pinIcon = {
-                url: pin
-            };
-            
-            // New Marker mhs_tm_map.marker[Map_id][Route_id][Marker_id]
-            mhs_tm_map.marker[map_canvas_id][i][mark_counter] = new google.maps.Marker( {
-                position: myLatlng,
-                map: mhs_tm_map.map[map_canvas_id],
-                title: mhs_tm_utilities.coordinate_handling.get_title(
-                    mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j],
-                    mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'],
-                    mhs_tm_map.coordinates[map_canvas_id][i]['options'] ),
-                id: map_canvas_id + '_' + i + '_' + mark_counter,
-                id_route: i,
-                id_marker: mark_counter,
-                id_map: map_canvas_id,
-                icon: pinIcon,
-                note_div_id: {
-                    route_id: mhs_tm_map.coordinates[map_canvas_id][i].options.id,
-                    marker_id: mark_counter
-                }
-            } );
-            
-            mhs_tm_map.marker[map_canvas_id][i][mark_counter].content_string =
-                mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
-                    mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j],
-                    mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'],
-                    mhs_tm_map.coordinates[map_canvas_id][i]['options'] );
-            
-            //click on a pin
-            mhs_tm_map.marker[map_canvas_id][i][mark_counter].addListener('click', function() {
-                var marker = this;
-                var load_next = false;
-                var load_previous = false;
-                var next_active_coordinate = {};
-                next_active_coordinate.route_id = marker.id_route;
-                next_active_coordinate.coordinate_id = marker.id_marker;
-                var previous_active_coordinate = {};
-                previous_active_coordinate.route_id = marker.id_route;
-                previous_active_coordinate.coordinate_id = marker.id_marker;
-                
-                // check if it alreadz has been loaded before or load via ajax note content 
-                if( !( marker.note_div_id.route_id + '-' + marker.note_div_id.marker_id in mhs_tm_map.marker_notes[map_canvas_id] ) ) {
-                    // load via ajax note content 
-                    jQuery( function ( $ ) {
-                        $.post(
-                            mhs_tm_map.ajax_url + '?action=get_coordinate_note',
-                            {
-                                route_id: marker.note_div_id.route_id,
-                                marker_id: marker.note_div_id.marker_id,
-                            },
-                            function ( response ) {
-                                $( '#mhs-tm-gmap-popup-window-' + map_canvas_id ).
-                                    find( '.mhs-tm-gmap-popup-window-content-before' ).
-                                    html( response );
+                var pinIcon = {
+                    url: pin
+                };
 
-                                //Save in marker_note object
-                               mhs_tm_map.marker_notes[map_canvas_id][marker.note_div_id.route_id + '-' + marker.note_div_id.marker_id] =
-                                       response;
-                               
-                               //load next notes
-                               load_next_notes()
-                               
-                                setTimeout( function () {
-                                    mhs_tm_map.map[map_canvas_id].popup_window.hide_loading( 200 );
-                                    mhs_tm_map.map[map_canvas_id].popup_window.show( marker.content_string );
-                                }, 1500);
-                            },
-                            "json"
-                        );
-                    } );
-                } else {
-                    jQuery( function ( $ ) {
-                        $( '#mhs-tm-gmap-popup-window-' + map_canvas_id ).
-                            find( '.mhs-tm-gmap-popup-window-content-before' ).
-                            html( mhs_tm_map.marker_notes[map_canvas_id][marker.note_div_id.route_id + '-' + marker.note_div_id.marker_id] );
-                        
-                        //load next notes
-                        load_next_notes()
+                // New Marker mhs_tm_map.marker[Map_id][Route_id][Marker_id]
+                mhs_tm_map.marker[map_canvas_id][i][mark_counter] = new google.maps.Marker( {
+                    position: myLatlng,
+                    map: mhs_tm_map.map[map_canvas_id],
+                    title: mhs_tm_utilities.coordinate_handling.get_title(
+                        mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j],
+                        mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'],
+                        mhs_tm_map.coordinates[map_canvas_id][i]['options'] ),
+                    id: map_canvas_id + '_' + i + '_' + mark_counter,
+                    id_route: i,
+                    id_marker: mark_counter,
+                    id_map: map_canvas_id,
+                    icon: pinIcon,
+                    note_div_id: {
+                        route_id: mhs_tm_map.coordinates[map_canvas_id][i].options.id,
+                        marker_id: note_div_mark_counter
+                    }
+                } );
 
-                        setTimeout( function () {
-                            mhs_tm_map.map[map_canvas_id].popup_window.hide_loading( 200 );
-                            mhs_tm_map.map[map_canvas_id].popup_window.show( marker.content_string );
-                        }, 1500);
-                    } );
-                }
-                
-                //Function to load more notes before and after the actual one
-                function load_next_notes() {
-                    for ( var y = 0; y < 4; y++ ) {
-                        load_next = false;
-                        //calculate which id are for the nextcoordinate
-                        if( next_active_coordinate.coordinate_id < mhs_tm_map.marker[map_canvas_id][next_active_coordinate.route_id].length - 1 ) {
-                            next_active_coordinate.coordinate_id = next_active_coordinate.coordinate_id + 1;
-                            load_next = true;
-                        } else if( next_active_coordinate.route_id < mhs_tm_map.marker[map_canvas_id].length - 1 ) {
-                            next_active_coordinate.route_id = next_active_coordinate.route_id + 1;
-                            next_active_coordinate.coordinate_id = 0;
-                            load_next = true;
-                        }
+                mhs_tm_map.marker[map_canvas_id][i][mark_counter].content_string =
+                    mhs_tm_utilities.coordinate_handling.get_contentstring_of_coordinate(
+                        mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j],
+                        mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'],
+                        mhs_tm_map.coordinates[map_canvas_id][i]['options'] );
 
-                        var next_marker = mhs_tm_map.marker[map_canvas_id][next_active_coordinate.route_id][next_active_coordinate.coordinate_id];
+                //click on a pin
+                mhs_tm_map.marker[map_canvas_id][i][mark_counter].addListener('click', function() {
+                    var marker = this;
+                    var load_next = false;
+                    var load_previous = false;
+                    var next_active_coordinate = {};
+                    next_active_coordinate.route_id = marker.id_route;
+                    next_active_coordinate.coordinate_id = marker.id_marker;
+                    var previous_active_coordinate = {};
+                    previous_active_coordinate.route_id = marker.id_route;
+                    previous_active_coordinate.coordinate_id = marker.id_marker;
 
-                        // check if it alreadz has been loaded before or load via ajax note content 
-                        if( load_next && !( next_marker.note_div_id.route_id + '-' + next_marker.note_div_id.marker_id in mhs_tm_map.marker_notes[map_canvas_id] ) ) {
-                            jQuery( function ( $ ) {
-                                var route_id = next_marker.note_div_id.route_id;
-                                var marker_id = next_marker.note_div_id.marker_id;
-                                $.post(
+                    // check if it alreadz has been loaded before or load via ajax note content 
+                    if( !( marker.note_div_id.route_id + '-' + marker.note_div_id.marker_id in mhs_tm_map.marker_notes[map_canvas_id] ) ) {
+                        // load via ajax note content 
+                        jQuery( function ( $ ) {
+                            $.post(
+                                mhs_tm_map.ajax_url + '?action=get_coordinate_note',
+                                {
+                                    route_id: marker.note_div_id.route_id,
+                                    marker_id: marker.note_div_id.marker_id,
+                                },
+                                function ( response ) {
+                                    $( '#mhs-tm-gmap-popup-window-' + map_canvas_id ).
+                                        find( '.mhs-tm-gmap-popup-window-content-before' ).
+                                        html( response );
 
-                                    mhs_tm_map.ajax_url + '?action=get_coordinate_note',
-                                    {
-                                        route_id: next_marker.note_div_id.route_id,
-                                        marker_id: next_marker.note_div_id.marker_id,
-                                    },
-                                    function ( response ) { 
-                                        //Save in marker_note object
-                                       mhs_tm_map.marker_notes[map_canvas_id][route_id + '-' + marker_id] =
-                                               response; 
-                                    },
-                                    "json"
-                                );
-                            } );
-                        }
+                                    //Save in marker_note object
+                                   mhs_tm_map.marker_notes[map_canvas_id][marker.note_div_id.route_id + '-' + marker.note_div_id.marker_id] =
+                                           response;
 
-                        load_previous = false;
-                        //calculate which id are for the previous coordinate
-                        if( previous_active_coordinate.route_id === 0 ) {
-                            if( previous_active_coordinate.coordinate_id !== 0 ) {
+                                   //load next notes
+                                   load_next_notes()
+
+                                    setTimeout( function () {
+                                        mhs_tm_map.map[map_canvas_id].popup_window.hide_loading( 200 );
+                                        mhs_tm_map.map[map_canvas_id].popup_window.show( marker.content_string );
+                                    }, 1500);
+                                },
+                                "json"
+                            );
+                        } );
+                    } else {
+                        jQuery( function ( $ ) {
+                            $( '#mhs-tm-gmap-popup-window-' + map_canvas_id ).
+                                find( '.mhs-tm-gmap-popup-window-content-before' ).
+                                html( mhs_tm_map.marker_notes[map_canvas_id][marker.note_div_id.route_id + '-' + marker.note_div_id.marker_id] );
+
+                            //load next notes
+                            load_next_notes()
+
+                            setTimeout( function () {
+                                mhs_tm_map.map[map_canvas_id].popup_window.hide_loading( 200 );
+                                mhs_tm_map.map[map_canvas_id].popup_window.show( marker.content_string );
+                            }, 1500);
+                        } );
+                    }
+
+                    //Function to load more notes before and after the actual one
+                    function load_next_notes() {
+                        for ( var y = 0; y < 4; y++ ) {
+                            load_next = false;
+                            //calculate which id are for the nextcoordinate
+                            if( next_active_coordinate.coordinate_id < mhs_tm_map.marker[map_canvas_id][next_active_coordinate.route_id].length - 1 ) {
+                                next_active_coordinate.coordinate_id = next_active_coordinate.coordinate_id + 1;
+                                load_next = true;
+                            } else if( next_active_coordinate.route_id < mhs_tm_map.marker[map_canvas_id].length - 1 ) {
+                                next_active_coordinate.route_id = next_active_coordinate.route_id + 1;
+                                next_active_coordinate.coordinate_id = 0;
+                                load_next = true;
+                            }
+
+                            var next_marker = mhs_tm_map.marker[map_canvas_id][next_active_coordinate.route_id][next_active_coordinate.coordinate_id];
+
+                            // check if it alreadz has been loaded before or load via ajax note content 
+                            if( load_next && !( next_marker.note_div_id.route_id + '-' + next_marker.note_div_id.marker_id in mhs_tm_map.marker_notes[map_canvas_id] ) ) {
+                                jQuery( function ( $ ) {
+                                    var route_id = next_marker.note_div_id.route_id;
+                                    var marker_id = next_marker.note_div_id.marker_id;
+                                    $.post(
+
+                                        mhs_tm_map.ajax_url + '?action=get_coordinate_note',
+                                        {
+                                            route_id: next_marker.note_div_id.route_id,
+                                            marker_id: next_marker.note_div_id.marker_id,
+                                        },
+                                        function ( response ) { 
+                                            //Save in marker_note object
+                                           mhs_tm_map.marker_notes[map_canvas_id][route_id + '-' + marker_id] =
+                                                   response; 
+                                        },
+                                        "json"
+                                    );
+                                } );
+                            }
+
+                            load_previous = false;
+                            //calculate which id are for the previous coordinate
+                            if( previous_active_coordinate.route_id === 0 ) {
+                                if( previous_active_coordinate.coordinate_id !== 0 ) {
+                                    previous_active_coordinate.coordinate_id = previous_active_coordinate.coordinate_id - 1;
+                                    load_previous = true;
+                                }
+                            } else if( previous_active_coordinate.route_id !== 0 && previous_active_coordinate.coordinate_id !== 0 ) {
                                 previous_active_coordinate.coordinate_id = previous_active_coordinate.coordinate_id - 1;
                                 load_previous = true;
+                            } else if( previous_active_coordinate.route_id !== 0 && previous_active_coordinate.coordinate_id === 0 ) {
+                                previous_active_coordinate.route_id = previous_active_coordinate.route_id - 1;       
+                                previous_active_coordinate.coordinate_id = mhs_tm_map.marker[map_canvas_id][previous_active_coordinate.route_id].length - 1;
+                                load_previous = true;
                             }
-                        } else if( previous_active_coordinate.route_id !== 0 && previous_active_coordinate.coordinate_id !== 0 ) {
-                            previous_active_coordinate.coordinate_id = previous_active_coordinate.coordinate_id - 1;
-                            load_previous = true;
-                        } else if( previous_active_coordinate.route_id !== 0 && previous_active_coordinate.coordinate_id === 0 ) {
-                            previous_active_coordinate.route_id = previous_active_coordinate.route_id - 1;       
-                            previous_active_coordinate.coordinate_id = mhs_tm_map.marker[map_canvas_id][previous_active_coordinate.route_id].length - 1;
-                            load_previous = true;
-                        }
 
-                        var previous_marker = mhs_tm_map.marker[map_canvas_id][previous_active_coordinate.route_id][previous_active_coordinate.coordinate_id];
+                            var previous_marker = mhs_tm_map.marker[map_canvas_id][previous_active_coordinate.route_id][previous_active_coordinate.coordinate_id];
 
-                        // check if it alreadz has been loaded before or load via ajax note content 
-                        if( load_previous && !( previous_marker.note_div_id.route_id + '-' + previous_marker.note_div_id.marker_id in mhs_tm_map.marker_notes[map_canvas_id] ) ) {
-                            jQuery( function ( $ ) {
-                                var route_id = previous_marker.note_div_id.route_id;
-                                var marker_id = previous_marker.note_div_id.marker_id;
-                                $.post(
+                            // check if it alreadz has been loaded before or load via ajax note content 
+                            if( load_previous && !( previous_marker.note_div_id.route_id + '-' + previous_marker.note_div_id.marker_id in mhs_tm_map.marker_notes[map_canvas_id] ) ) {
+                                jQuery( function ( $ ) {
+                                    var route_id = previous_marker.note_div_id.route_id;
+                                    var marker_id = previous_marker.note_div_id.marker_id;
+                                    $.post(
 
-                                    mhs_tm_map.ajax_url + '?action=get_coordinate_note',
-                                    {
-                                        route_id: previous_marker.note_div_id.route_id,
-                                        marker_id: previous_marker.note_div_id.marker_id,
-                                    },
-                                    function ( response ) { 
-                                        //Save in marker_note object
-                                       mhs_tm_map.marker_notes[map_canvas_id][route_id + '-' + marker_id] =
-                                               response; 
-                                    },
-                                    "json"
-                                );
-                            } );
-                        }
-                    };
-                }
-                
-                // save the aktiv pin to know which is the previous and next pin
-                mhs_tm_map.active_coordinate[map_canvas_id].route_id = marker.id_route;
-                mhs_tm_map.active_coordinate[map_canvas_id].coordinate_id = marker.id_marker;
-                
-                mhs_tm_map.set_pop_up_control( marker );
-                                          
-                mhs_tm_map.map[map_canvas_id].popup_window.show_loading( 200 );
-                mhs_tm_map.no_mousover_out[map_canvas_id] = true;
-                mhs_tm_map.set_opacity( mhs_tm_map.marker, mhs_tm_map.route_path, map_canvas_id, 
-                    'single_marker', this );
-                //Set ZIndex for this marker to the highest  single_marker
-                this.setZIndex( google.maps.Marker.MAX_ZINDEX + 2 );
-                
-                // set bounds of map tp path
-                mhs_tm_map.set_bounds_via_marker( map_canvas_id, 
-                    mhs_tm_map.marker[map_canvas_id][marker.id_route], 
-                    mhs_tm_map.map[map_canvas_id] );
-            } );
-            
-            mhs_tm_map.marker[map_canvas_id][i][mark_counter].addListener('mouseover', function() {
-                if ( !mhs_tm_map.no_mousover_out[map_canvas_id] ) {
+                                        mhs_tm_map.ajax_url + '?action=get_coordinate_note',
+                                        {
+                                            route_id: previous_marker.note_div_id.route_id,
+                                            marker_id: previous_marker.note_div_id.marker_id,
+                                        },
+                                        function ( response ) { 
+                                            //Save in marker_note object
+                                           mhs_tm_map.marker_notes[map_canvas_id][route_id + '-' + marker_id] =
+                                                   response; 
+                                        },
+                                        "json"
+                                    );
+                                } );
+                            }
+                        };
+                    }
+
+                    // save the aktiv pin to know which is the previous and next pin
+                    mhs_tm_map.active_coordinate[map_canvas_id].route_id = marker.id_route;
+                    mhs_tm_map.active_coordinate[map_canvas_id].coordinate_id = marker.id_marker;
+
+                    mhs_tm_map.set_pop_up_control( marker );
+
+                    mhs_tm_map.map[map_canvas_id].popup_window.show_loading( 200 );
+                    mhs_tm_map.no_mousover_out[map_canvas_id] = true;
                     mhs_tm_map.set_opacity( mhs_tm_map.marker, mhs_tm_map.route_path, map_canvas_id, 
-                        'marker', this );
-                }
-                //Set ZIndex for this marker to the highest
-                this.setZIndex( google.maps.Marker.MAX_ZINDEX + 2 );
-            } );
-            
-            mhs_tm_map.marker[map_canvas_id][i][mark_counter].addListener( 'mouseout', function () {
-                if ( !mhs_tm_map.no_mousover_out[map_canvas_id] ) {
-                    mhs_tm_map.set_full_opacity( mhs_tm_map.marker[map_canvas_id],
-                        mhs_tm_map.route_path[map_canvas_id] );
-                }
-            } );
+                        'single_marker', this );
+                    //Set ZIndex for this marker to the highest  single_marker
+                    this.setZIndex( google.maps.Marker.MAX_ZINDEX + 2 );
 
-            mhs_tm_map.map[map_canvas_id].fitBounds( mhs_tm_map.bounds[map_canvas_id] );
-            mhs_tm_map.map[map_canvas_id].panToBounds( mhs_tm_map.bounds[map_canvas_id] );
-            
-            mark_counter++;
-            mhs_tm_map.marker_count[map_canvas_id]++;
+                    // set bounds of map tp path
+                    mhs_tm_map.set_bounds_via_marker( map_canvas_id, 
+                        mhs_tm_map.marker[map_canvas_id][marker.id_route], 
+                        mhs_tm_map.map[map_canvas_id] );
+                } );
+
+                mhs_tm_map.marker[map_canvas_id][i][mark_counter].addListener('mouseover', function() {
+                    if ( !mhs_tm_map.no_mousover_out[map_canvas_id] ) {
+                        mhs_tm_map.set_opacity( mhs_tm_map.marker, mhs_tm_map.route_path, map_canvas_id, 
+                            'marker', this );
+                    }
+                    //Set ZIndex for this marker to the highest
+                    this.setZIndex( google.maps.Marker.MAX_ZINDEX + 2 );
+                } );
+
+                mhs_tm_map.marker[map_canvas_id][i][mark_counter].addListener( 'mouseout', function () {
+                    if ( !mhs_tm_map.no_mousover_out[map_canvas_id] ) {
+                        mhs_tm_map.set_full_opacity( mhs_tm_map.marker[map_canvas_id],
+                            mhs_tm_map.route_path[map_canvas_id] );
+                    }
+                } );
+
+                mhs_tm_map.map[map_canvas_id].fitBounds( mhs_tm_map.bounds[map_canvas_id] );
+                mhs_tm_map.map[map_canvas_id].panToBounds( mhs_tm_map.bounds[map_canvas_id] );
+                
+                mhs_tm_map.marker_count[map_canvas_id]++;
+                mark_counter++;
+            }
+            note_div_mark_counter++;
         }
         
         var lines = [];
