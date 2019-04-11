@@ -237,7 +237,9 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$output .= '<input id="mhs-tm-gmap-search-input" class="mhs-tm-gmap-controls" style="display: none;" 
 				type="text" placeholder="Enter a location">';
 			$output .= '<div id="mhs-tm-invisible-pins" class="mhs-tm-gmap-draw-controls">
-                                        <input name="invisible pin" id="invisible-pins-checkbox" type="checkbox"> add invisble pins
+                                        <input name="invisible pin" id="invisible-pins-checkbox" type="checkbox"> add invisble pins <br>
+                                        <input name="route pin" id="partofaroute-pins-checkbox" type="checkbox"> add on the route pins <br>
+                                        <input name="hitchhiking pin" id="itchhikingspot-pins-checkbox" type="checkbox"> add hitchhiking pins
                                     </div>';
 			//div for gmaps popup window
 			$output .= '<div id="mhs-tm-gmap-popup-window-0" class="mhs-tm-gmap-popup-window"></div>';

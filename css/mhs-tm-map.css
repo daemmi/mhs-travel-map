@@ -37,7 +37,7 @@
     display: none;
     direction: ltr;
     overflow: hidden;
-    text-align: center;
+    text-align: left;
     position: relative;
     background-color: rgb(255, 255, 255);
     padding: 4px 4px;

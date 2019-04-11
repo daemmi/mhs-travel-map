@@ -29,6 +29,15 @@ jQuery( function ( $ ) {
         }
     } );    
     
+    // check checkboxes for drawring related to settings
+    if( settings['new_coordinate_is_hitchhiking_spot'] ) {
+        $( '#itchhikingspot-pins-checkbox' ).prop('checked', true);
+    }
+    
+    if( settings['new_coordinate_part_of_the_road'] ) {
+        $( '#partofaroute-pins-checkbox' ).prop('checked', true);
+    }
+    
     // change coordinate header name if coordinate is hidden
     $( '#mhs_tm_form_1' ).find( '.coordinate' ).each( function ( index ) {
         var id = index + 1;
@@ -585,6 +594,7 @@ jQuery( function ( $ ) {
             center: { lat: coord_center_lat, lng: coord_center_lng },
             zoom: 5,
             fullscreenControl: true,
+            scaleControl: true,
             mapTypeControlOptions: {
                 style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
                 position: google.maps.ControlPosition.LEFT_TOP
@@ -599,11 +609,26 @@ jQuery( function ( $ ) {
             $( '.mhs_tm_form' ).show();
             //show the gmap search box
             $( '#mhs-tm-gmap-search-input' ).show();
-            //show the gmap checkbox
-            $( '#mhs-tm-invisible-pins' ).show();
+            
+            if( $( '#mhs_tm_map_canvas_' + map_canvas_id ).height() > 350 ) {
+                //show the gmap checkbox
+                $( '#mhs-tm-invisible-pins' ).show();
+            }
+            
             //enable sortable, otherwise touch punch doesnt work with sortable
             $( '.mhs_tm_normal_sortables' ).sortable( 'enable' );
             $( '.mhs_tm_loading' ).slideUp( 1500 );
+        } );
+        
+        google.maps.event.addListener( map[map_canvas_id], 'bounds_changed', function () {
+            // hide options in gmaps bz its size
+            if( $( '#mhs_tm_map_canvas_' + map_canvas_id ).children().eq(0).height() > 350 ) {
+                //show the gmap checkbox
+                $( '#mhs-tm-invisible-pins' ).show();
+            } else if( $( '#mhs_tm_map_canvas_' + map_canvas_id ).children().eq(0).height() <= 350 ) {
+                //hide the gmap checkbox
+                $( '#mhs-tm-invisible-pins' ).hide();
+            }
         } );
 
         //Make ne popup window for the map
@@ -618,7 +643,7 @@ jQuery( function ( $ ) {
 
         //set a search box to the map
         var search_input = document.getElementById( 'mhs-tm-gmap-search-input' );
-        //set a checkbox to the map
+        //set checkboxes to the map
         var invisible_pins = document.getElementById( 'mhs-tm-invisible-pins' );
 
         map[map_canvas_id].controls[google.maps.ControlPosition.TOP_LEFT].push( search_input );
@@ -887,12 +912,14 @@ jQuery( function ( $ ) {
 
         $( '#mhs_tm_form_1 .mhs_tm_normal_sortables' ).accordion( 'refresh' );
 
-        if ( settings['new_coordinate_part_of_the_road'] ) {
+        // settings['new_coordinate_part_of_the_road']
+        if ( $( '#partofaroute-pins-checkbox' ).prop( "checked" ) ) {
             $( '#ispartofaroute_' + coordinate_id ).prop( "checked", true );
             coordinates[map_canvas_id]['coordinates'][coordinate_id - 1]['ispartofaroute'] = 1;
         }
 
-        if ( settings['new_coordinate_is_hitchhiking_spot'] ) {
+        //settings['new_coordinate_is_hitchhiking_spot']
+        if ( $( '#itchhikingspot-pins-checkbox' ).prop( "checked" ) ) {
             $( '#ishitchhikingspot_' + coordinate_id ).prop( "checked", true );
             coordinates[map_canvas_id]['coordinates'][coordinate_id - 1]['ishitchhikingspot'] = 1;
         }

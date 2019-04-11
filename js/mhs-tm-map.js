@@ -58,7 +58,8 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
     var mapOptions = {
         center: { lat: mhs_tm_map.coord_center_lat[map_canvas_id], lng: mhs_tm_map.coord_center_lng[map_canvas_id] },
         zoom: 5,
-        fullscreenControl: true
+        fullscreenControl: true,
+        scaleControl: true
     };
     mhs_tm_map.route_path[map_canvas_id] = [];
     mhs_tm_map.active_coordinate[map_canvas_id] = [];

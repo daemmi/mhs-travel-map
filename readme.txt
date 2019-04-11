@@ -5,7 +5,7 @@ Tags: map, google maps, hitchhike, hitchhiking, travel, backpacking, traveling
 Tested up to: 5.0.3
 Requires at least: 3.8.0
 Requires PHP: 5.2.0
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPL3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -59,6 +59,12 @@ This section describes how to install and use the plugin.
 == Frequently Asked Questions ==
 
 == Changelog ==
+
+= 1.4.0 (2019-04-11) =
+- added, browse through coordinates function is faster
+- added, possibility to add invisible pins to change the snap to road as you need it
+- changed, some styles
+- fixed, minor bugs
 
 = 1.3.0 (2018-11-XX) =
 - added, browse through the coordinates in front end

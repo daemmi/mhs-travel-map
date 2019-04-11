@@ -642,6 +642,7 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
                 waited_total_min[transport_class] = 0;
                 total_distance[transport_class] = 0;
             } 
+            
             //Make statistics for each transport class
             if( typeof start_date['all'] === 'undefined' || 
                 routes[x].coordinates[0].starttime < start_date['all'] ) {
@@ -771,8 +772,8 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
             journey_string[item] += ( mhs_tm_utilities.utilities.get_days_from_hours( journey_total_h[item] ).days ) + 'd ';
         }
         if( journey_total_h[item] > 0) {
-            journey_string[item] += (  mhs_tm_utilities.utilities.get_days_from_hours( journey_total_h[item] ).hours + 
-                mhs_tm_utilities.utilities.get_hours_from_minutes( journey_total_min[item] ).hours ) + 'h ';
+            journey_string[item] += mhs_tm_utilities.utilities.get_days_from_hours( journey_total_h[item] + 
+                    mhs_tm_utilities.utilities.get_hours_from_minutes( journey_total_min[item] ).hours ).hours + 'h ';
         }
         if( journey_total_h[item] > 0 && journey_total_min[item] > 0 || journey_total_h[item] === 0 ) {
             journey_string[item] += mhs_tm_utilities.utilities.get_hours_from_minutes( journey_total_min[item] ).minutes + 'min';
@@ -784,8 +785,8 @@ mhs_tm_utilities.coordinate_handling.get_contentstring_of_map = function ( route
                 waited_string[item] += ( mhs_tm_utilities.utilities.get_days_from_hours( waited_total_h[item] ).days ) + 'd ';
             }
             if( waited_total_h[item] > 0 ) {
-                waited_string[item] += (  mhs_tm_utilities.utilities.get_days_from_hours( waited_total_h[item] ).hours + 
-                    mhs_tm_utilities.utilities.get_hours_from_minutes( waited_total_min[item] ).hours ) + 'h ';
+                waited_string[item] += mhs_tm_utilities.utilities.get_days_from_hours( waited_total_h[item] + 
+                        mhs_tm_utilities.utilities.get_hours_from_minutes( waited_total_min[item] ).hours ).hours + 'h ';
             }   
             if( waited_total_h[item] > 0 && waited_total_min[item] > 0 || waited_total_h[item] === 0 ) {
                 waited_string[item] += mhs_tm_utilities.utilities.get_hours_from_minutes( waited_total_min[item] ).minutes + 'min';
