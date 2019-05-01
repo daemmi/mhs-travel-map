@@ -222,7 +222,11 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 			'WHERE active = 1 AND id = %d ORDER BY id DESC', (int) $map_id
 			) );
 
-			return json_decode( $route_ids, true );
+                        if( json_decode( $route_ids, true ) != null ) {
+                            return json_decode( $route_ids, true );                            
+                        } else {
+                            return array();
+                        }
 		}
 
 		/**

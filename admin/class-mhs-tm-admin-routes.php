@@ -74,75 +74,75 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 		 * @access private
 		 */
 		private function routes_menu( $messages = NULL ) {
-			global $wpdb, $MHS_TM_Admin_Settings, $MHS_TM_Utilities;
-			$table_name = $wpdb->prefix . 'mhs_tm_routes';
+                    global $wpdb, $MHS_TM_Admin_Settings, $MHS_TM_Utilities;
+                    $table_name = $wpdb->prefix . 'mhs_tm_routes';
 
-			$url	 = 'admin.php?page=MHS_TM-routes';
-			$height	 = 10;
+                    $url	 = 'admin.php?page=MHS_TM-routes';
+                    $height	 = 10;
 
-			$adminpage = new MHS_TM_Admin_Page( array(
-				'title'		 => __( 'Overview Routes', 'mhs_tm' ),
-				'messages'	 => $messages,
-				'url'		 => $url
-			) );
+                    $adminpage = new MHS_TM_Admin_Page( array(
+                            'title'		 => __( 'Overview Routes', 'mhs_tm' ),
+                            'messages'	 => $messages,
+                            'url'		 => $url
+                    ) );
 
-			$button = '<form method="post" action="' . $url . '&todo=new">' .
-			'<input type="submit" style="margin-right: 6px;" class="mhs_tm_prim_button button" value="+ ' . __( 'add new route', 'mhs_tm' ) . '" />' .
-			'</form>';
+                    $button = '<form method="post" action="' . $url . '&todo=new">' .
+                    '<input type="submit" style="margin-right: 6px;" class="mhs_tm_prim_button button" value="+ ' . __( 'add new route', 'mhs_tm' ) . '" />' .
+                    '</form>';
 
-			$button2 = '<form method="post" action="' . $url . '&todo=import">' .
-			'<input type="submit" class="mhs_tm_prim_button button" value="+ ' . __( 'import new route(s)', 'mhs_tm' ) . '" />' .
-			'</form>';
+                    $button2 = '<form method="post" action="' . $url . '&todo=import">' .
+                    '<input type="submit" class="mhs_tm_prim_button button" value="+ ' . __( 'import new route(s)', 'mhs_tm' ) . '" />' .
+                    '</form>';
 
-			// create table class="mhs_tm_button-primary"
-			//Create an instance of our package class...
-			$ListTable = new List_Table_Routes();
-			//Fetch, prepare, sort, and filter our data...
-			$ListTable->prepare_items();
+                    // create table class="mhs_tm_button-primary"
+                    //Create an instance of our package class...
+                    $ListTable = new List_Table_Routes();
+                    //Fetch, prepare, sort, and filter our data...
+                    $ListTable->prepare_items();
 
-			echo $adminpage->top();
-			echo '<br />' . $button . $button2 . '<br /> <br /> ' .
-			'<!-- Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions -->
-                     <form id="list_table" method="get">
-                     <!-- For plugins, we also need to ensure that the form posts back to our current page -->
-                     <input type="hidden" name="page" value="' . esc_attr( $_REQUEST[ 'page' ] ) . '" />
-                     <!-- Now we can render the completed list table -->';
+                    echo $adminpage->top();
+                    echo '<br />' . $button . $button2 . '<br /> <br /> ' .
+                    '<!-- Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions -->
+                    <form id="list_table" method="get">
+                    <!-- For plugins, we also need to ensure that the form posts back to our current page -->
+                    <input type="hidden" name="page" value="' . esc_attr( $_REQUEST[ 'page' ] ) . '" />
+                    <!-- Now we can render the completed list table -->';
 //                echo $ListTable->search_box( 'search', 'search_id' );
-			echo $ListTable->display();
-			echo '</form>' .
-			'<br />' . $button .
-			$adminpage->bottom();
+                    echo $ListTable->display();
+                    echo '</form>' .
+                    '<br />' . $button .
+                    $adminpage->bottom();
 
-			echo '<div style="display: none;" id="mhs_tm_dialog_info" title="Info" >'
-			. '<div class="mhs_tm-map" id="mhs_tm_map_canvas_0" style="height: ' . esc_attr( $height ) . 'px; margin-right: auto ; margin-left: auto ; padding: 0;"></div>'
-			. '</div>';
+                    echo '<div style="display: none;" id="mhs_tm_dialog_info" title="Info" >'
+                    . '<div class="mhs_tm-map" id="mhs_tm_map_canvas_0" style="height: ' . esc_attr( $height ) . 'px; margin-right: auto ; margin-left: auto ; padding: 0;"></div>'
+                    . '</div>';
 
-			$key = $MHS_TM_Utilities->get_gmaps_api_key();
+                    $key = $MHS_TM_Utilities->get_gmaps_api_key();
 
-			wp_register_script( 'googlemap', 'https://maps.googleapis.com/maps/api/js?key=' . $key, true );
-			wp_enqueue_script( 'googlemap' );
+                    wp_register_script( 'googlemap', 'https://maps.googleapis.com/maps/api/js?key=' . $key, true );
+                    wp_enqueue_script( 'googlemap' );
 
-			$routes = $wpdb->get_results(
-			'SELECT * FROM ' . $table_name .
-			' WHERE active = 1 order by updated DESC', ARRAY_A
-			);
-			
-			$plugin_settings = $MHS_TM_Utilities->get_plugin_settings();
-			$map_options['transport_classes'] = $plugin_settings['transport_classes'];
+                    $routes = $wpdb->get_results(
+                        'SELECT * FROM ' . $table_name .
+                        ' WHERE active = 1 order by updated DESC', ARRAY_A
+                    );
 
-			wp_enqueue_script( 'mhs_tm_map' );
-			wp_localize_script( 'mhs_tm_map', 'mhs_tm_app_vars_0', array(
-				'coordinates'		 => $routes,
-				'coord_center_lat'	 => 54.023884,
-				'coord_center_lng'	 => 9.377068,
-				'auto_load'			 => false,
-				'map_id'			 => 0,
-				'map_options'		 => $map_options,
-				'plugin_dir'		 => MHS_TM_RELPATH,
-				'ajax_url'			 => admin_url( 'admin-ajax.php' ),
-			) );
+                    $plugin_settings = $MHS_TM_Utilities->get_plugin_settings();
+                    $map_options['transport_classes'] = $plugin_settings['transport_classes'];
 
-			wp_enqueue_script( 'mhs_tm_admin_routes' );
+                    wp_enqueue_script( 'mhs_tm_map' );
+                    wp_localize_script( 'mhs_tm_map', 'mhs_tm_app_vars_0', array(
+                            'coordinates'		=> $routes,
+                            'coord_center_lat'	=> 54.023884,
+                            'coord_center_lng'	=> 9.377068,
+                            'auto_load'		=> false,
+                            'map_id'		=> 0,
+                            'map_options'		=> $map_options,
+                            'plugin_dir'		=> MHS_TM_RELPATH,
+                            'ajax_url'		=> admin_url( 'admin-ajax.php' ),
+                    ) );
+
+                    wp_enqueue_script( 'mhs_tm_admin_routes' );
 		}
 
 		/**
@@ -200,11 +200,11 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				'id'			 => $id,
 				'form_id'		 => 0,
 				'back'			 => true,
-				'custom_buttons' => $custom_buttons,
+				'custom_buttons'         => $custom_buttons,
 				'back_url'		 => $url,
 				'fields'		 => $fields_the_route,
-				'top_button'	 => true,
-				'bottom_button'	 => false,
+				'top_button'             => true,
+				'bottom_button'     	 => false,
 				'hide'			 => true,
 				'nonce'			 => $nonce
 			);
@@ -219,13 +219,13 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 				'id'				 => $id,
 				'form_id'			 => 1,
 				'back'				 => false,
-				'custom_buttons'	 => [ ],
+				'custom_buttons'                 => [ ],
 				'back_url'			 => NULL,
 				'fields'			 => $fields_coordinates,
-				'top_button'		 => false,
-				'bottom_button'		 => true,
+				'top_button'    		 => false,
+				'bottom_button' 		 => true,
 				'hide'				 => true,
-				'sortable_handler'	 => 'mhs-tm-sortable-handler ui-icon ui-icon-arrowthick-2-n-s'
+				'sortable_handler'  	 => 'mhs-tm-sortable-handler ui-icon ui-icon-arrowthick-2-n-s'
 			);
 			$form_coordinates	 = new MHS_TM_Admin_Form( $args );
 

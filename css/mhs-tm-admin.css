@@ -1,3 +1,5 @@
+/* Version 1.0.5
+
 /* UI FIXES
 ----------------------------------------- */
 input.mhs_tm_prim_button.button {
@@ -53,4 +55,10 @@ td.transport_class_color {
 
 td.transport_class_settings {
     text-align: right;
+}
+
+/* Map Edit Menu
+----------------------------------------- */
+.wp-list-table .column-added {
+    width: 90px;
 }

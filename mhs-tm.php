@@ -4,7 +4,8 @@
 Plugin Name: My Hitchhiking Spot Travel Map (MHS Travel Map)
 Plugin URI: 
 Description: Create your travel map with use of google maps by adding coordinates to a map, make your route public, write a story for each coordinate and import backup files from the Android app "<a title="My Hitchhiking Spots" href="https://play.google.com/store/apps/details?id=com.myhitchhikingspots" target="_blank" rel="noopener">My Hitchhiking Spots</a>"
-Version: 1.4.0
+Version: 1.4.0 
+ * 1.5.0 soll es werden 
 Author: Jonas Damhuis
 Author URI: 
 License: GPL3
@@ -51,6 +52,7 @@ if ( !defined( 'MHS_TM_DIRNAME' ) )
  * @since 1.0
  */
 function MHS_TM_enqueue() {
+    
 	/* register scripts */ 
 	wp_register_script( 'google_jsapi','https://www.google.com/jsapi', true ); 
 	wp_register_script( 'mhs_tm_map', MHS_TM_RELPATH . 'js/mhs-tm-map.js', array(), '1.0.8' ); 
@@ -170,7 +172,6 @@ require_once ( MHS_TM_ABSPATH . '/includes/class-mhs-tm-utilities.php' );
  */
 add_action( 'wp_ajax_nopriv_get_coordinate_note', array( 'MHS_TM_Maps', 'get_coordinate_note' ) );
 
-
 /**
  * MHS_TM Objects
  *
@@ -199,6 +200,7 @@ if ( is_admin() ) {
         
 	/* templates for tables */
 	require_once( MHS_TM_ABSPATH . '/admin/tables/list-table-maps.php' );
+	require_once( MHS_TM_ABSPATH . '/admin/tables/list-table-map-routes.php' );
 	require_once( MHS_TM_ABSPATH . '/admin/tables/list-table-routes.php' );
             
 	/**
@@ -219,7 +221,13 @@ if ( is_admin() ) {
 	 */
 	add_action( 'wp_ajax_routes_save', array( 'MHS_TM_Admin_Routes', 'routes_save' ) );
 	add_action( 'wp_ajax_get_coordinate_note', array( 'MHS_TM_Maps', 'get_coordinate_note' ) );
-	
+
+	/**
+	 * MHS_TM_Admin Wp_List_Table Bulk action 
+	 *
+	 * @since 1.5.0
+	 */ 
+        add_action( 'admin_action_mhs_tm_change_map_routes', array( 'MHS_TM_Admin_Maps', 'mhs_tm_change_map_routes' ) );
 }
 
 /**

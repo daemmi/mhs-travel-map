@@ -49,19 +49,22 @@ if ( !class_exists( 'WP_List_Table_My' ) ) {
  * Our theme for this list table is going to be movies.
  */
 
-class List_Table_Maps extends WP_List_Table_My {
+class List_Table_Map_Routes extends WP_List_Table_My {
+    private $map_id; 
 
 	/**	 * ***********************************************************************
 	 * REQUIRED. Set up a constructor that references the parent constructor. We 
 	 * use the parent reference to set some default configs.
 	 * ************************************************************************* */
-	function __construct() {
+	function __construct( $map_id ) {
 		global $status, $page;
 
+                $this->map_id = $map_id;
+                
 		//Set parent defaults
 		parent::__construct( array(
-			'singular'	 => 'Map', //singular name of the listed records
-			'plural'	 => 'Maps', //plural name of the listed records
+			'singular'	 => 'Route', //singular name of the listed records
+			'plural'	 => 'Routes', //plural name of the listed records
 			'ajax'		 => false		//does this table support ajax?
 		) );
 	}
@@ -89,21 +92,19 @@ class List_Table_Maps extends WP_List_Table_My {
 	 * ************************************************************************ */
 	function column_default( $item, $column_name ) {
 		switch ( $column_name ) {
-			case 'short_code':
 			case 'date':
 			case 'name':
+			case 'added':
 			case 'update':
-			case 'active':
+			case 'route_start_date':
 				return $item[ $column_name ];
-				break;
 			default:
 				return print_r( $item, true ); //Show the whole array for troubleshooting purposes
-				break;
 		}
 	}
 
 	function no_items() {
-		_e( 'No maps found!' );
+		_e( 'No routes found!' );
 	}
 
 	/**	 * ***********************************************************************
@@ -123,20 +124,18 @@ class List_Table_Maps extends WP_List_Table_My {
 	 * @return string Text to be placed inside the column <td> (movie title only)
 	 * ************************************************************************ */
 	function column_name( $item ) {
-		$delete_nonce = wp_create_nonce( 'mhs_tm_delete_map_' . absint( $item['id'] ) );
+		$delete_nonce    = wp_create_nonce( 'mhs_tm_delete_route_' . absint( $item['id'] ) );
+		$duplicate_nonce = wp_create_nonce( 'mhs_tm_duplicate_route_' . absint( $item['id'] ) );
 
 		//Build row actions
 		$actions = array(
-			'edit'	 => sprintf( '<a href="?page=%s&todo=edit&id=%s">Edit</a>', esc_attr( $_REQUEST['page'] ), absint( $item['id'] ) ),
-			'delete' => sprintf( '<a onclick="if ( confirm(\'Really delete %s?\') ) { return true; } return false;"' .
-			'href="?page=%s&action=delete&id=%s&_wpnonce=%s">Delete</a>', esc_html( $item['name'] ), esc_attr( $_REQUEST['page'] ), absint( $item['id'] ), $delete_nonce ),
+                    'mhs_tm_info'	 => sprintf( '<a id="mhs_tm_info_%s" href="javascript:void(0);">Info</a>', absint( $item['id'] ) ),
 		);
 
 		//Return the title contents
 		return sprintf( '%1$s %2$s',
 		/* $1%s */ esc_html( $item['name'] ),
 		/* $2%s */ $this->row_actions( $actions )
-		// return sprintf('%1$s %2$s', $item['kursbeginn'], $this->row_actions($actions) 
 		);
 	}
 
@@ -151,7 +150,7 @@ class List_Table_Maps extends WP_List_Table_My {
 	 * ************************************************************************ */
 	function column_cb( $item ) {
 		return sprintf(
-		'<input type="checkbox" name="map_id[]" value="%s" />', absint( $item['id'] )
+		'<input type="checkbox" name="route_id[]" value="%s" />', absint( $item['id'] )
 		// '<input type="checkbox" name="%1$s[]" value="%2$s" />',
 		// /*$1%s*/ $this->_args['singular'],  //$this->_args['singular'] Let's simply repurpose the table's singular label ("movie")
 		// /*$2%s*/ $item['ID']                //The value of the checkbox should be the record's id
@@ -174,12 +173,12 @@ class List_Table_Maps extends WP_List_Table_My {
 	function get_columns() {
 
 		$columns = array(
-			'cb'		 => '<input type="checkbox" />', //Render a checkbox instead of text,
-			'name'		 => 'Name',
-			'active'	 => 'Active map?',
-			'update'	 => 'Last updated',
-			'date'		 => 'Create date',
-			'short_code' => 'Shortcode and ID'
+			'cb'	           => '<input type="checkbox" />', //Render a checkbox instead of text
+			'name'	           => 'Name',
+			'added'            => 'In map?',
+			'route_start_date' => 'Start date',
+			'update'           => 'Last updated',
+			'date'	           => 'Create date',
 		);
 		return $columns;
 	}
@@ -201,10 +200,11 @@ class List_Table_Maps extends WP_List_Table_My {
 	function get_sortable_columns() {
 
 		$sortable_columns = array(
-			'short_code' => array( 'short_code', false ),
-			'date'		 => array( 'date', false ), //true means it's already sorted
-			'update'	 => array( 'update', false ),
-			'name'		 => array( 'name', false )
+			'date'	           => array( 'date', false ), //true means it's already sorted 
+			'update'           => array( 'update', false ),
+			'route_start_date' => array( 'route_start_date', false ),
+			'added'            => array( 'added', true ),
+			'name'	           => array( 'name', false )
 		);
 		return $sortable_columns;
 	}
@@ -241,7 +241,7 @@ class List_Table_Maps extends WP_List_Table_My {
 	function get_bulk_actions() {
 
 		$actions = array(
-			'delete_bulk' => 'Delete'
+			'change_map_routes_bulk'    => 'Add/Remove to/from map'
 		);
 		return $actions;
 	}
@@ -254,65 +254,48 @@ class List_Table_Maps extends WP_List_Table_My {
 	 * @see $this->prepare_items()
 	 * ************************************************************************ */
 	function process_bulk_action() {
-		global $wpdb, $MHS_TM_Admin, $MHS_TM_Admin_Utilities;
-		$table_name = $wpdb->prefix . 'mhs_tm_maps';
+            global $MHS_TM_Admin_Utilities, $MHS_TM_Maps, $wpdb, $MHS_TM_Admin;
+                    
+            $map_id     = isset( $_GET[ 'id' ] ) ? sanitize_text_field( $_GET[ 'id' ] ) : null;
+            $route_ids  = isset( $_POST['route_id'] ) ? $MHS_TM_Admin_Utilities->sanitize_id_array( $_POST['route_id'] ) : null;
+            $nonce_post = isset( $_POST['_wpnonce'] ) ? esc_attr( $_POST['_wpnonce'] ) : null;
+            
+            if( isset( $_POST['action'] ) ) {
+                if( wp_verify_nonce( $nonce_post, 'bulk-routes' ) && $map_id != null 
+                        && 'change_map_routes_bulk' == $this->current_action() ) {
+                    
+                    $routes_of_map = $MHS_TM_Maps->get_routes_of_map( $map_id );
 
-		$nonce	 = isset( $_GET['_wpnonce'] ) ? esc_attr( $_GET['_wpnonce'] ) : null;
-		$id		 = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
-		$map_ids = isset( $_GET['map_id'] ) ? $MHS_TM_Admin_Utilities->sanitize_id_array( $_GET['map_id'] ) : null;
+                    foreach ( $route_ids as $route_id ) {
+                        if ( is_numeric( $route_id ) ) {
+                            if( in_array( $route_id, $routes_of_map ) ) {
+                                array_splice( $routes_of_map, array_search( $route_id, $routes_of_map ), 1 );
+                            } else {
+                                $routes_of_map[] = $route_id;
+                            }
+                        }
+                    }
 
-		//Detect when a bulk action is being triggered...
-		switch ( $this->current_action() ) {
-			case 'delete':
-				if ( is_numeric( $id ) && wp_verify_nonce( $nonce, 'mhs_tm_delete_map_' . $id ) ) {
-					$wpdb->update(
-					$table_name, array(
-						'active' => 0
-					), array( 'id' => $id ), array( '%s' ), array( '%d' )
-					);
-					$messages[] = array(
-						'type'		 => 'updated',
-						'message'	 => __( 'Map have been deleted!', 'mhs_tm' )
-					);
-					echo $MHS_TM_Admin->convert_messages( $messages );
-				} else {
-					$messages[] = array(
-						'type'		 => 'error',
-						'message'	 => __( 'Something went wrong!', 'mhs_tm' )
-					);
-					echo $MHS_TM_Admin->convert_messages( $messages );
-				}
-				break;
+                    $wpdb->update(
+                        $wpdb->prefix . 'mhs_tm_maps', array(
+                            'route_ids'	 => json_encode( $routes_of_map ),
+                        ), array( 'id' => $map_id ), array( '%s' ), array( '%d' )
+                    );    
 
-			case 'delete_bulk':
-				if ( wp_is_numeric_array( $map_ids ) && wp_verify_nonce( $nonce, 'bulk-' . $this->_args['plural'] ) ) {
-					foreach ( $map_ids as $map_id ) {
-						if ( is_numeric( $map_id ) ) {
-							$wpdb->update(
-							$table_name, array(
-								'active' => 0
-							), array( 'id' => absint( $map_id ) ), array( '%s' ), array( '%d' )
-							);
-						}
-					}
-					$messages[] = array(
-						'type'		 => 'updated',
-						'message'	 => __( 'Maps have been deleted!', 'mhs_tm' )
-					);
-					echo $MHS_TM_Admin->convert_messages( $messages );
-				} else {
-					$messages[] = array(
-						'type'		 => 'error',
-						'message'	 => __( 'Something went wrong!', 'mhs_tm' )
-					);
-					echo $MHS_TM_Admin->convert_messages( $messages );
-				}
-				break;
-
-			default:
-				$this->maps_menu();
-				break;
-		}
+                    $messages[] = array(
+                            'type'		 => 'updated',
+                            'message'	 => __( 'Routes have been added / removed!', 'mhs_tm' )
+                    );
+                    echo $MHS_TM_Admin->convert_messages( $messages );
+                    
+                } else { 
+                    $messages[] = array(
+                            'type'		 => 'error',
+                            'message'	 => __( 'Something went wrong!', 'mhs_tm' )
+                    );
+                    echo $MHS_TM_Admin->convert_messages( $messages );
+                }
+            }
 	}
 
 	/**	 * ***********************************************************************
@@ -331,8 +314,8 @@ class List_Table_Maps extends WP_List_Table_My {
 	 * @uses $this->set_pagination_args()
 	 * ************************************************************************ */
 	function prepare_items() {
-		global $wpdb; //This is used only if making any database queries
-		$table_name = $wpdb->prefix . 'mhs_tm_maps';
+		global $wpdb, $MHS_TM_Maps; 
+		$table_name = $wpdb->prefix . 'mhs_tm_routes';
 
 		/**
 		 * First, lets decide how many records per page to show
@@ -361,7 +344,6 @@ class List_Table_Maps extends WP_List_Table_My {
 		 */
 		$this->_column_headers = array( $columns, $hidden, $sortable, $primary );
 
-
 		/**
 		 * Optional. You can handle your bulk actions however you see fit. In this
 		 * case, we'll handle them within our package just to keep things clean.
@@ -370,53 +352,54 @@ class List_Table_Maps extends WP_List_Table_My {
 
 
 		/**
-		 * Instead of querying a database, we're going to fetch the example data
-		 * property we created for use in this plugin. This makes this example 
-		 * package slightly different than one you might build on your own. In 
-		 * this example, we'll be using array manipulation to sort and paginate 
-		 * our data. In a real-world implementation, you will probably want to 
-		 * use sort and pagination data to build a custom query instead, as you'll
-		 * be able to use your precisely-queried data immediately.
+		 * Querying a database
 		 */
-		$maps = $wpdb->get_results(
-		'SELECT * FROM ' . $table_name .
-		' WHERE active = 1 order by updated DESC', ARRAY_A
+		$routes = $wpdb->get_results(
+                    'SELECT * FROM ' . $table_name .
+                    ' WHERE active = 1 order by updated DESC', ARRAY_A
 		);
-
+                
+                $map_routes = $MHS_TM_Maps->get_routes_of_map( $this->map_id );
+                
 		$id = 0;
 		$data = [];
-		foreach ( $maps as $map ) {
+		foreach ( $routes as $route ) {
 
-			$date                    = $map['create_date'];
-                        $update			 = $map['updated'];
-			$selected		 = $map['selected'];
-			$map_option_string	 = $map['options'];
-			$map_options		 = array();
-			$map_options		 = json_decode( $map_option_string, true );
-
-			date_default_timezone_set( 'Europe/Berlin' );
-			$data[ $id ]['date']	     = $date;
-			$data[ $id ]['update']       = $update;
-			$data[ $id ]['name']	     = $map_options['name'];
-			$data[ $id ]['id']	         = $map['id'];
-			$data[ $id ]['short_code']   = '[mhs-travel-map map_id=' . $map['id'] . ']';
-			if ( $selected ) {
-				$data[ $id ]['active'] = 'Map is selected! <br> <span class="edit"><a title="' .
-				__( 'Unselect this Map!', 'mhs_tm' ) .
-				'" href="?page=MHS_TM-maps&todo=unselect&amp;id=' . $map['id'] . '">' .
-				__( 'Set as unselected!', 'mhs_tm' ) .
-				'</a></span>';
-			} else {
-				$data[ $id ]['active'] = 'Map is unselected! <br> <span class="edit"><a title="' .
-				__( 'Select this Map!', 'mhs_tm' ) .
-				'" href="?page=MHS_TM-maps&todo=select&amp;id=' . $map['id'] . '">' .
-				__( 'Set as selected!', 'mhs_tm' ) .
-				'</a></span>';
-			}
-
-			$id = $id + 1;
+                    $date                           = $route['create_date'];
+                    $update                         = $route['updated'];
+                    $route_options                  = array();
+                    $route_options                  = $MHS_TM_Maps->sanitize_coordinate_option_array( json_decode( $route['options'], true ) );
+                    $route_coordinates              = array();
+                    $route_coordinates              = $MHS_TM_Maps->sanitize_coordinates_array( json_decode( $route['coordinates'], true ) );
+                    $remove_route_from_map_nonce    = wp_create_nonce( 'mhs_tm_remove_route_from_map' . absint( $route['id'] ) );
+                    $add_route_from_map_nonce       = wp_create_nonce( 'mhs_tm_add_route_from_map' . absint( $route['id'] ) );
+                    
+                    If( $route_coordinates == null ) {
+                            $route_coordinates[0] = [];
+                            $route_coordinates[0]['starttime'] = '0000000000';
+                    }
+                    date_default_timezone_set( 'Europe/London' );
+                    
+                    if ( in_array($route['id'], $map_routes ) ) {
+                        $data[ $id ]['added']	        = sprintf( '<a style="color:#7AD03A; font-weight:bold">Yes</a> <br> '
+                                . '<a href="?%s&action=mhs_tm_change_map_routes&id=%s&remove_id=%s&_wpnonce=%s&referer=%s">Remove</a>', 
+                                admin_url(), $_GET['id'], absint( $route['id'] ), $remove_route_from_map_nonce, 
+                                urlencode( admin_url() . 'admin.php?' . esc_attr( $_SERVER['QUERY_STRING'] ) ) ); 
+                    } else {
+                        $data[ $id ]['added']	        = sprintf( '<a style="color:black; font-weight:bold">No</a> <br> '
+                                . '<a href="?%s&action=mhs_tm_change_map_routes&id=%s&add_id=%s&_wpnonce=%s&referer=%s">Add</a>', 
+                                admin_url(), $_GET['id'], absint( $route['id'] ), $add_route_from_map_nonce, 
+                                urlencode( admin_url() . 'admin.php?' . esc_attr( $_SERVER['QUERY_STRING'] ) ) );                
+                    }
+                    
+                    $data[ $id ]['date']	        = $date;
+                    $data[ $id ]['update']              = $update;
+                    $data[ $id ]['route_start_date']    = date( 'Y-m-d', $route_coordinates[0]['starttime'] );
+                    $data[ $id ]['id']                  = $route['id'];
+                    $data[ $id ]['name']                = $route_options['name'];
+                    $id                                 = $id + 1;
 		}
-
+                
 		/**
 		 * This checks for sorting input and sorts the data in our array accordingly.
 		 * 
@@ -426,22 +409,22 @@ class List_Table_Maps extends WP_List_Table_My {
 		 * sorting technique would be unnecessary.
 		 */
 		function usort_reorder( $a, $b ) {
-			$orderby_options = ['update', 'date', 'name', 'short_code'];
+			$orderby_options = ['update', 'date', 'name', 'id', 'route_start_date', 'added'];
 			$order_options   = ['DESC', 'ASC', 'desc', 'asc'];
 			
 			if ( isset( $_GET['orderby'], $_GET['order'] ) && in_array( $_GET['orderby'], $orderby_options ) && in_array( $_GET['order'], $order_options ) ) {
 				$orderby = esc_attr( $_GET['orderby'] );
 				$order   = esc_attr( $_GET['order'] );
 			} else {
-				$orderby = 'update';
-				$order   = 'desc';
+				$orderby = 'added';
+				$order   = 'asc';
 			}
 			
 			$result	 = strcmp( $a[ $orderby ], $b[ $orderby ] ); //Determine sort order
 			return ( $order === 'asc' ) ? $result : -$result; //Send final sort direction to usort
 		}
 
-		if ( NULL != $data ) {
+		if ( isset( $data ) && NULL != $data ) {
 			usort( $data, 'usort_reorder' );
 		}
 
@@ -467,7 +450,7 @@ class List_Table_Maps extends WP_List_Table_My {
 		 * array_slice() to 
 		 */
 		if ( NULL != $data ) {
-			$data = array_slice( $data, (($current_page - 1) * $per_page ), $per_page );
+			$data = array_slice( $data, ( ( $current_page - 1 ) * $per_page ), $per_page );
 		}
 
 
@@ -485,7 +468,7 @@ class List_Table_Maps extends WP_List_Table_My {
 		 */
 		$this->set_pagination_args( array(
 			'total_items'	 => $total_items, //WE have to calculate the total number of items
-			'per_page'		 => $per_page, //WE have to determine how many items to show on a page
+			'per_page'	 => $per_page, //WE have to determine how many items to show on a page
 			'total_pages'	 => ceil( $total_items / $per_page )   //WE have to calculate the total number of pages
 		) );
 	}

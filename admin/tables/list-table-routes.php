@@ -126,10 +126,10 @@ class List_Table_Routes extends WP_List_Table_My {
 
 		//Build row actions
 		$actions = array(
-			'edit'			 => sprintf( '<a href="?page=%s&todo=edit&id=%s">Edit</a>', esc_attr( $_REQUEST['page'] ), absint( $item['id'] ) ),
-			'duplicate'		 => sprintf( '<a href="?page=%s&action=duplicate&id=%s&_wpnonce=%s">Duplicate</a>', esc_attr( $_REQUEST['page'] ), absint( $item['id'] ), $duplicate_nonce ),
-			'delete'		 => sprintf( '<a onclick="if ( confirm(\'Really delete %s?\') ) { return true; } return false;"' .
-			'href="?page=%s&action=delete&id=%s&_wpnonce=%s">Delete</a>', esc_html( $item['name'] ), esc_attr( $_REQUEST['page'] ), absint( $item['id'] ), $delete_nonce ),
+			'edit'		=> sprintf( '<a href="?page=%s&todo=edit&id=%s">Edit</a>', esc_attr( $_REQUEST['page'] ), absint( $item['id'] ) ),
+			'duplicate'	=> sprintf( '<a href="?page=%s&action=duplicate&id=%s&_wpnonce=%s">Duplicate</a>', esc_attr( $_REQUEST['page'] ), absint( $item['id'] ), $duplicate_nonce ),
+			'delete'	=> sprintf( '<a onclick="if ( confirm(\'Really delete %s?\') ) { return true; } return false;"' .
+                            'href="?page=%s&action=delete&id=%s&_wpnonce=%s">Delete</a>', esc_html( $item['name'] ), esc_attr( $_REQUEST['page'] ), absint( $item['id'] ), $delete_nonce ),
 			'mhs_tm_info'	 => sprintf( '<a id="mhs_tm_info_%s" href="javascript:void(0);">Info</a>', absint( $item['id'] ) ),
 		);
 
@@ -259,9 +259,9 @@ class List_Table_Routes extends WP_List_Table_My {
 		global $wpdb, $MHS_TM_Admin, $MHS_TM_Admin_Utilities, $MHS_TM_Maps, $MHS_TM_Admin_Routes;
 		$table_name = $wpdb->prefix . 'mhs_tm_routes';
 
-		$id			 = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
-		$route_ids	 = isset( $_GET['route_id'] ) ? $MHS_TM_Admin_Utilities->sanitize_id_array( $_GET['route_id'] ) : null;
-		$nonce		 = isset( $_GET['_wpnonce'] ) ? esc_attr( $_GET['_wpnonce'] ) : null;
+		$id         = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
+		$route_ids  = isset( $_GET['route_id'] ) ? $MHS_TM_Admin_Utilities->sanitize_id_array( $_GET['route_id'] ) : null;
+		$nonce      = isset( $_GET['_wpnonce'] ) ? esc_attr( $_GET['_wpnonce'] ) : null;
 
 		//Detect when a bulk action is being triggered...
 		if ( 'delete' === $this->current_action() ) {

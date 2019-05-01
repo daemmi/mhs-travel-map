@@ -14,11 +14,6 @@ jQuery( function ( $ ) {
      // reinitialize so that the change will be in power
      mhs_tm_map.gmap_initialize( mhs_tm_map_admin_maps.map_canvas_id, 'map' );
     
-    $( 'option' ).mousedown( function ( e ) {
-        e.preventDefault();
-        $( this ).prop( 'selected', !$( this ).prop( 'selected' ) );
-    } );
-    
     $( "#mhs_tm_update_map" ).on( 'click', $( this ), function () {
         var coordinates_all = mhs_tm_app_vars.coordinates_all;
         var map_canvas_id = parseInt( $( '.mhs_tm-map' ).attr( 'id' ).replace( 'mhs_tm_map_canvas_', '' ) );

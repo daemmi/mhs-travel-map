@@ -20,14 +20,14 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 		 * @access public
 		 */
 		public function maps_control() {
-			global $wpdb, $MHS_TM_Admin;
+			global $wpdb, $MHS_TM_Admin, $List_Table_Map_Routes;
 			
 			$messages = array();
 			$url = 'admin.php?page=MHS_TM-maps';
 			
 			//save Get and Post
-			$todo = isset(  $_GET[ 'todo' ] ) ? sanitize_text_field( $_GET[ 'todo' ] ) : 'default';
-			$id	  = isset(  $_GET[ 'id' ] ) ? absint( $_GET[ 'id' ] ) : null;
+			$todo       = isset(  $_GET[ 'todo' ] ) ? sanitize_text_field( $_GET[ 'todo' ] ) : 'default';
+			$id         = isset(  $_GET[ 'id' ] ) ? absint( $_GET[ 'id' ] ) : null;
 
 			switch ( $todo ) {
 
@@ -95,7 +95,7 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 					$this->maps_menu( $messages );
 					
 					break;
-
+                                
 				case 'save':
 					//validate the input
 					if( is_numeric( $id ) ) {
@@ -182,62 +182,141 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 		 * @since 1.0
 		 * @access private
 		 */
-		private function maps_edit( $id = NULL ) {
-			global $MHS_TM_Maps;
+		private function maps_edit( $id = NULL, $messages = NULL ) {
+                    global $MHS_TM_Maps, $MHS_TM_Utilities, $wpdb;
 
-			$url		 = 'admin.php?page=MHS_TM-maps';
-			$form_action = $url . '&amp;todo=save&amp;id=' . $id;
+                    $table_name  = $wpdb->prefix . 'mhs_tm_routes';
+                    $url         = 'admin.php?page=MHS_TM-maps';
+                    $form_action = $url . '&amp;todo=save&amp;id=' . $id;
+                    $height      = 10;
+                    $message  = isset( $_GET['message'] ) ? sanitize_text_field( $_GET['message'] ) : null;
 
-			if ( !is_numeric( $id ) ) {
-				$title	 = sprintf( __( 'Add New Map', 'mhs_tm' ) );
-				$fields	 = $this->maps_fields();
-				$nonce	 = 'mhs_tm_maps_save';
-			} else {
-				$map_options		 = $MHS_TM_Maps->get_map_options( $id );
-				$title	 = sprintf( __( 'Edit &quot;%s&quot;', 'mhs_tm' ), $map_options['name'] );
-				$fields	 = $this->maps_fields( $id );
-				$nonce	 = 'mhs_tm_maps_save_' . $id;
-			}
-			
-			$custom_buttons = array(
-				'<a href="javascript:void(0);" id="mhs_tm_update_map" class="button-secondary margin" 
-					title="Update the map">' . __( 'update map', 'mhs_tm' ) . '</a>',
-			);
+                    if ( !is_numeric( $id ) ) {
+                            $title	 = sprintf( __( 'Add New Map', 'mhs_tm' ) );
+                            $fields	 = $this->maps_fields();
+                            $nonce	 = 'mhs_tm_maps_save';
+                    } else {
+                            $map_options		 = $MHS_TM_Maps->get_map_options( $id );
+                            $title	 = sprintf( __( 'Edit &quot;%s&quot;', 'mhs_tm' ), $map_options['name'] );
+                            $fields	 = $this->maps_fields( $id );
+                            $nonce	 = 'mhs_tm_maps_save_' . $id;
+                    }
 
-			$adminpage = new MHS_TM_Admin_Page( array(
-				'title'	 => $title,
-				'url'	 => $url
-			) );
+                    $custom_buttons = array(
+                            '<a href="javascript:void(0);" id="mhs_tm_update_map" class="button-secondary margin" 
+                                    title="Update the map">' . __( 'update map', 'mhs_tm' ) . '</a>',
+                    );
+                    
+                    switch( $message ) {
+                        case 'route_added':
+                            $messages[] = array(
+                                'type'		 => 'updated',
+                                'message'	 => __( 'Route successfully added!', 'mhs_tm' )
+                            );
+                            break;
+                        
+                        case 'route_removed':
+                            $messages[] = array(
+                                'type'		 => 'updated',
+                                'message'	 => __( 'Route successfully removed!', 'mhs_tm' )
+                            );
+                            break;
+                        
+                        case 'error':
+                            $messages[] = array(
+                                'type'		 => 'error',
+                                'message'	 => __( 'Something went wrong!', 'mhs_tm' )
+                            );
+                            break;
+                        
+                        default:
+                            break;
+                    }
+                   
+                    $adminpage = new MHS_TM_Admin_Page( array(
+                            'title'	 => $title,
+                            'messages'	 => $messages,
+                            'url'	 => $url
+                    ) );
 
-			$args	 = array(
-				'echo'		     => false,
-				'form'		     => true,
-				'metaboxes'	     => true,
-				'action'	     => $form_action,
-				'custom_buttons' => $custom_buttons,
-				'id'		     => $id,
-				'back'		     => true,
-				'back_url'	     => $url,
-				'fields'	     => $fields,
-				'nonce'		     => $nonce
-			);
-			$form	 = new MHS_TM_Admin_Form( $args );
+                    $args	 = array(
+                        'echo'		     => false,
+                        'form'		     => true,
+                        'metaboxes'	     => true,
+                        'action'	     => $form_action,
+                        'custom_buttons'     => $custom_buttons,
+                        'id'		     => $id,
+                        'back'		     => true,
+                        'back_url'	     => $url,
+                        'fields'	     => $fields,
+                        'bottom_button'      => true,
+                        'nonce'		     => $nonce,
+                        'button'             => 'Save map settings'
+                    );
+                    $form	 = new MHS_TM_Admin_Form( $args );
 
-			echo $adminpage->top();
-			echo do_shortcode( '[mhs-travel-map map_id=' . $id . ' run_shortcodes=0] </br>' );
-			echo $form->output();
-			echo $adminpage->bottom();
+                    echo $adminpage->top();
+                    echo do_shortcode( '[mhs-travel-map map_id=' . $id . ' run_shortcodes=0] </br>' );
+                    echo $form->output();
+                    
+                    echo '<h2>Add routes to map</h2> <hr>';
+                    
+                    // if there is no id the route is new and first you have to 
+                    // save the route before you can add routes to the map
+                    if ( !is_numeric( $id ) ) {
+                        echo '<p>Please save the new map first to add routes to the map!</p>';
+                    } else {
+                        $ListTable = new List_Table_Map_Routes( $id );
+                        $ListTable->prepare_items();
+                        echo '<!-- Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions -->
+                            <form id="list_table" method="post">';
+//                        echo $ListTable->search_box( 'search', 'search_id' );
+                        echo        $ListTable->display();
+                    }
+                    
+                    echo $adminpage->bottom();
 
-			$route_ids		 = $this->get_routes_array();
-			$coordinates_all = array();
-			foreach ( $route_ids as $route ) {
-				$coordinates_all[ $route['value'] ] = $MHS_TM_Maps->get_coordinates( $route['value'], 'route' );
-			}
-			
+                    echo '<div style="display: none;" id="mhs_tm_dialog_info" title="Info" >'
+                    . '<div class="mhs_tm-map" id="mhs_tm_map_canvas_0" style="height: ' . esc_attr( $height ) . 'px; margin-right: auto ; margin-left: auto ; padding: 0;"></div>'
+                    . '</div>';
+
+                    $route_ids		 = $this->get_routes_array();
+                    $coordinates_all = array();
+                    foreach ( $route_ids as $route ) {
+                            $coordinates_all[ $route['value'] ] = $MHS_TM_Maps->get_coordinates( $route['value'], 'route' );
+                    }
+
 			wp_enqueue_script( 'mhs_tm_admin_maps' );
 			wp_localize_script( 'mhs_tm_admin_maps', 'mhs_tm_app_vars', array(
 				'coordinates_all' => $coordinates_all
 			) );
+
+                    $key = $MHS_TM_Utilities->get_gmaps_api_key();
+
+                    wp_register_script( 'googlemap', 'https://maps.googleapis.com/maps/api/js?key=' . $key, true );
+                    wp_enqueue_script( 'googlemap' );
+
+                    $routes = $wpdb->get_results(
+                        'SELECT * FROM ' . $table_name .
+                        ' WHERE active = 1 order by updated DESC', ARRAY_A
+                    );
+
+                    $plugin_settings = $MHS_TM_Utilities->get_plugin_settings();
+                    $map_options['transport_classes'] = $plugin_settings['transport_classes'];
+
+                    wp_enqueue_script( 'mhs_tm_map' );
+                    wp_localize_script( 'mhs_tm_map', 'mhs_tm_app_vars_0', array(
+                            'coordinates'		=> $routes,
+                            'coord_center_lat'	=> 54.023884,
+                            'coord_center_lng'	=> 9.377068,
+                            'auto_load'		=> false,
+                            'map_id'		=> 0,
+                            'map_options'		=> $map_options,
+                            'plugin_dir'		=> MHS_TM_RELPATH,
+                            'ajax_url'		=> admin_url( 'admin-ajax.php' ),
+                    ) );
+
+                    wp_enqueue_script( 'mhs_tm_admin_routes' );
 		}
 
 		/**
@@ -256,61 +335,47 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			}
 
 			$maps_fields = array(
-				array(
-					'title'	 => __( 'The Map', 'mhs_tm' ),
-					'fields' => array(
-						array(
-							'type'	 => 'text',
-							'label'	 => __( 'Name of Map', 'mhs_tm' ),
-							'id'	 => 'name',
-							'desc'	 => __( 'The name or title of the map', 'mhs_tm' )
-						),
-						array(
-							'type'	 => 'hidden',
-							'hidden' => true,
-							'id'	 => 'todo_check',
-							'value'	 => 'check'
-						),
-						array(
-							'type'		 => 'radio',
-							'label'		 => __( 'Is the map the active one?', 'mhs_tm' ),
-							'id'		 => 'selected',
-							'desc'		 => __( 'All new routes will be maped automaticly to this map!', 'mhs_tm' ),
-							'options'	 => array(
-								array(
-									'value'	 => 1,
-									'label'	 => 'Yes'
-								),
-								array(
-									'value'	 => 0,
-									'label'	 => 'No'
-								)
-							)
-						),
-						array(
-							'type'	 => 'text',
-							'label'	 => __( 'Start zoom on last added routes?', 'mhs_tm' ),
-							'id'	 => 'zoom',
-							'desc'	 => __( 'If you enter a number the map will zoom at the first load on the entered 
-								number of last routes sorted by time. If you which to zoom on all routes leave the field 
-								blank or enter 0. ', 'mhs_tm' )
-						)
-					)
-				),
-				array(
-					'title'	 => __( 'Routes', 'mhs_tm' ),
-					'fields' => array(
-						array(
-							'type'		 => 'select',
-							'label'		 => __( 'Select the routes you would like to add to the map.', 'mhs_tm' ),
-							'id'		 => 'route_ids[]',
-							'desc'		 => __( 'You could select more than one route. The selected routes will be added to the map.', 'mhs_tm' ),
-							'options'	 => $this->get_routes_array(),
-							'multiple'	 => true,
-							'size'		 => $size_of_select
-						)
-					)
-				)
+                            array(
+                                'title'	 => __( 'Map settings', 'mhs_tm' ),
+                                'fields' => array(
+                                    array(
+                                        'type'	 => 'text',
+                                        'label'	 => __( 'Name of Map', 'mhs_tm' ),
+                                        'id'	 => 'name',
+                                        'desc'	 => __( 'The name or title of the map', 'mhs_tm' )
+                                    ),
+                                    array(
+                                        'type'	 => 'hidden',
+                                        'hidden' => true,
+                                        'id'	 => 'todo_check',
+                                        'value'	 => 'check'
+                                    ),
+                                    array(
+                                        'type'		 => 'radio',
+                                        'label'		 => __( 'Is the map the active one?', 'mhs_tm' ),
+                                        'id'		 => 'selected',
+                                        'desc'		 => __( 'All new routes will be maped automaticly to this map!', 'mhs_tm' ),
+                                        'options'	 => array(
+                                            array(
+                                                'value'	 => 1,
+                                                'label'	 => 'Yes'
+                                            ),
+                                            array(
+                                                'value'	 => 0,
+                                                'label'	 => 'No'
+                                            )
+                                        )
+                                    ),
+                                    array(
+                                        'type'	 => 'text',
+                                        'label'	 => __( 'Start zoom on last added routes?', 'mhs_tm' ),
+                                        'id'	 => 'zoom',
+                                        'desc'	 => __( 'If you enter a number the map will zoom at the first load on the entered 
+                                                number of last routes sorted by time. If you which to zoom on all routes leave the field 
+                                                blank or enter 0. ', 'mhs_tm' )
+                                    )
+                                )
+                            )
 			);
 
 			if ( !is_numeric( $id ) ) {
@@ -336,15 +401,9 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 					if( isset( $maps_fields[ $i ]['fields'] ) ) {
 						$fcount = count( $maps_fields[ $i ]['fields'] );
 						for ( $j = 0; $j < $fcount; $j++ ) {
-							if ( $maps_fields[ $i ]['fields'][ $j ]['id'] == 'route_ids[]' ) {
-								if( isset( $data['route_ids'] ) ) {
-									$maps_fields[ $i ]['fields'][ $j ]['value'] = json_decode( $data['route_ids'], true );
-								}
-							} else {
-								if( isset( $data[ $maps_fields[ $i ]['fields'][ $j ]['id'] ] ) ) {
-									$maps_fields[ $i ]['fields'][ $j ]['value'] = stripslashes( $data[ $maps_fields[ $i ]['fields'][ $j ]['id'] ] );
-								}	
-							}
+                                                    if( isset( $data[ $maps_fields[ $i ]['fields'][ $j ]['id'] ] ) ) {
+                                                            $maps_fields[ $i ]['fields'][ $j ]['value'] = stripslashes( $data[ $maps_fields[ $i ]['fields'][ $j ]['id'] ] );
+                                                    }	
 						}
 					}
 				}
@@ -434,10 +493,9 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 				$wpdb->update(
 				$wpdb->prefix . 'mhs_tm_maps', array(
 					'active'	 => 1,
-					'route_ids'	 => json_encode( $route_ids ),
 					'options'	 => $options,
 					'selected'	 => $selected
-				), array( 'id' => $id ), array( '%d', '%s', '%s', '%d' ), array( '%d' )
+				), array( 'id' => $id ), array( '%d', '%s', '%d' ), array( '%d' )
 				);
 				$messages[] = array(
 					'type'		 => 'updated',
@@ -447,11 +505,10 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 				$wpdb->insert(
 				$wpdb->prefix . 'mhs_tm_maps', array(
 					'active'		 => 1,
-					'route_ids'		 => json_encode( $route_ids ),
 					'options'		 => $options,
 					'selected'		 => $selected,
 					'create_date'	 => date( 'Y-m-d H:i:s' )
-				), array( '%d', '%s', '%s', '%d', '%s' )
+				), array( '%d', '%s', '%d', '%s' )
 				);
 				$messages[] = array(
 					'type'		 => 'updated',
@@ -508,7 +565,73 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 
 			return $selected_id[0]['id'];
 		}
+		
+		/**
+		 * Bulk action handler
+		 *
+		 * @since 1.5.0
+		 * @access public
+		 */
+		public function mhs_tm_change_map_routes() {
+                    global $MHS_TM_Admin_Utilities, $MHS_TM_Maps, $wpdb, $MHS_TM_Admin;
 
+                    $remove_id  = isset( $_GET[ 'remove_id' ] ) ? sanitize_text_field( $_GET[ 'remove_id' ] ) : null;
+                    $add_id     = isset( $_GET[ 'add_id' ] ) ? sanitize_text_field( $_GET[ 'add_id' ] ) : null;
+                    $map_id     = isset( $_GET[ 'id' ] ) ? sanitize_text_field( $_GET[ 'id' ] ) : null;
+                    $nonce_get  = isset( $_GET['_wpnonce'] ) ? esc_attr( $_GET['_wpnonce'] ) : null;
+                    $wp_referer = isset( $_GET['referer'] ) ? htmlspecialchars_decode( $_GET['referer'] ) : null;
+                    
+                    error_log($remove_id . "\n", 3,  'C:\xampp\htdocs\my_errors.log');
+                    error_log( $add_id . "\n", 3,  'C:\xampp\htdocs\my_errors.log');
+                    error_log( $map_id . "\n", 3,  'C:\xampp\htdocs\my_errors.log');
+                    error_log( $nonce_get . "\n", 3,  'C:\xampp\htdocs\my_errors.log');
+                    error_log( $wp_referer . "\n", 3,  'C:\xampp\htdocs\my_errors.log');
+                    error_log( wp_verify_nonce( $nonce_get, 'mhs_tm_remove_route_from_map' . absint( $remove_id ) ) . "\n", 3,  'C:\xampp\htdocs\my_errors.log');
+                    error_log( wp_verify_nonce( $nonce_get, 'mhs_tm_add_route_from_map' . absint( $add_id ) ) . "\n", 3,  'C:\xampp\htdocs\my_errors.log');
+                    
+                    if ( wp_verify_nonce( $nonce_get, 'mhs_tm_remove_route_from_map' . absint( $remove_id ) ) && $map_id != null ) {
+
+                        $routes_of_map = $MHS_TM_Maps->get_routes_of_map( $map_id );
+
+                        if ( is_numeric( $remove_id ) ) {
+                            if( in_array( $remove_id, $routes_of_map ) ) {
+                                array_splice( $routes_of_map, array_search( $remove_id, $routes_of_map ), 1 );
+                            } 
+                        }
+
+                        $wpdb->update(
+                            $wpdb->prefix . 'mhs_tm_maps', array(
+                                'route_ids'	 => json_encode( $routes_of_map ),
+                            ), array( 'id' => $map_id ), array( '%s' ), array( '%d' )
+                        );  
+
+                        wp_safe_redirect( add_query_arg( 'message', 'route_removed', $wp_referer ) );
+                        exit();
+
+                    } else if ( wp_verify_nonce( $nonce_get, 'mhs_tm_add_route_from_map' . absint( $add_id ) ) && $map_id != null ) {
+
+                        $routes_of_map = $MHS_TM_Maps->get_routes_of_map( $map_id );
+
+                        if ( is_numeric( $add_id ) ) {
+                            if( ! in_array( $add_id, $routes_of_map ) ) {
+                                $routes_of_map[] = $add_id;
+                            } 
+                        }
+
+                        $wpdb->update(
+                            $wpdb->prefix . 'mhs_tm_maps', array(
+                                'route_ids'	 => json_encode( $routes_of_map ),
+                            ), array( 'id' => $map_id ), array( '%s' ), array( '%d' )
+                        );  
+
+                        wp_safe_redirect( add_query_arg( 'message', 'route_added', $wp_referer ) );
+                        exit();
+
+                    } else { 
+                        wp_safe_redirect( add_query_arg( 'message', 'error', $wp_referer ) );
+                        exit(); 
+                    }
+                }
 	}
 
 	 // class
