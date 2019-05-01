@@ -28,6 +28,7 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 			//save Get and Post
 			$todo       = isset(  $_GET[ 'todo' ] ) ? sanitize_text_field( $_GET[ 'todo' ] ) : 'default';
 			$id         = isset(  $_GET[ 'id' ] ) ? absint( $_GET[ 'id' ] ) : null;
+                        $nonce      = isset( $_GET['_wpnonce'] ) ? esc_attr( $_GET['_wpnonce'] ) : null;
 
 			switch ( $todo ) {
 
@@ -37,11 +38,11 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 
 				case 'select':
 					//validate the input
-					if( is_numeric( $id ) ) {
+					if( is_numeric( $id ) && wp_verify_nonce( $nonce, 'mhs_tm_select_map' . $id ) ) {
 						// get old selected map and set it to unselected
 						$selected_id = $this->get_selected_map();
 
-						if($selected_id !== NULL) {
+						if( $selected_id !== NULL ) {
 							$wpdb->update(
 							$wpdb->prefix . 'mhs_tm_maps', array(
 								'selected' => 0
@@ -73,7 +74,7 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
 
 				case 'unselect':
 					//validate the input
-					if( is_numeric( $id ) ) {
+					if( is_numeric( $id ) && wp_verify_nonce( $nonce, 'mhs_tm_select_map' . $id ) ) {
 						// Set new map to unselected
 						$wpdb->update(
 						$wpdb->prefix . 'mhs_tm_maps', array(

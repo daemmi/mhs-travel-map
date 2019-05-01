@@ -258,7 +258,7 @@ class List_Table_Maps extends WP_List_Table_My {
 		$table_name = $wpdb->prefix . 'mhs_tm_maps';
 
 		$nonce	 = isset( $_GET['_wpnonce'] ) ? esc_attr( $_GET['_wpnonce'] ) : null;
-		$id		 = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
+		$id	 = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
 		$map_ids = isset( $_GET['map_id'] ) ? $MHS_TM_Admin_Utilities->sanitize_id_array( $_GET['map_id'] ) : null;
 
 		//Detect when a bulk action is being triggered...
@@ -332,7 +332,7 @@ class List_Table_Maps extends WP_List_Table_My {
 	 * ************************************************************************ */
 	function prepare_items() {
 		global $wpdb; //This is used only if making any database queries
-		$table_name = $wpdb->prefix . 'mhs_tm_maps';
+		$table_name         = $wpdb->prefix . 'mhs_tm_maps';
 
 		/**
 		 * First, lets decide how many records per page to show
@@ -385,36 +385,38 @@ class List_Table_Maps extends WP_List_Table_My {
 
 		$id = 0;
 		$data = [];
+                
 		foreach ( $maps as $map ) {
 
-			$date                    = $map['create_date'];
-                        $update			 = $map['updated'];
-			$selected		 = $map['selected'];
-			$map_option_string	 = $map['options'];
-			$map_options		 = array();
-			$map_options		 = json_decode( $map_option_string, true );
+                    $date                = $map['create_date'];
+                    $update		 = $map['updated'];
+                    $selected		 = $map['selected'];
+                    $map_option_string	 = $map['options'];
+                    $map_options	 = array();
+                    $map_options	 = json_decode( $map_option_string, true );
+                    $select_map_nonce    = wp_create_nonce( 'mhs_tm_select_map' . absint( $map['id'] ) );
 
-			date_default_timezone_set( 'Europe/Berlin' );
-			$data[ $id ]['date']	     = $date;
-			$data[ $id ]['update']       = $update;
-			$data[ $id ]['name']	     = $map_options['name'];
-			$data[ $id ]['id']	         = $map['id'];
-			$data[ $id ]['short_code']   = '[mhs-travel-map map_id=' . $map['id'] . ']';
-			if ( $selected ) {
-				$data[ $id ]['active'] = 'Map is selected! <br> <span class="edit"><a title="' .
-				__( 'Unselect this Map!', 'mhs_tm' ) .
-				'" href="?page=MHS_TM-maps&todo=unselect&amp;id=' . $map['id'] . '">' .
-				__( 'Set as unselected!', 'mhs_tm' ) .
-				'</a></span>';
-			} else {
-				$data[ $id ]['active'] = 'Map is unselected! <br> <span class="edit"><a title="' .
-				__( 'Select this Map!', 'mhs_tm' ) .
-				'" href="?page=MHS_TM-maps&todo=select&amp;id=' . $map['id'] . '">' .
-				__( 'Set as selected!', 'mhs_tm' ) .
-				'</a></span>';
-			}
+                    date_default_timezone_set( 'Europe/Berlin' );
+                    $data[ $id ]['date']	 = $date;
+                    $data[ $id ]['update']       = $update;
+                    $data[ $id ]['name']         = $map_options['name'];
+                    $data[ $id ]['id']	         = $map['id'];
+                    $data[ $id ]['short_code']   = '[mhs-travel-map map_id=' . $map['id'] . ']';
+                    if ( $selected ) {
+                            $data[ $id ]['active'] = 'Map is selected! <br> <span class="edit"><a title="' .
+                            __( 'Unselect this Map!', 'mhs_tm' ) .
+                            '" href="?page=MHS_TM-maps&todo=unselect&amp;id=' . $map['id'] . '&_wpnonce=' . $select_map_nonce . '">' .
+                            __( 'Set as unselected!', 'mhs_tm' ) .
+                            '</a></span>';
+                    } else {
+                            $data[ $id ]['active'] = 'Map is unselected! <br> <span class="edit"><a title="' .
+                            __( 'Select this Map!', 'mhs_tm' ) .
+                            '" href="?page=MHS_TM-maps&todo=select&amp;id=' . $map['id'] . '&_wpnonce=' . $select_map_nonce . '">' .
+                            __( 'Set as selected!', 'mhs_tm' ) .
+                            '</a></span>';
+                    }
 
-			$id = $id + 1;
+                    $id = $id + 1;
 		}
 
 		/**
