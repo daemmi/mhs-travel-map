@@ -95,6 +95,7 @@ class List_Table_Map_Routes extends WP_List_Table_My {
 			case 'date':
 			case 'name':
 			case 'added':
+			case 'country':
 			case 'update':
 			case 'route_start_date':
 				return $item[ $column_name ];
@@ -176,6 +177,7 @@ class List_Table_Map_Routes extends WP_List_Table_My {
 			'cb'	           => '<input type="checkbox" />', //Render a checkbox instead of text
 			'name'	           => 'Name',
 			'added'            => 'In map?',
+			'country'          => 'Country',
 			'route_start_date' => 'Start date',
 			'update'           => 'Last updated',
 			'date'	           => 'Create date',
@@ -202,6 +204,7 @@ class List_Table_Map_Routes extends WP_List_Table_My {
 		$sortable_columns = array(
 			'date'	           => array( 'date', false ), //true means it's already sorted 
 			'update'           => array( 'update', false ),
+			'country'          => array( 'country', false ),
 			'route_start_date' => array( 'route_start_date', false ),
 			'added'            => array( 'added', true ),
 			'name'	           => array( 'name', false )
@@ -373,6 +376,7 @@ class List_Table_Map_Routes extends WP_List_Table_My {
                     $route_coordinates              = $MHS_TM_Maps->sanitize_coordinates_array( json_decode( $route['coordinates'], true ) );
                     $remove_route_from_map_nonce    = wp_create_nonce( 'mhs_tm_remove_route_from_map' . absint( $route['id'] ) );
                     $add_route_from_map_nonce       = wp_create_nonce( 'mhs_tm_add_route_from_map' . absint( $route['id'] ) );
+                    $coordinates_of_route           = $MHS_TM_Maps->get_coordinates( $route['id'], 'route' );
                     
                     If( $route_coordinates == null ) {
                             $route_coordinates[0] = [];
@@ -392,6 +396,7 @@ class List_Table_Map_Routes extends WP_List_Table_My {
                                 urlencode( admin_url() . 'admin.php?' . esc_attr( $_SERVER['QUERY_STRING'] ) ) );                
                     }
                     
+                    $data[ $id ]['country']	        = $coordinates_of_route[0]['coordinates'][0]['country'];
                     $data[ $id ]['date']	        = $date;
                     $data[ $id ]['update']              = $update;
                     $data[ $id ]['route_start_date']    = date( 'Y-m-d', $route_coordinates[0]['starttime'] );
@@ -399,7 +404,7 @@ class List_Table_Map_Routes extends WP_List_Table_My {
                     $data[ $id ]['name']                = $route_options['name'];
                     $id                                 = $id + 1;
 		}
-                
+                                
 		/**
 		 * This checks for sorting input and sorts the data in our array accordingly.
 		 * 
@@ -409,7 +414,7 @@ class List_Table_Map_Routes extends WP_List_Table_My {
 		 * sorting technique would be unnecessary.
 		 */
 		function usort_reorder( $a, $b ) {
-			$orderby_options = ['update', 'date', 'name', 'id', 'route_start_date', 'added'];
+			$orderby_options = ['update', 'date', 'name', 'id', 'route_start_date', 'added', 'country'];
 			$order_options   = ['DESC', 'ASC', 'desc', 'asc'];
 			
 			if ( isset( $_GET['orderby'], $_GET['order'] ) && in_array( $_GET['orderby'], $orderby_options ) && in_array( $_GET['order'], $order_options ) ) {

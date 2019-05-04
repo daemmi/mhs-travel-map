@@ -102,7 +102,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 		 * **************************************************************************** */
 
 		/**
-		 * Funktion to get coordinates by map_id, route_id or all routes
+		 * Function to get coordinates by map_id, route_id or all routes
 		 *
 		 * @since 1.0
 		 * @access public
@@ -150,7 +150,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 						) );
 						$route_options	 = json_decode( $route_options, true );
 
-						$coordinates[ $key ][ 'options' ]			= $this->sanitize_coordinate_option_array( $route_options );
+						$coordinates[ $key ][ 'options' ]		= $this->sanitize_coordinate_option_array( $route_options );
 						$coordinates[ $key ][ 'options' ] [ 'id' ]	= (int) $route_id;
 						$coordinates[ $key ][ 'coordinates' ]		= $this->sanitize_coordinates_array( $temp_coordinates );
 						$key++;
