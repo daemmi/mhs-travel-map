@@ -203,10 +203,10 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
                             $nonce	 = 'mhs_tm_maps_save_' . $id;
                     }
 
-                    $custom_buttons = array(
-                            '<a href="javascript:void(0);" id="mhs_tm_update_map" class="button-secondary margin" 
-                                    title="Update the map">' . __( 'update map', 'mhs_tm' ) . '</a>',
-                    );
+//                    $custom_buttons = array(
+//                            '<a href="javascript:void(0);" id="mhs_tm_update_map" class="button-secondary margin" 
+//                                    title="Update the map">' . __( 'update map', 'mhs_tm' ) . '</a>',
+//                    );
                     
                     switch( $message ) {
                         case 'route_added':
@@ -245,7 +245,7 @@ if ( !class_exists( 'MHS_TM_Admin_Maps' ) ) :
                         'form'		     => true,
                         'metaboxes'	     => true,
                         'action'	     => $form_action,
-                        'custom_buttons'     => $custom_buttons,
+//                        'custom_buttons'     => $custom_buttons,
                         'id'		     => $id,
                         'back'		     => true,
                         'back_url'	     => $url,
