@@ -983,23 +983,25 @@ jQuery( function ( $ ) {
     function hide_elements_from_invisble_pin( checkbox ) {
         var coordinate_index = parseInt( $( checkbox ).attr( 'id' ).replace( 'invisiblepin_', '' ) );
         
-        if( $( checkbox ).attr( 'id' ).substr( 0, $( checkbox ).attr( 'id' ).search( '_' ) ) == 'invisiblepin'
-            && $( checkbox ).is(":checked") ) {
-            $( checkbox ).closest('table' ).find( 'tr' ).each( function() {
-                if( $( this ).attr( 'id' ) != 'row-invisiblepin_' + ( coordinate_index ) ) {
-                    $( this ).hide();
-                }     
-            } );
-        } else {
-            $( checkbox ).closest('table' ).find( 'tr' ).each( function() {
-                if( $( this ).attr( 'id' ) != 'row-invisiblepin_' + ( coordinate_index ) ) {
-                    $( this ).show();
-                }     
-            } );
+        if( $( checkbox ).attr( 'id' ).substr( 0, $( checkbox ).attr( 'id' ).search( '_' ) ) == 'invisiblepin' ) {
+            if( $( checkbox ).is(":checked") ) {
+                $( checkbox ).closest('table' ).find( 'tr' ).each( function() {
+                    if( $( this ).attr( 'id' ) != 'row-invisiblepin_' + ( coordinate_index ) 
+                            && $( this ).attr( 'id' ) != 'row-dissnaptoroad_' + ( coordinate_index ) ) {
+                        $( this ).hide();
+                    }     
+                } );
+            } else {
+                $( checkbox ).closest('table' ).find( 'tr' ).each( function() {
+                    if( $( this ).attr( 'id' ) != 'row-invisiblepin_' + ( coordinate_index ) ) {
+                        $( this ).show();
+                    }     
+                } );
+            }
+                
+            // change the header name
+            change_coordinate_header_name( $( checkbox ).closest('.coordinate' ), coordinate_index );
         }
-        
-        // change the header name
-        change_coordinate_header_name( $( checkbox ).closest('.coordinate' ), coordinate_index );
     }
     
     // change coordinate header name
