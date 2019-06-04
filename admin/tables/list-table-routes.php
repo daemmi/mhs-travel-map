@@ -503,7 +503,6 @@ class List_Table_Routes extends WP_List_Table_My {
 			$route_coordinates	 = array();
 			$route_coordinates	 = $MHS_TM_Maps->sanitize_coordinates_array( json_decode( $route['coordinates'], true ) );
                         
-                        error_log('$route_options:  ' . print_r( $route_options, true) . "\n", 3,  'C:\xampp\htdocs\my_errors.log');
 			If( $route_coordinates == null ) {
 				$route_coordinates[0] = [];
 				$route_coordinates[0]['starttime'] = '0000000000';
