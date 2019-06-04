@@ -93,6 +93,7 @@ class List_Table_Routes extends WP_List_Table_My {
 			case 'date':
 			case 'name':
 			case 'country':
+			case 'class':
 			case 'update':
 			case 'route_start_date':
 				return $item[ $column_name ];
@@ -178,6 +179,7 @@ class List_Table_Routes extends WP_List_Table_My {
 			'cb'	           => '<input type="checkbox" />', //Render a checkbox instead of text
 			'name'	           => 'Name',
 			'country'          => 'Country',
+			'class'            => 'Tranport class',
 			'route_start_date' => 'Start date',
 			'update'           => 'Last updated',
 			'date'	           => 'Create date',
@@ -208,6 +210,7 @@ class List_Table_Routes extends WP_List_Table_My {
 			'update'           => array( 'update', false ),
 			'route_start_date' => array( 'route_start_date', false ),
 			'country'          => array( 'country', false ),
+			'class'            => array( 'class', false ),
 			'name'	           => array( 'name', false )
 		);
 		return $sortable_columns;
@@ -262,9 +265,15 @@ class List_Table_Routes extends WP_List_Table_My {
 		global $wpdb, $MHS_TM_Admin, $MHS_TM_Admin_Utilities, $MHS_TM_Maps, $MHS_TM_Admin_Routes;
 		$table_name = $wpdb->prefix . 'mhs_tm_routes';
 
-		$id         = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
-		$route_ids  = isset( $_GET['route_id'] ) ? $MHS_TM_Admin_Utilities->sanitize_id_array( $_GET['route_id'] ) : null;
-		$nonce      = isset( $_GET['_wpnonce'] ) ? esc_attr( $_GET['_wpnonce'] ) : null;
+                if ( isset( $_GET['_wpnonce'] ) ) {
+                    $id         = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
+                    $route_ids  = isset( $_GET['route_id'] ) ? $MHS_TM_Admin_Utilities->sanitize_id_array( $_GET['route_id'] ) : null;
+                    $nonce      = isset( $_GET['_wpnonce'] ) ? esc_attr( $_GET['_wpnonce'] ) : null;
+                } else { 
+                    $id         = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : null;
+                    $route_ids  = isset( $_POST['route_id'] ) ? $MHS_TM_Admin_Utilities->sanitize_id_array( $_POST['route_id'] ) : null;
+                    $nonce      = isset( $_POST['_wpnonce'] ) ? esc_attr( $_POST['_wpnonce'] ) : null;
+                }
 
 		//Detect when a bulk action is being triggered...
 		if ( 'delete' === $this->current_action() ) {
@@ -422,13 +431,23 @@ class List_Table_Routes extends WP_List_Table_My {
 	 * @uses $this->set_pagination_args()
 	 * ************************************************************************ */
 	function prepare_items() {
-		global $wpdb, $MHS_TM_Maps; //This is used only if making any database queries
+		global $wpdb, $MHS_TM_Maps, $MHS_TM_Admin_Utilities; 
 		$table_name = $wpdb->prefix . 'mhs_tm_routes';
 
 		/**
 		 * First, lets decide how many records per page to show
 		 */
-		$per_page = 50;
+                $user = get_current_user_id();
+                $screen = get_current_screen();
+                $option = $screen->get_option('per_page', 'option');
+
+                $per_page = get_user_meta($user, $option, true);
+
+                if ( empty ( $per_page) || $per_page < 1 ) {
+
+                    $per_page = $screen->get_option( 'per_page', 'default' );
+
+                }
 
 
 		/**
@@ -450,7 +469,7 @@ class List_Table_Routes extends WP_List_Table_My {
 		 * 3 other arrays. One for all columns, one for hidden columns, and one
 		 * for sortable columns.
 		 */
-		$this->_column_headers = array( $columns, $hidden, $sortable, $primary );
+                $this->_column_headers = $this->get_column_info();
 
 		/**
 		 * Optional. You can handle your bulk actions however you see fit. In this
@@ -469,8 +488,8 @@ class List_Table_Routes extends WP_List_Table_My {
 		 * be able to use your precisely-queried data immediately.
 		 */
 		$routes = $wpdb->get_results(
-		'SELECT * FROM ' . $table_name .
-		' WHERE active = 1 order by updated DESC', ARRAY_A
+                    'SELECT * FROM ' . $table_name .
+                    ' WHERE active = 1 order by updated DESC', ARRAY_A
 		);
 
 		$id = 0;
@@ -483,18 +502,19 @@ class List_Table_Routes extends WP_List_Table_My {
 			$route_options		 = $MHS_TM_Maps->sanitize_coordinate_option_array( json_decode( $route['options'], true ) );
 			$route_coordinates	 = array();
 			$route_coordinates	 = $MHS_TM_Maps->sanitize_coordinates_array( json_decode( $route['coordinates'], true ) );
-                        $coordinates_of_route    = $MHS_TM_Maps->get_coordinates( $route['id'], 'route' );
                         
+                        error_log('$route_options:  ' . print_r( $route_options, true) . "\n", 3,  'C:\xampp\htdocs\my_errors.log');
 			If( $route_coordinates == null ) {
 				$route_coordinates[0] = [];
 				$route_coordinates[0]['starttime'] = '0000000000';
 			}
 			date_default_timezone_set( 'Europe/London' );
 
-                        $data[ $id ]['country']	         = $coordinates_of_route[0]['coordinates'][0]['country'];
+                        $data[ $id ]['country']	         = $route_coordinates[0]['country'];
 			$data[ $id ]['date']	         = $date;
 			$data[ $id ]['update']           = $update;
 			$data[ $id ]['name']	         = $route_options['name'];
+                        $data[ $id ]['class']            = $MHS_TM_Admin_Utilities->get_route_class_name( $route_options['transport_class'] );
 			$data[ $id ]['route_start_date'] = date( 'Y-m-d', $route_coordinates[0]['starttime'] );
 			$data[ $id ]['id']	         = $route['id'];
 			$data[ $id ]['short_code']	 = '[mhs-travel-map type=route map_id=' . $route['id'] . ']';
@@ -510,7 +530,7 @@ class List_Table_Routes extends WP_List_Table_My {
 		 * sorting technique would be unnecessary.
 		 */
 		function usort_reorder( $a, $b ) {
-			$orderby_options = ['update', 'date', 'name', 'id', 'route_start_date', 'short_code', 'country'];
+			$orderby_options = ['update', 'date', 'name', 'id', 'route_start_date', 'short_code', 'country', 'class'];
 			$order_options   = ['DESC', 'ASC', 'desc', 'asc'];
 			
 			if ( isset( $_GET['orderby'], $_GET['order'] ) && in_array( $_GET['orderby'], $orderby_options ) && in_array( $_GET['order'], $order_options ) ) {

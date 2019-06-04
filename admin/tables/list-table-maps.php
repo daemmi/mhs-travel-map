@@ -127,7 +127,7 @@ class List_Table_Maps extends WP_List_Table_My {
 
 		//Build row actions
 		$actions = array(
-			'edit'	 => sprintf( '<a href="?page=%s&todo=edit&id=%s">Edit</a>', esc_attr( $_REQUEST['page'] ), absint( $item['id'] ) ),
+			'edit'	 => sprintf( '<a href="?page=%s&id=%s">Edit</a>', 'mhs_tm-maps-edit', absint( $item['id'] ) ),
 			'delete' => sprintf( '<a onclick="if ( confirm(\'Really delete %s?\') ) { return true; } return false;"' .
 			'href="?page=%s&action=delete&id=%s&_wpnonce=%s">Delete</a>', esc_html( $item['name'] ), esc_attr( $_REQUEST['page'] ), absint( $item['id'] ), $delete_nonce ),
 		);
@@ -257,9 +257,15 @@ class List_Table_Maps extends WP_List_Table_My {
 		global $wpdb, $MHS_TM_Admin, $MHS_TM_Admin_Utilities;
 		$table_name = $wpdb->prefix . 'mhs_tm_maps';
 
-		$nonce	 = isset( $_GET['_wpnonce'] ) ? esc_attr( $_GET['_wpnonce'] ) : null;
-		$id	 = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
-		$map_ids = isset( $_GET['map_id'] ) ? $MHS_TM_Admin_Utilities->sanitize_id_array( $_GET['map_id'] ) : null;
+                if ( isset( $_POST['_wpnonce'] ) ) {
+                    $nonce	 = isset( $_POST['_wpnonce'] ) ? esc_attr( $_POST['_wpnonce'] ) : null;
+                    $id	 = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : null;
+                    $map_ids = isset( $_POST['map_id'] ) ? $MHS_TM_Admin_Utilities->sanitize_id_array( $_POST['map_id'] ) : null;
+                } else {
+                    $nonce	 = isset( $_GET['_wpnonce'] ) ? esc_attr( $_GET['_wpnonce'] ) : null;
+                    $id	 = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : null;
+                    $map_ids = isset( $_GET['map_id'] ) ? $MHS_TM_Admin_Utilities->sanitize_id_array( $_GET['map_id'] ) : null;
+                }
 
 		//Detect when a bulk action is being triggered...
 		switch ( $this->current_action() ) {
@@ -337,7 +343,17 @@ class List_Table_Maps extends WP_List_Table_My {
 		/**
 		 * First, lets decide how many records per page to show
 		 */
-		$per_page = 50;
+                $user = get_current_user_id();
+                $screen = get_current_screen();
+                $option = $screen->get_option('per_page', 'option');
+
+                $per_page = get_user_meta($user, $option, true);
+
+                if ( empty ( $per_page) || $per_page < 1 ) {
+
+                    $per_page = $screen->get_option( 'per_page', 'default' );
+
+                }
 
 
 		/**
@@ -359,7 +375,7 @@ class List_Table_Maps extends WP_List_Table_My {
 		 * 3 other arrays. One for all columns, one for hidden columns, and one
 		 * for sortable columns.
 		 */
-		$this->_column_headers = array( $columns, $hidden, $sortable, $primary );
+                $this->_column_headers = $this->get_column_info();
 
 
 		/**
@@ -405,13 +421,13 @@ class List_Table_Maps extends WP_List_Table_My {
                     if ( $selected ) {
                             $data[ $id ]['active'] = 'Map is selected! <br> <span class="edit"><a title="' .
                             __( 'Unselect this Map!', 'mhs_tm' ) .
-                            '" href="?page=MHS_TM-maps&todo=unselect&amp;id=' . $map['id'] . '&_wpnonce=' . $select_map_nonce . '">' .
+                            '" href="?page=mhs_tm-maps&todo=unselect&amp;id=' . $map['id'] . '&_wpnonce=' . $select_map_nonce . '">' .
                             __( 'Set as unselected!', 'mhs_tm' ) .
                             '</a></span>';
                     } else {
                             $data[ $id ]['active'] = 'Map is unselected! <br> <span class="edit"><a title="' .
                             __( 'Select this Map!', 'mhs_tm' ) .
-                            '" href="?page=MHS_TM-maps&todo=select&amp;id=' . $map['id'] . '&_wpnonce=' . $select_map_nonce . '">' .
+                            '" href="?page=mhs_tm-maps&todo=select&amp;id=' . $map['id'] . '&_wpnonce=' . $select_map_nonce . '">' .
                             __( 'Set as selected!', 'mhs_tm' ) .
                             '</a></span>';
                     }

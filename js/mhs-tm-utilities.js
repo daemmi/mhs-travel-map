@@ -1072,13 +1072,15 @@ mhs_tm_utilities.coordinate_handling.get_coordinate_distance_overview = function
             Math.round( distance_total / 1000 ) + 'km';
         return { 'string': string,
             'coordinate_distance': Math.round( distance / 1000 ),
-            'total_distance': Math.round( distance_total / 1000 ) 
+            'total_distance': Math.round( distance_total / 1000 ), 
+            'total_distance_in_m': distance_total
         };
     } else {
         var string =  'Distance to pin: ' + Math.round( distance / 1000 ) + 'km';
         return { 'string': string,
             'coordinate_distance': Math.round( distance / 1000 ),
-            'total_distance': Math.round( distance_total / 1000 ) 
+            'total_distance': Math.round( distance_total / 1000 ), 
+            'total_distance_in_m': distance_total
         };
     }
 };

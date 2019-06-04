@@ -23,7 +23,7 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 			global $wpdb, $MHS_TM_Admin;
 			
 			$messages = array();
-			$url = 'admin.php?page=MHS_TM-settings';
+			$url = 'admin.php?page=mhs_tm-settings';
 			
 			//save Get and Post and sanitize
 			$todo	= isset( $_GET[ 'todo' ] ) ? sanitize_text_field( $_GET[ 'todo' ] ) : 'default';
@@ -101,7 +101,7 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 		 */
 		private function settings_menu( $messages = NULL ) {
 
-			$url = 'admin.php?page=MHS_TM-settings';
+			$url = 'admin.php?page=mhs_tm-settings';
 			
 			//save Get and Post and sanitize
 			$active_tab	= isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'settings';
@@ -144,7 +144,7 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 		
 			switch ( $tab ){
 				case 'settings' :
-					$url = 'admin.php?page=MHS_TM-settings';
+					$url = 'admin.php?page=mhs_tm-settings';
 					$form_action = $url . '&amp;todo=save';
 					$fields	 = $this->settings_fields();
 					

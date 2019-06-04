@@ -47,6 +47,58 @@ if ( !defined( 'MHS_TM_DIRNAME' ) )
 	define( 'MHS_TM_DIRNAME', basename( MHS_TM_ABSPATH ) );
 
 /**
+ * Admin UI
+ *
+ * @since 1.0
+ */
+if ( is_admin() ) {
+        
+	/* templates for tables */
+	require_once( MHS_TM_ABSPATH . '/admin/tables/list-table-maps.php' );
+	require_once( MHS_TM_ABSPATH . '/admin/tables/list-table-map-routes.php' );
+	require_once( MHS_TM_ABSPATH . '/admin/tables/list-table-routes.php' );
+        
+	/* functional classes (usually insantiated only once) */
+	require_once( MHS_TM_ABSPATH . '/admin/class-mhs-tm-admin-main.php' );
+	require_once( MHS_TM_ABSPATH . '/admin/class-mhs-tm-admin-maps.php' );
+	require_once( MHS_TM_ABSPATH . '/admin/class-mhs-tm-admin-map-edit.php' );
+	require_once( MHS_TM_ABSPATH . '/admin/class-mhs-tm-admin-routes.php' );
+	require_once( MHS_TM_ABSPATH . '/admin/class-mhs-tm-admin-settings.php' );
+	require_once( MHS_TM_ABSPATH . '/admin/class-mhs-tm-admin-utilities.php' );
+
+	/* template classes (non-OOP templates are included on the spot) */
+	require_once( MHS_TM_ABSPATH . '/templates/class-mhs-tm-admin-page.php' );
+	require_once( MHS_TM_ABSPATH . '/templates/class-mhs-tm-admin-form.php' );
+            
+	/**
+	 * MHS_TM_Admin object
+	 *
+	 * @since 1.0
+	 */
+	$GLOBALS['MHS_TM_Admin'] = new MHS_TM_Admin();
+	$GLOBALS['MHS_TM_Admin_Maps'] = new MHS_TM_Admin_Maps();
+	$GLOBALS['MHS_TM_Admin_Map_Edit'] = new MHS_TM_Admin_Map_Edit();
+	$GLOBALS['MHS_TM_Admin_Routes'] = new MHS_TM_Admin_Routes();
+	$GLOBALS['MHS_TM_Admin_Settings'] = new MHS_TM_Admin_Settings();
+	$GLOBALS['MHS_TM_Admin_Utilities'] = new MHS_TM_Admin_Utilities();
+
+	/**
+	 * MHS_TM_Admin ajax
+	 *
+	 * @since 1.0.1
+	 */
+	add_action( 'wp_ajax_routes_save', array( 'MHS_TM_Admin_Routes', 'routes_save' ) );
+	add_action( 'wp_ajax_get_coordinate_note', array( 'MHS_TM_Maps', 'get_coordinate_note' ) );
+
+	/**
+	 * MHS_TM_Admin Wp_List_Table Bulk action 
+	 *
+	 * @since 1.5.0
+	 */ 
+        add_action( 'admin_action_mhs_tm_change_map_routes', array( 'MHS_TM_Admin_Maps', 'mhs_tm_change_map_routes' ) );
+}
+
+/**
  * Enqueue the plugin's javascript
  *
  * @since 1.0
@@ -182,55 +234,6 @@ $GLOBALS['MHS_TM_Maps'] = new MHS_TM_Maps();
 $GLOBALS['MHS_TM_Utilities'] = new MHS_TM_Utilities();
 
 /**
- * Admin UI
- *
- * @since 1.0
- */
-if ( is_admin() ) {
-	/* functional classes (usually insantiated only once) */
-	require_once( MHS_TM_ABSPATH . '/admin/class-mhs-tm-admin-main.php' );
-	require_once( MHS_TM_ABSPATH . '/admin/class-mhs-tm-admin-maps.php' );
-	require_once( MHS_TM_ABSPATH . '/admin/class-mhs-tm-admin-routes.php' );
-	require_once( MHS_TM_ABSPATH . '/admin/class-mhs-tm-admin-settings.php' );
-	require_once( MHS_TM_ABSPATH . '/admin/class-mhs-tm-admin-utilities.php' );
-
-	/* template classes (non-OOP templates are included on the spot) */
-	require_once( MHS_TM_ABSPATH . '/templates/class-mhs-tm-admin-page.php' );
-	require_once( MHS_TM_ABSPATH . '/templates/class-mhs-tm-admin-form.php' );
-        
-	/* templates for tables */
-	require_once( MHS_TM_ABSPATH . '/admin/tables/list-table-maps.php' );
-	require_once( MHS_TM_ABSPATH . '/admin/tables/list-table-map-routes.php' );
-	require_once( MHS_TM_ABSPATH . '/admin/tables/list-table-routes.php' );
-            
-	/**
-	 * MHS_TM_Admin object
-	 *
-	 * @since 1.0
-	 */
-	$GLOBALS['MHS_TM_Admin'] = new MHS_TM_Admin();
-	$GLOBALS['MHS_TM_Admin_Maps'] = new MHS_TM_Admin_Maps();
-	$GLOBALS['MHS_TM_Admin_Routes'] = new MHS_TM_Admin_Routes();
-	$GLOBALS['MHS_TM_Admin_Settings'] = new MHS_TM_Admin_Settings();
-	$GLOBALS['MHS_TM_Admin_Utilities'] = new MHS_TM_Admin_Utilities();
-
-	/**
-	 * MHS_TM_Admin ajax
-	 *
-	 * @since 1.0.1
-	 */
-	add_action( 'wp_ajax_routes_save', array( 'MHS_TM_Admin_Routes', 'routes_save' ) );
-	add_action( 'wp_ajax_get_coordinate_note', array( 'MHS_TM_Maps', 'get_coordinate_note' ) );
-
-	/**
-	 * MHS_TM_Admin Wp_List_Table Bulk action 
-	 *
-	 * @since 1.5.0
-	 */ 
-        add_action( 'admin_action_mhs_tm_change_map_routes', array( 'MHS_TM_Admin_Maps', 'mhs_tm_change_map_routes' ) );
-}
-
-/**
  * Define globals
  *
  * @since 1.0
@@ -297,11 +300,7 @@ function MHS_TM_install() {
 			$plugin_settings = $MHS_TM_Utilities->get_plugin_settings();
 			$transport_classes = $plugin_settings['transport_classes'];
 			
-
-				error_log('$transport_classes: ' . print_r($transport_classes,1) . "\n", 3,
-				'D:\xampp\htdocs\Tramprennen\my_errors.log');
-				
-			//get the classes and add a unique id 
+                        //get the classes and add a unique id 
 			$x = 1;
 			foreach ( $transport_classes as $transport_class ) {
 				$transport_classes[$x - 1]['id'] = $x;  
@@ -383,6 +382,16 @@ function MHS_TM_uninstall(){
     // drop a custom database table
     global $wpdb;
     
+    //delete user meta datas
+    $users = get_users( array( 'fields' => array( 'ID' ) ) );
+    foreach($users as $user_id){
+        delete_user_meta($user_id->ID, 'mhs_tm_map_routes_per_page');
+        delete_user_meta($user_id->ID, 'mhs_tm_maps_per_page');
+        delete_user_meta($user_id->ID, 'mhs_tm_routes_per_page');
+        delete_user_meta($user_id->ID, 'managetoplevel_page_mhs_tm-mapscolumnshidden');
+        delete_user_meta($user_id->ID, 'managemhs-travel-map_page_mhs_tm-maps-editcolumnshidden');
+        delete_user_meta($user_id->ID, 'managemhs-travel-map_page_mhs_tm-routescolumnshidden');
+    }
     delete_option( 'MHS_TM_db_version' );
     $wpdb->query("DROP TABLE IF EXISTS " . $wpdb->prefix . "mhs_tm_routes");
     $wpdb->query("DROP TABLE IF EXISTS " . $wpdb->prefix . "mhs_tm_maps");

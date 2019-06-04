@@ -76,8 +76,8 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 		private function routes_menu( $messages = NULL ) {
                     global $wpdb, $MHS_TM_Admin_Settings, $MHS_TM_Utilities;
                     $table_name = $wpdb->prefix . 'mhs_tm_routes';
-
-                    $url	 = 'admin.php?page=MHS_TM-routes';
+        
+                    $url	 = 'admin.php?page=mhs_tm-routes';
                     $height	 = 10;
 
                     $adminpage = new MHS_TM_Admin_Page( array(
@@ -103,7 +103,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
                     echo $adminpage->top();
                     echo '<br />' . $button . $button2 . '<br /> <br /> ' .
                     '<!-- Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions -->
-                    <form id="list_table" method="get">
+                    <form id="list_table" method="post">
                     <!-- For plugins, we also need to ensure that the form posts back to our current page -->
                     <input type="hidden" name="page" value="' . esc_attr( $_REQUEST[ 'page' ] ) . '" />
                     <!-- Now we can render the completed list table -->';
@@ -156,7 +156,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 			$output		 = '';
 			$table_name	 = $wpdb->prefix . 'mhs_tm_routes';
 
-			$url		 = 'admin.php?page=MHS_TM-routes';
+			$url		 = 'admin.php?page=mhs_tm-routes';
 			$form_action = 'javascript:void(0);';
 
 			if ( !is_numeric( $id ) ) {
@@ -316,7 +316,7 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 		private function routes_import( $id = NULL ) {
 			global $MHS_TM_Utilities;
 
-			$url		 = 'admin.php?page=MHS_TM-routes';
+			$url		 = 'admin.php?page=mhs_tm-routes';
 			$form_action = '';
 			$title		 = sprintf( __( 'Import new Route(s)', 'mhs_tm' ) );
 

@@ -85,12 +85,12 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 				'coordinates'		 => $coordinates,
 				'coord_center_lat'	 => $coord_center_lat,
 				'coord_center_lng'	 => $coord_center_lng,
-				'auto_load'			 => true,
-				'map_id'			 => $map_id,
+				'auto_load'              => true,
+				'map_id'		 => $map_id,
 				'map_options'		 => $map_options,
 				'shortcode_options'	 => $shortcode_options,
 				'plugin_dir'		 => MHS_TM_RELPATH,
-				'ajax_url'			 => admin_url( 'admin-ajax.php' ),
+				'ajax_url'		 => admin_url( 'admin-ajax.php' ),
 			)
 			);
 
@@ -135,9 +135,9 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 					
 					$temp_coordinates	 = array();
 					$temp_coordinates	 = $wpdb->get_var( $wpdb->prepare(
-					'SELECT coordinates FROM ' .
-					$wpdb->prefix . 'mhs_tm_routes ' .
-					'WHERE active = 1 AND id = %d ORDER BY id DESC', (int) $route_id
+                                            'SELECT coordinates FROM ' .
+                                            $wpdb->prefix . 'mhs_tm_routes ' .
+                                            'WHERE active = 1 AND id = %d ORDER BY id DESC', (int) $route_id
 					) );
 					$temp_coordinates	 = json_decode( $temp_coordinates, true );
 					
@@ -252,7 +252,12 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 				$new_input[ 'dis_route_time_date' ]	 = array_key_exists( 'dis_route_time_date', $array ) ?
 					$MHS_TM_Utilities->sanitize_checkbox( $array[ 'dis_route_time_date' ] ) : false;
 			} else {
-				$new_input[ 0 ] = (int) sanitize_text_field( $array );
+				$new_input[ 'path' ]                    = null;
+				$new_input[ 'name' ]                    = null;
+				$new_input[ 'transport_class' ]         = null;
+                                $new_input[ 'route_color' ]             = null;
+				$new_input[ 'dis_route_snap_to_road' ]  = null;
+				$new_input[ 'dis_route_time_date' ]     = null;
 			}
 			return $new_input;
 		}

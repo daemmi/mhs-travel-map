@@ -97,6 +97,7 @@ class List_Table_Map_Routes extends WP_List_Table_My {
 			case 'added':
 			case 'country':
 			case 'update':
+			case 'class':
 			case 'route_start_date':
 				return $item[ $column_name ];
 			default:
@@ -178,6 +179,7 @@ class List_Table_Map_Routes extends WP_List_Table_My {
 			'name'	           => 'Name',
 			'added'            => 'In map?',
 			'country'          => 'Country',
+			'class'            => 'Tranport class',
 			'route_start_date' => 'Start date',
 			'update'           => 'Last updated',
 			'date'	           => 'Create date',
@@ -205,6 +207,7 @@ class List_Table_Map_Routes extends WP_List_Table_My {
 			'date'	           => array( 'date', false ), //true means it's already sorted 
 			'update'           => array( 'update', false ),
 			'country'          => array( 'country', false ),
+			'class'            => array( 'class', false ),
 			'route_start_date' => array( 'route_start_date', false ),
 			'added'            => array( 'added', true ),
 			'name'	           => array( 'name', false )
@@ -317,14 +320,23 @@ class List_Table_Map_Routes extends WP_List_Table_My {
 	 * @uses $this->set_pagination_args()
 	 * ************************************************************************ */
 	function prepare_items() {
-		global $wpdb, $MHS_TM_Maps; 
+		global $wpdb, $MHS_TM_Maps, $MHS_TM_Admin_Utilities; 
 		$table_name = $wpdb->prefix . 'mhs_tm_routes';
 
 		/**
 		 * First, lets decide how many records per page to show
 		 */
-		$per_page = 50;
+                $user = get_current_user_id();
+                $screen = get_current_screen();
+                $option = $screen->get_option('per_page', 'option');
 
+                $per_page = get_user_meta($user, $option, true);
+
+                if ( empty ( $per_page) || $per_page < 1 ) {
+
+                    $per_page = $screen->get_option( 'per_page', 'default' );
+
+                }
 
 		/**
 		 * REQUIRED. Now we need to define our column headers. This includes a complete
@@ -345,7 +357,8 @@ class List_Table_Map_Routes extends WP_List_Table_My {
 		 * 3 other arrays. One for all columns, one for hidden columns, and one
 		 * for sortable columns.
 		 */
-		$this->_column_headers = array( $columns, $hidden, $sortable, $primary );
+//		$this->_column_headers = array( $columns, $hidden, $sortable, $primary );
+                $this->_column_headers = $this->get_column_info();
 
 		/**
 		 * Optional. You can handle your bulk actions however you see fit. In this
@@ -363,7 +376,7 @@ class List_Table_Map_Routes extends WP_List_Table_My {
 		);
                 
                 $map_routes = $MHS_TM_Maps->get_routes_of_map( $this->map_id );
-                
+
 		$id = 0;
 		$data = [];
 		foreach ( $routes as $route ) {
@@ -384,7 +397,7 @@ class List_Table_Map_Routes extends WP_List_Table_My {
                     }
                     date_default_timezone_set( 'Europe/London' );
                     
-                    if ( in_array($route['id'], $map_routes ) ) {
+                    if ( in_array( $route['id'], $map_routes ) ) {
                         $data[ $id ]['added']	        = sprintf( '<a style="color:#7AD03A; font-weight:bold">Yes</a> <br> '
                                 . '<a href="?%s&action=mhs_tm_change_map_routes&id=%s&remove_id=%s&_wpnonce=%s&referer=%s">Remove</a>', 
                                 admin_url(), $_GET['id'], absint( $route['id'] ), $remove_route_from_map_nonce, 
@@ -402,6 +415,7 @@ class List_Table_Map_Routes extends WP_List_Table_My {
                     $data[ $id ]['route_start_date']    = date( 'Y-m-d', $route_coordinates[0]['starttime'] );
                     $data[ $id ]['id']                  = $route['id'];
                     $data[ $id ]['name']                = $route_options['name'];
+                    $data[ $id ]['class']               = $MHS_TM_Admin_Utilities->get_route_class_name( $route_options['transport_class'] );
                     $id                                 = $id + 1;
 		}
                                 
@@ -414,7 +428,7 @@ class List_Table_Map_Routes extends WP_List_Table_My {
 		 * sorting technique would be unnecessary.
 		 */
 		function usort_reorder( $a, $b ) {
-			$orderby_options = ['update', 'date', 'name', 'id', 'route_start_date', 'added', 'country'];
+			$orderby_options = ['update', 'date', 'name', 'id', 'route_start_date', 'added', 'country', 'class'];
 			$order_options   = ['DESC', 'ASC', 'desc', 'asc'];
 			
 			if ( isset( $_GET['orderby'], $_GET['order'] ) && in_array( $_GET['orderby'], $orderby_options ) && in_array( $_GET['order'], $order_options ) ) {
