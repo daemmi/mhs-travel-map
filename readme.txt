@@ -2,10 +2,10 @@
 Contributors: daemmi
 Donate link: https://profiles.wordpress.org/daemmi
 Tags: map, google maps, hitchhike, hitchhiking, travel, backpacking, traveling
-Tested up to: 5.0.3
+Tested up to: 5.2.1
 Requires at least: 3.8.0
 Requires PHP: 5.2.0
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPL3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -21,7 +21,7 @@ coordinate and import backup files from the Android app
 
 = Features =
 
-Got to [the demo page](http://mhs-tm.goip.de) to have a look of a couple of example maps and to try out the backend!
+Got to [the demo page](http://mhs-tm.aenywhere.de) to have a look of a couple of example maps and to try out the backend!
 
 * create you own travel map with use of google maps
 * import backup files from the Android app `My Hitchhiking Spots`
@@ -59,6 +59,11 @@ This section describes how to install and use the plugin.
 == Frequently Asked Questions ==
 
 == Changelog ==
+
+= 1.5.0 (2019-06-04) =
+- added, new way to add routes to map, now styled as a table
+- added, screen option to all tables and for some more columns
+- fixed, minor bugs
 
 = 1.4.0 (2019-04-11) =
 - added, browse through coordinates function is faster

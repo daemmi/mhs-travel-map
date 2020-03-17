@@ -389,7 +389,6 @@ class List_Table_Map_Routes extends WP_List_Table_My {
                     $route_coordinates              = $MHS_TM_Maps->sanitize_coordinates_array( json_decode( $route['coordinates'], true ) );
                     $remove_route_from_map_nonce    = wp_create_nonce( 'mhs_tm_remove_route_from_map' . absint( $route['id'] ) );
                     $add_route_from_map_nonce       = wp_create_nonce( 'mhs_tm_add_route_from_map' . absint( $route['id'] ) );
-                    $coordinates_of_route           = $MHS_TM_Maps->get_coordinates( $route['id'], 'route' );
                     
                     If( $route_coordinates == null ) {
                             $route_coordinates[0] = [];
@@ -409,7 +408,7 @@ class List_Table_Map_Routes extends WP_List_Table_My {
                                 urlencode( admin_url() . 'admin.php?' . esc_attr( $_SERVER['QUERY_STRING'] ) ) );                
                     }
                     
-                    $data[ $id ]['country']	        = $coordinates_of_route[0]['coordinates'][0]['country'];
+                    $data[ $id ]['country']	        = $route_coordinates[0]['country'];
                     $data[ $id ]['date']	        = $date;
                     $data[ $id ]['update']              = $update;
                     $data[ $id ]['route_start_date']    = date( 'Y-m-d', $route_coordinates[0]['starttime'] );

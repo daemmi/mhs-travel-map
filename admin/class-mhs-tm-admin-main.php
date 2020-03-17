@@ -26,7 +26,7 @@ if ( !class_exists( 'MHS_TM_Admin' ) ) :
 		 * @access public
 		 */
 		public function __construct() {			
-//                        add_filter('set-screen-option', [ __CLASS__, 'table_map_routes_set_option' ], 10, 3);
+                        add_filter('set-screen-option', [ __CLASS__, 'table_map_routes_set_option' ], 10, 3);
 			add_action( 'admin_menu', array( &$this, 'display_admin_menu', ) );
                         add_filter( 'submenu_file', array( &$this, 'mhs_tm_wp_admin_submenu_filter', ) );
 		}
@@ -192,13 +192,13 @@ if ( !class_exists( 'MHS_TM_Admin' ) ) :
 		 * @since 1.0
 		 * @access public
 		 */
-//		public function MHS_TM_Admin() {
-//			$this->__construct();
-//		}
+		public function MHS_TM_Admin() {
+			$this->__construct();
+		}
                 
-//                public static function table_map_routes_set_option($status, $option, $value) {
-//                    return $value;
-//                }
+                public static function table_map_routes_set_option($status, $option, $value) {
+                    return $value;
+                }
                
 	}
 

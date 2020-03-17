@@ -39,11 +39,6 @@ if ( !class_exists( 'MHS_TM_Admin_Map_Edit' ) ) :
                         $fields	 = $MHS_TM_Admin_Maps->maps_fields( $id );
                         $nonce	 = 'mhs_tm_maps_save_' . $id;
 
-    //                    $custom_buttons = array(
-    //                            '<a href="javascript:void(0);" id="mhs_tm_update_map" class="button-secondary margin" 
-    //                                    title="Update the map">' . __( 'update map', 'mhs_tm' ) . '</a>',
-    //                    );
-
                         switch( $message ) {
                             case 'route_added':
                                 $messages[] = array(
@@ -81,7 +76,6 @@ if ( !class_exists( 'MHS_TM_Admin_Map_Edit' ) ) :
                             'form'		     => true,
                             'metaboxes'	     => true,
                             'action'	     => $form_action,
-    //                        'custom_buttons'     => $custom_buttons,
                             'id'		     => $id,
                             'back'		     => true,
                             'back_url'	     => $url,
@@ -91,14 +85,14 @@ if ( !class_exists( 'MHS_TM_Admin_Map_Edit' ) ) :
                             'button'             => 'Save map settings'
                         );
                         $form	 = new MHS_TM_Admin_Form( $args );
+                        $ListTable = new List_Table_Map_Routes( $id );
 
                         echo $adminpage->top();
+                        $ListTable->prepare_items();
                         echo do_shortcode( '[mhs-travel-map map_id=' . $id . ' run_shortcodes=0] </br>' );
                         echo $form->output();
 
                         echo '<h2>Add routes to map</h2> <hr>';
-                        $ListTable = new List_Table_Map_Routes( $id );
-                        $ListTable->prepare_items();
                         echo '<!-- Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions -->
                             <form id="list_table" method="post">';
     //                        echo $ListTable->search_box( 'search', 'search_id' );
@@ -115,11 +109,6 @@ if ( !class_exists( 'MHS_TM_Admin_Map_Edit' ) ) :
                         foreach ( $route_ids as $route ) {
                                 $coordinates_all[ $route['value'] ] = $MHS_TM_Maps->get_coordinates( $route['value'], 'route' );
                         }
-
-                            wp_enqueue_script( 'mhs_tm_admin_maps' );
-                            wp_localize_script( 'mhs_tm_admin_maps', 'mhs_tm_app_vars', array(
-                                    'coordinates_all' => $coordinates_all
-                            ) );
 
                         $key = $MHS_TM_Utilities->get_gmaps_api_key();
 
