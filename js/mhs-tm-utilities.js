@@ -159,7 +159,8 @@ mhs_tm_utilities.gmaps.geocode_lat_lng = function ( lat, lng, settings, callback
                     // success! 
                     var return_result = [ ];
                     var address = results[0].address_components;
-                    $.each( index, function ( key ) {
+                    
+                    for ( var key in index ) {
                         return_result[key] = '';
                         for ( var p = address.length - 1; p >= 0; p-- ) {
                             //loop through all indexes of the present field
@@ -174,7 +175,7 @@ mhs_tm_utilities.gmaps.geocode_lat_lng = function ( lat, lng, settings, callback
                                 break;
                             }
                         }
-                    } );
+                    }
                     callback( return_result );
                     break;
 
