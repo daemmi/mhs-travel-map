@@ -268,14 +268,17 @@ if ( !class_exists( 'MHS_TM_Admin_Settings' ) ) :
 			$plugin_settings = $MHS_TM_Utilities->get_plugin_settings();
 			$transport_classes_table_rows = '';
 			
-			foreach ( $plugin_settings['transport_classes'] as $key => $transport_class ) {
-				$transport_classes_table_rows .= '<tr><td class="transport_class_color" style="background-color: ' . $transport_class['color'] . 
-				';"></td><td>' . $transport_class['name'] . '</td>
-				<td class="transport_class_settings">
-				<a class="mhs_tm_edit_transport" href="javascript:void(0)">Edit</a> | 
-				<a class="mhs_tm_delete_transport" href="javascript:void(0)">Delete</a>
-				</td></tr>';
-			}
+                        if( is_array( $plugin_settings['transport_classes'] ) )
+                        {
+                            foreach ( $plugin_settings['transport_classes'] as $key => $transport_class ) {
+                                    $transport_classes_table_rows .= '<tr><td class="transport_class_color" style="background-color: ' . $transport_class['color'] . 
+                                    ';"></td><td>' . $transport_class['name'] . '</td>
+                                    <td class="transport_class_settings">
+                                    <a class="mhs_tm_edit_transport" href="javascript:void(0)">Edit</a> | 
+                                    <a class="mhs_tm_delete_transport" href="javascript:void(0)">Delete</a>
+                                    </td></tr>';
+                            }
+                        }
 
 			$settings_fields = array(
 				array(

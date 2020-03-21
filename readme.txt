@@ -2,10 +2,10 @@
 Contributors: daemmi
 Donate link: https://profiles.wordpress.org/daemmi
 Tags: map, google maps, hitchhike, hitchhiking, travel, backpacking, traveling
-Tested up to: 5.2.1
-Requires at least: 3.8.0
+Tested up to: 5.3.2
+Requires at least: 4.4.0
 Requires PHP: 5.2.0
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: GPL3
 License URI: http://www.gnu.org/licenses/gpl.html
 
@@ -59,6 +59,9 @@ This section describes how to install and use the plugin.
 == Frequently Asked Questions ==
 
 == Changelog ==
+
+= 1.5.1 (2020-20-03) =
+- fixed, minor bugs
 
 = 1.5.0 (2019-06-04) =
 - added, new way to add routes to map, now styled as a table

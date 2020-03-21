@@ -461,11 +461,14 @@ if ( !class_exists( 'MHS_TM_Admin_Routes' ) ) :
 					'value'	 => '',
 					'label'	 => '---' ];
 
-				foreach ( $plugin_settings[ 'transport_classes' ] as $transport_class ) {
-					$transport_classes[] = [
-						'value'	 => $transport_class[ 'id' ],
-						'label'	 => $transport_class[ 'name' ] ];
-				}
+                                if( is_array( $plugin_settings['transport_classes'] ) )
+                                {
+                                    foreach ( $plugin_settings[ 'transport_classes' ] as $transport_class ) {
+                                            $transport_classes[] = [
+                                                    'value'	 => $transport_class[ 'id' ],
+                                                    'label'	 => $transport_class[ 'name' ] ];
+                                    }
+                                }
 
 				$routes_fields = array(
 					array(

@@ -4,13 +4,13 @@
 Plugin Name: My Hitchhiking Spot Travel Map (MHS Travel Map)
 Plugin URI: 
 Description: Create your travel map with use of google maps by adding coordinates to a map, make your route public, write a story for each coordinate and import backup files from the Android app "<a title="My Hitchhiking Spots" href="https://play.google.com/store/apps/details?id=com.myhitchhikingspots" target="_blank" rel="noopener">My Hitchhiking Spots</a>"
-Version: 1.5.0 
+Version: 1.5.1 
 Author: Jonas Damhuis
 Author URI: 
 License: GPL3
 */
 
-/*  Copyright 2017 Jonas Damhuis  (email : jonas-damhuis@web.de)
+/*  Copyright 2020 Jonas Damhuis  (email : jonas-damhuis@web.de)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 3, as
@@ -293,7 +293,6 @@ function MHS_TM_install() {
 				
                 add_option( 'MHS_TM_db_version', $MHS_TM_db_version ); 
         }   
-		
 		//First DB Update adding id for class option in json array
 		if ( version_compare( $installed_ver, '1.1' ) < 0 ) {
 			$plugin_settings = $MHS_TM_Utilities->get_plugin_settings();
@@ -301,6 +300,12 @@ function MHS_TM_install() {
 			
                         //get the classes and add a unique id 
 			$x = 1;
+                        
+                        if( !is_array( $transport_classes ) )
+                        {
+                            return;
+                        }
+                        
 			foreach ( $transport_classes as $transport_class ) {
 				$transport_classes[$x - 1]['id'] = $x;  
 				$x++;
@@ -324,6 +329,12 @@ function MHS_TM_install() {
 			$routes = $wpdb->get_results("select * from " . $wpdb->prefix . "mhs_tm_routes", ARRAY_A );
 			
 			//find options rows with a transportation_class
+                        
+                        if( !is_array( $routes ) )
+                        {
+                            return;
+                        }
+                        
 			foreach ( $routes as $key => $route_row ) {
 				$route_row_option = json_decode( $route_row['options'], true );
 				
