@@ -509,12 +509,12 @@ class List_Table_Routes extends WP_List_Table_My {
 			}
 			date_default_timezone_set( 'Europe/London' );
 
-                        $data[ $id ]['country']	         = $route_coordinates[0]['country'];
+                        $data[ $id ]['country']	         = isset( $route_coordinates[0]['country'] ) ? $route_coordinates[0]['country'] : "";
 			$data[ $id ]['date']	         = $date;
 			$data[ $id ]['update']           = $update;
-			$data[ $id ]['name']	         = $route_options['name'];
+			$data[ $id ]['name']	         = isset( $route_options['name'] ) ? $route_options['name'] : "";
                         $data[ $id ]['class']            = $MHS_TM_Admin_Utilities->get_route_class_name( $route_options['transport_class'] );
-			$data[ $id ]['route_start_date'] = date( 'Y-m-d', $route_coordinates[0]['starttime'] );
+			$data[ $id ]['route_start_date'] = date( 'Y-m-d', isset( $route_coordinates[0]['starttime'] ) ? $route_coordinates[0]['starttime'] : 0 );
 			$data[ $id ]['id']	         = $route['id'];
 			$data[ $id ]['short_code']	 = '[mhs-travel-map type=route map_id=' . $route['id'] . ']';
 			$id				 = $id + 1;

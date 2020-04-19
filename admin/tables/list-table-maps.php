@@ -415,7 +415,7 @@ class List_Table_Maps extends WP_List_Table_My {
                     date_default_timezone_set( 'Europe/Berlin' );
                     $data[ $id ]['date']	 = $date;
                     $data[ $id ]['update']       = $update;
-                    $data[ $id ]['name']         = $map_options['name'];
+                    $data[ $id ]['name']         = isset( $map_options['name'] ) ? $map_options['name'] : "";
                     $data[ $id ]['id']	         = $map['id'];
                     $data[ $id ]['short_code']   = '[mhs-travel-map map_id=' . $map['id'] . ']';
                     if ( $selected ) {
