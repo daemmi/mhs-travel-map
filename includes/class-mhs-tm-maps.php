@@ -167,7 +167,7 @@ if ( !class_exists( 'MHS_TM_Maps' ) ) :
 		 * @since 1.3.0
 		 * @access public
 		 */
-		public function get_coordinate_note() {
+		public static function get_coordinate_note() {
 			global $MHS_TM_Maps;
 			
 			$route_id	= isset( $_POST[ 'route_id' ] ) ? absint( $_POST[ 'route_id' ] ) : null;

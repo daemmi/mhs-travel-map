@@ -231,6 +231,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
                     var previous_active_coordinate = {};
                     previous_active_coordinate.route_id = marker.id_route;
                     previous_active_coordinate.coordinate_id = marker.id_marker;
+                    var load_marker_info_counter = 0;
 
                     // check if it alreadz has been loaded before or load via ajax note content 
                     if( !( marker.note_div_id.route_id + '-' + marker.note_div_id.marker_id in mhs_tm_map.marker_notes[map_canvas_id] ) ) {
@@ -280,7 +281,8 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
 
                     //Function to load more notes before and after the actual one
                     function load_next_notes() {
-                        for ( var y = 0; y < 4; y++ ) {
+                        jQuery(function ($) {
+                            
                             load_next = false;
                             //calculate which id are for the nextcoordinate
                             if( next_active_coordinate.coordinate_id < mhs_tm_map.marker[map_canvas_id][next_active_coordinate.route_id].length - 1 ) {
@@ -296,47 +298,52 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
 
                             // check if it alreadz has been loaded before or load via ajax note content 
                             if( load_next && !( next_marker.note_div_id.route_id + '-' + next_marker.note_div_id.marker_id in mhs_tm_map.marker_notes[map_canvas_id] ) ) {
-                                jQuery( function ( $ ) {
-                                    var route_id = next_marker.note_div_id.route_id;
-                                    var marker_id = next_marker.note_div_id.marker_id;
-                                    $.post(
+                                var route_id = next_marker.note_div_id.route_id;
+                                var marker_id = next_marker.note_div_id.marker_id;
+                                $.post(
 
-                                        mhs_tm_map.ajax_url + '?action=get_coordinate_note',
-                                        {
-                                            route_id: next_marker.note_div_id.route_id,
-                                            marker_id: next_marker.note_div_id.marker_id,
-                                        },
-                                        function ( response ) { 
-                                            //Save in marker_note object
-                                           mhs_tm_map.marker_notes[map_canvas_id][route_id + '-' + marker_id] =
-                                                   response; 
-                                        },
-                                        "json"
-                                    );
-                                } );
+                                    mhs_tm_map.ajax_url + '?action=get_coordinate_note',
+                                    {
+                                        route_id: next_marker.note_div_id.route_id,
+                                        marker_id: next_marker.note_div_id.marker_id,
+                                    },
+                                    function ( response ) { 
+                                        //Save in marker_note object
+                                        mhs_tm_map.marker_notes[map_canvas_id][route_id + '-' + marker_id] =
+                                            response; 
+                                        
+                                        load_next_notes_precious();
+                                    },
+                                    "json"
+                                );
+                            }
+                            else {
+                                load_next_notes_precious();
                             }
 
-                            load_previous = false;
-                            //calculate which id are for the previous coordinate
-                            if( previous_active_coordinate.route_id === 0 ) {
-                                if( previous_active_coordinate.coordinate_id !== 0 ) {
+                            function load_next_notes_precious() {
+                                load_previous = false;
+                                //calculate which id are for the previous coordinate
+                                if (previous_active_coordinate.route_id === 0) {
+                                    if (previous_active_coordinate.coordinate_id !== 0) {
+                                        previous_active_coordinate.coordinate_id = previous_active_coordinate.coordinate_id - 1;
+                                        load_previous = true;
+                                    }
+                                } else if (previous_active_coordinate.route_id !== 0 && previous_active_coordinate.coordinate_id !== 0) {
                                     previous_active_coordinate.coordinate_id = previous_active_coordinate.coordinate_id - 1;
                                     load_previous = true;
+                                } else if (previous_active_coordinate.route_id !== 0 && previous_active_coordinate.coordinate_id === 0) {
+                                    previous_active_coordinate.route_id = previous_active_coordinate.route_id - 1;
+                                    previous_active_coordinate.coordinate_id = mhs_tm_map.marker[map_canvas_id][previous_active_coordinate.route_id].length - 1;
+                                    load_previous = true;
                                 }
-                            } else if( previous_active_coordinate.route_id !== 0 && previous_active_coordinate.coordinate_id !== 0 ) {
-                                previous_active_coordinate.coordinate_id = previous_active_coordinate.coordinate_id - 1;
-                                load_previous = true;
-                            } else if( previous_active_coordinate.route_id !== 0 && previous_active_coordinate.coordinate_id === 0 ) {
-                                previous_active_coordinate.route_id = previous_active_coordinate.route_id - 1;       
-                                previous_active_coordinate.coordinate_id = mhs_tm_map.marker[map_canvas_id][previous_active_coordinate.route_id].length - 1;
-                                load_previous = true;
-                            }
 
-                            var previous_marker = mhs_tm_map.marker[map_canvas_id][previous_active_coordinate.route_id][previous_active_coordinate.coordinate_id];
+                                var previous_marker = mhs_tm_map.marker[map_canvas_id][previous_active_coordinate.route_id][previous_active_coordinate.coordinate_id];
+                                
+                                load_marker_info_counter++;
 
-                            // check if it alreadz has been loaded before or load via ajax note content 
-                            if( load_previous && !( previous_marker.note_div_id.route_id + '-' + previous_marker.note_div_id.marker_id in mhs_tm_map.marker_notes[map_canvas_id] ) ) {
-                                jQuery( function ( $ ) {
+                                // check if it alreadz has been loaded before or load via ajax note content 
+                                if (load_previous && !(previous_marker.note_div_id.route_id + '-' + previous_marker.note_div_id.marker_id in mhs_tm_map.marker_notes[map_canvas_id])) {
                                     var route_id = previous_marker.note_div_id.route_id;
                                     var marker_id = previous_marker.note_div_id.marker_id;
                                     $.post(
@@ -346,16 +353,28 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
                                             route_id: previous_marker.note_div_id.route_id,
                                             marker_id: previous_marker.note_div_id.marker_id,
                                         },
-                                        function ( response ) { 
+                                        function (response) {
                                             //Save in marker_note object
-                                           mhs_tm_map.marker_notes[map_canvas_id][route_id + '-' + marker_id] =
-                                                   response; 
+                                            mhs_tm_map.marker_notes[map_canvas_id][route_id + '-' + marker_id] =
+                                                response;
+                                            
+                                            if (4 >= load_marker_info_counter)
+                                            {
+                                                load_next_notes();
+                                            }
                                         },
                                         "json"
                                     );
-                                } );
+                                }
+                                else
+                                {
+                                    if (4 >= load_marker_info_counter)
+                                    {
+                                        load_next_notes();
+                                    }
+                                }
                             }
-                        };
+                        } );
                     }
 
                     // save the aktiv pin to know which is the previous and next pin
@@ -639,7 +658,23 @@ next_route_id, next_coordinate_id, change_bounce, five_next_route_id, five_next_
         if( ready === false ) {
            window.setTimeout( check_note_status, 100 ); /* this checks the flag every 100 milliseconds*/
         } else {
-            if( !( marker.note_div_id.route_id + '-' + marker.note_div_id.marker_id in mhs_tm_map.marker_notes[map_canvas_id] ) ) {
+            if (!(marker.note_div_id.route_id + '-' + marker.note_div_id.marker_id in mhs_tm_map.marker_notes[map_canvas_id])) {
+                // if animation ready but marker note is not loaded just load it again
+                jQuery( function ( $ ) {
+                    $.post(
+                        mhs_tm_map.ajax_url + '?action=get_coordinate_note',
+                        {
+                            route_id: mhs_tm_map.marker[map_canvas_id][next_route_id][next_coordinate_id].note_div_id.route_id,
+                            marker_id: mhs_tm_map.marker[map_canvas_id][next_route_id][next_coordinate_id].note_div_id.marker_id,
+                        },
+                        function ( response ) {
+                            mhs_tm_map.marker_notes[map_canvas_id]
+                                [mhs_tm_map.marker[map_canvas_id][next_route_id][next_coordinate_id].note_div_id.route_id + 
+                                            '-' + mhs_tm_map.marker[map_canvas_id][next_route_id][next_coordinate_id].note_div_id.marker_id] = response;
+                        },
+                        "json"
+                    );
+                });
                window.setTimeout( check_note_status, 100 ); /* this checks the flag every 100 milliseconds*/
             } else {
                 jQuery( function ( $ ) {
