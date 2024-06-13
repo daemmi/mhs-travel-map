@@ -59,7 +59,8 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
         center: { lat: mhs_tm_map.coord_center_lat[map_canvas_id], lng: mhs_tm_map.coord_center_lng[map_canvas_id] },
         zoom: 5,
         fullscreenControl: true,
-        scaleControl: true
+        scaleControl: true,
+        mapId: "DEMO_MAP_ID", // Map ID is required for advanced markers.
     };
     mhs_tm_map.route_path[map_canvas_id] = [];
     mhs_tm_map.active_coordinate[map_canvas_id] = [];
@@ -166,7 +167,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
                 // check if the coordinate is part of the route then set pin and set flag so that no other coordinate could get start pin
                 if ( start_is_set === 0 && mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j].ispartofaroute ) {
                     start_is_set = 1;
-                    pin = 'https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=S|7f7f7f|ffffff';
+                    pin = mhs_tm_map.plugin_dir + '/img/Pin-Start.png';
                 } else if ( mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j].ispartofaroute ) {
                     // if there is a new coordinate on the route change pin of old destination
                     if ( last_spot_id != 0 && last_mark_id != 0 && mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][last_spot_id].ishitchhikingspot ) {
@@ -186,7 +187,7 @@ mhs_tm_map.gmap_initialize = function( map_canvas_id, type ) {
                     last_route_id = i;
                     last_mark_id = mark_counter;
                     last_spot_id = j;
-                    pin = 'https://chart.apis.google.com/chart?chst=d_map_pin_icon&chld=flag|000000';
+                    pin = mhs_tm_map.plugin_dir + '/img/Pin-Finish.png';
                 } else if ( !mhs_tm_map.coordinates[map_canvas_id][i]['coordinates'][j].ishitchhikingspot ) {
                     pin = mhs_tm_map.plugin_dir + '/img/Pin-Star.png';
                 } 
